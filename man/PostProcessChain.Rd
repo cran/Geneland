@@ -7,11 +7,17 @@
  of the spatial domain. 
 }
 \usage{
-PostProcessChain(path.data, path.mcmc,nxdom, nydom,burnin)
+PostProcessChain(coordinates,genotypes,allele.numbers,
+path.mcmc,nxdom, nydom,burnin)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{path.data}{ Path to input files directory }
+  \item{coordinates}{Spatial coordinates of individuals. A matrix with 2
+    columns and one line per individual.}
+  \item{genotypes}{Genotypes of individuals. A matrix with one line per
+    individual and 2 columns per locus}
+  \item{allele.numbers}{A vector of integer containing the number of possible
+    allele for each locus}
   \item{path.mcmc}{ Path to output files directory }
   \item{nxdom}{Number of pixel for discretization of the spatial domain
     in the horizontal direction}

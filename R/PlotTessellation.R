@@ -1,5 +1,5 @@
 "PlotTessellation" <-
-function(path.data,path.mcmc,printit=FALSE,path=NULL)
+function(coordinates,path.mcmc,printit=FALSE,path=NULL)
   {
 
     param.postprocess <- as.matrix(read.table(paste(path.mcmc,
@@ -9,10 +9,9 @@ function(path.data,path.mcmc,printit=FALSE,path=NULL)
     nydom <- as.numeric(param.postprocess[2,3])
 
     param <- as.matrix(read.table(paste(path.mcmc,"parameters.txt",sep="")))
-    delta.coord <- as.numeric(param[4,3])
+    delta.coord <- as.numeric(param[3,3])
     
-    files <-  paste(path.data,"coordinates.txt",sep="")
-    s <- as.matrix(read.table(files))
+    s <- coordinates
     filedom <- paste(path.mcmc,"proba.pop.membership.txt",sep="")
     dom.post <- as.matrix(read.table(filedom))
     npopmax <- ncol(dom.post)

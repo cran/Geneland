@@ -6,11 +6,14 @@
   estimators.}
 
 \usage{
-Fstat(path.data, path.mcmc)
+Fstat(genotypes,allele.numbers, path.mcmc)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-   \item{path.data}{ Path to input files directory }
+   \item{genotypes}{Genotypes of individuals. A matrix with one line per
+    individual and 2 columns per locus}
+  \item{allele.numbers}{A vector of integer containing the number of possible
+    allele for each locus}
   \item{path.mcmc}{ Path to output files directory }
 }
 }

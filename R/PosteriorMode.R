@@ -1,5 +1,5 @@
 "PosteriorMode" <-
-function(path.data,path.mcmc,write=FALSE,plotit=TRUE,
+function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
                           printit=FALSE,file=NULL,main.title=NULL)
   {
                                         # get informations about the MCMC run 
@@ -12,8 +12,7 @@ function(path.data,path.mcmc,write=FALSE,plotit=TRUE,
     nxdom <- as.numeric(param.postprocess[1,3])
     nydom <- as.numeric(param.postprocess[2,3])
 
-    files <- paste(path.data,"coordinates.txt",sep="/")
-    s <- as.matrix(read.table(files))
+    s <- coordinates
     filedom <- paste(path.mcmc,"proba.pop.membership.txt",sep="/")
     dom.post <- as.matrix(read.table(filedom))
     
@@ -30,11 +29,6 @@ function(path.data,path.mcmc,write=FALSE,plotit=TRUE,
     s.discr[,2] <- floor(s[,2]/Dy)*Dy
     
     
-    # next four lines edited by Gilles on 05/01/2005
-    # following report of bug by Aurélie
-    # not checked carefully yet
-    #is <- (s.discr[,1]-xlim[1])/Dx + 1
-    #js <- (s.discr[,2]-ylim[1])/Dy + 1
     is <- s.discr[,1]/Dx + 1
     js <- s.discr[,2]/Dy + 1
 
@@ -47,7 +41,7 @@ function(path.data,path.mcmc,write=FALSE,plotit=TRUE,
     if(write) write.table(map,file=filepm,quote=FALSE,row.name=FALSE,col.name=FALSE)
 
     map.dom <- t(apply(dom.post,1,order))[,npopmax]
-    s <- as.matrix(read.table(files))
+    s <- coordinates
     
     if(plotit) {
       X11()

@@ -1,43 +1,14 @@
 "Fstat" <-
-function(path.data,path.mcmc)
+function(genotypes,allele.numbers,path.mcmc)
   {
     fileparam <- paste(path.mcmc,"parameters.txt",sep="")
     param <- as.matrix(read.table(fileparam))
-    filez <- paste(path.data,"genotypes.txt",sep="")
-    filenall <- paste(path.data,"allele.numbers.txt",sep="")
     filepm <- paste(path.mcmc,"posterior.mode.txt",sep="")
 
-    z <- as.matrix(read.table(filez))
-    nindiv <- nrow(z)
-    nall <- scan(filenall)
+    nindiv <- nrow(genotypes)
     npop <- as.numeric(param[param[,1]=="npopmax",3])
     map <- scan(filepm)
 
-
-#                                         # Global computation
-#     tabindiv <- matrix(nr=nindiv,nc=npop,data=-999)
-#     kk <- numeric(npop)
-#     effcl <- table(map)
-#     nb.nuclei.max <- nindiv
-#     nloc <- length(nall)
-#     nloc2 <- 2*nloc
-#     Total.Fis <- Total.Fst <- Total.Fit <- -999
-#     res.glob <- .Fortran(name="fstat",
-#                          PACKAGE="Geneland",
-#                          as.integer(nindiv),
-#                          as.integer(nb.nuclei.max),
-#                          as.integer(nloc),
-#                          as.integer(nloc2),
-#                          as.integer(nall),
-#                          as.integer(npop),
-#                          as.integer(effcl),
-#                          as.integer(z),
-#                          as.integer(map),
-#                          as.integer(tabindiv),
-#                          as.integer(kk),
-#                          as.single(Total.Fis),
-#                          as.single(Total.Fst),
-#                          as.single(Total.Fit))
 
 
                                          # Pairwise computations
@@ -52,7 +23,7 @@ function(path.data,path.mcmc)
             sub1 <- map==iclass1
             sub2 <- map==iclass2
             if((sum(sub1)!=0)  & (sum(sub2)!=0)){
-              ztmp <- z[sub1 | sub2,]
+              ztmp <- genotypes[sub1 | sub2,]
               nindivtmp <- nrow(ztmp)
               maptmp <- map[sub1 | sub2]
               maptmp[maptmp==iclass1] <- 1
@@ -61,7 +32,7 @@ function(path.data,path.mcmc)
               kk <- numeric(2)
               effcl <- table(maptmp)
               nb.nuclei.max <- nindivtmp
-              nloc <- length(nall)
+              nloc <- length(allele.numbers)
               nloc2 <- 2*nloc
               Fistmp <- Fsttmp <- Fittmp <- -999
               res<- .Fortran(name="fstat",
@@ -70,7 +41,7 @@ function(path.data,path.mcmc)
                              as.integer(nb.nuclei.max),
                              as.integer(nloc),
                              as.integer(nloc2),
-                             as.integer(nall),
+                             as.integer(allele.numbers),
                              as.integer(2),
                              as.integer(effcl),
                              as.integer(ztmp),

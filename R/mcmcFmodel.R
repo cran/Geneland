@@ -1,6 +1,6 @@
 "mcmcFmodel" <-
-function(# path to input directory
-                 path.data,
+function(# input data
+                 coordinates,genotypes,allele.numbers,
                  # path to output directory
                  path.mcmc,
                  # hyper-prior parameters
@@ -11,11 +11,6 @@ function(# path to input directory
                  nit,thinning,freq.model,varnpop,spatial)
   {
     
-                                        # input files
-    files <- paste(path.data,"coordinates.txt",sep="")
-    filez <- paste(path.data,"genotypes.txt",sep="")
-    filenall <- paste(path.data,"allele.numbers.txt",sep="")
-    
                                         # output files
     filenpp <- paste(path.mcmc,"nuclei.numbers.txt",sep="")
     fileu <- paste(path.mcmc,"coord.nuclei.txt",sep="")
@@ -25,18 +20,18 @@ function(# path to input directory
     filedrift <- paste(path.mcmc,"drifts.txt",sep="")
     filenpop <- paste(path.mcmc,"populations.numbers.txt",sep="")
     filelambda <- paste(path.mcmc,"Poisson.process.rate.txt",sep="")
+    filet <-  paste(path.mcmc,"hidden.coord.txt",sep="")
     filelpp <- paste(path.mcmc,"log.posterior.density.txt",sep="")
     filell <- paste(path.mcmc,"log.likelihood.txt",sep="")
-    
-    nindiv <- nrow(read.table(filez))
-    nloc <- ncol(read.table(filez))/2
+
+
+    nindiv <- nrow(genotypes)
+    nloc <- length(allele.numbers)
     
     npp <- ifelse(spatial==1,
                   1+floor(runif(1)*nb.nuclei.max/2), #avoid large init for npp w.r.t lambda
                   nindiv)
-    nallmax <- max(scan(filenall,quiet=TRUE))
-    s <- matrix(nr=2,nc=nindiv,data=-999)
-    z <- matrix(nr=nindiv,nc=nloc*2,data=-999)
+    nallmax <- max(allele.numbers)
     u <- matrix(nr=2,nc=nb.nuclei.max,data=-999)
     utemp <- matrix(nr=2,nc=nb.nuclei.max,data=-999)
     c <- rep(times=nb.nuclei.max,-999)
@@ -45,7 +40,6 @@ function(# path to input directory
     ttemp <-matrix(nr=2,nc=nindiv,data=-999)
     f <- array(dim=c(npopmax,nloc,nallmax),data=-999)
     ftemp <- array(dim=c(npopmax,nloc,nallmax),data=-999)
-    nall <- scan(filenall,quiet=TRUE)
     fa <- array(dim=c(nloc,nallmax),data=-999)
     drift <- rep(-999,npopmax)
     drifttemp <- rep(-999,npopmax)
@@ -68,9 +62,9 @@ function(# path to input directory
 
     out.res<- .Fortran(name="mcmc",
                        PACKAGE="Geneland",
-                       as.character(files),
-                       as.character(filez),
-                       as.character(filenall),
+                       as.single(t(coordinates)),
+                       as.integer(genotypes),
+                       as.integer(allele.numbers),
                        as.character(filelambda),
                        as.character(filenpp),
                        as.character(fileu),
@@ -79,6 +73,7 @@ function(# path to input directory
                        as.character(filefa),
                        as.character(filedrift),
                        as.character(filenpop),
+                       as.character(filet),
                        as.character(filelpp),
                        as.character(filell),
                        as.single(rate.max),
@@ -94,8 +89,6 @@ function(# path to input directory
                        as.integer(npopinit),
                        as.integer(npopmin),
                        as.integer(npopmax),
-                       as.single(s),
-                       as.integer(z),
                        as.single(t),
                        as.single(ttemp),
                        as.single(u),
@@ -107,7 +100,6 @@ function(# path to input directory
                        as.single(fa),
                        as.single(drift),
                        as.single(drifttemp),
-                       as.single(nall),
                        as.integer(indcell),
                        as.integer(indcelltemp),
                        as.single(distcell),
@@ -125,8 +117,7 @@ function(# path to input directory
                        as.integer(spatial))
 
                                         # write parameters of the run in an ascii file
-    param <- c(paste("path.data :",path.data),
-               paste("path.mcmc :",path.mcmc),
+    param <- c(paste("path.mcmc :",path.mcmc),
                paste("rate.max :",rate.max),
                paste("delta.coord :",delta.coord),
                paste("npopmin :",npopmin),

@@ -8,11 +8,12 @@
   in ancestral population}
 
 \usage{
-PlotFreqA(path.data, path.mcmc,iloc,iall,printit=FALSE,path=NULL)
+PlotFreqA(allele.numbers, path.mcmc,iloc,iall,printit=FALSE,path=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-   \item{path.data}{ Path to input files directory }
+  \item{allele.numbers}{A vector of integer containing the number of possible
+    allele for each locus}
    \item{path.mcmc}{ Path to output files directory }
    \item{iloc}{Integer number : index of locus}
    \item{iall}{Integer number : index of allele}

@@ -3,7 +3,7 @@ function(path.mcmc,printit=FALSE,file=NULL)
   {
     fileparam <- paste(path.mcmc,"parameters.txt",sep="/")
     param <- as.matrix(read.table(fileparam))
-    thinning <- as.numeric(param[12,3])
+    thinning <- as.numeric(param[param[,1]=="thinning",3])
     
     filedrift <-  paste(path.mcmc,"drifts.txt",sep="")
     drift <- as.matrix(read.table(filedrift))

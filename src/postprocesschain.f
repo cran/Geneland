@@ -1,8 +1,8 @@
       subroutine  postprocesschain(nindivmax,nxdommax,nydommax,burn,
      &     nclassmax,nppmax,
-     &     nlocmax,nindiv,nloc,filenall,nallmax,files,dt,nchain,filenpp,
+     &     nlocmax,nindiv,nloc,nall,nallmax,dt,nchain,filenpp,
      &     filenclass,fileu,filec,filef,filefperm,filedom,filedomperm,
-     &     s,u,c,dom,domperm,coorddom,indvois,distvois,nall,f,orderf)
+     &     s,u,c,dom,domperm,coorddom,indvois,distvois,f,orderf)
       implicit none
 
       character*200 files,fileu,filec,filenpp,
@@ -32,24 +32,9 @@
       write(6,*) '          ***   postprocesschain      ***'
       write(6,*) '          *******************************'
 
-      open(10,file=files)
-      do iindiv=1,nindiv
-         read(10,*) s(1,iindiv), s(2,iindiv)
-      enddo
-      close(10)
-
-      
-      open(10,file=filenall)
-      do iloc=1,nloc
-         read(10,*) nall(iloc)
-      enddo
-      close(10)
 
       call limit(nindiv,nindivmax,s,xlim,ylim,dt)
-c      xlim(1) = 0.
-c      xlim(2) = 1.
-c      ylim(1) = 0.
-c      ylim(2) = 1.
+
 
 *     coordonnées de la grille 
       idom = 1

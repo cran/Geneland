@@ -1,0 +1,7 @@
+Changes from version 0.4 :
+
+
+* In Fortran subroutine mcmc (called by mcmcFmodel): 
+true coordinates are written on an ascci file named hidden.coord.txt
+
+* input data passed to functions as R objects instead of path to ascci files

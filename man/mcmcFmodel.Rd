@@ -4,12 +4,18 @@
 \title{ Inference in a  spatial statistical model  }
 \description{ Markov Chain Monte-Carlo inference in the spatial F-model}
 \usage{
-mcmcFmodel(path.data, path.mcmc, rate.max, delta.coord, npopmin, npopinit,
+mcmcFmodel(coordinates,genotypes,allele.numbers,
+path.mcmc, rate.max, delta.coord, npopmin, npopinit,
 npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{path.data}{ Path to input files directory }
+  \item{coordinates}{Spatial coordinates of individuals. A matrix with 2
+    columns and one line per individual.}
+  \item{genotypes}{Genotypes of individuals. A matrix with one line per
+    individual and 2 columns per locus}
+  \item{allele.numbers}{A vector of integer containing the number of possible
+    allele for each locus}
   \item{path.mcmc}{ Path to output files directory }
   \item{rate.max}{Maximum rate of Poisson process  (real number >0).
   Setting \code{rate.max} equal to the number of individuals in the
@@ -55,28 +61,6 @@ npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial)
     are not used  and the locations of  the nuclei are initialized and
     kept fixed at the locations of individuals.}
    
-}
-\details{ \code{path.data} directory should contain at least three files
-  named exactly :   \file{coordinates.txt},  \file{genotypes.txt} and
-  \file{allele.numbers.txt}   and containing respectively the spatial
-  coordinates, the genotypes and the number of alleles per locus.
-  
-  These files should be plain ascci files with no header.
-  \file{coordinates.txt} should have one line per individual
-  and two columns (x, y coordinates) missing value are not allowed.
-  
-  \file{genotypes.txt}  should have one line per individual
-  and two columns per locus,
-  alleles should be coded as integer between 1 and the maximum number of
-  alleles for this locus, missing genotypic values should be coded as -999.
-  If your initial file as the required number of lines and columns but
-  with alleles coded with non-consecutive integers, then the function
-  \code{\link{FormatGenotypes}} should be used first. 
-  
-  \file{allele.numbers.txt} should have one line per locus an one column
-  giving number of alleles for consecutive loci.
-
-  
 }
 
 
@@ -125,7 +109,13 @@ values of successive iterations are pasted.
 The file has \code{nallmax*nloc*nit/thinning} lines where \code{nallmax} 
 is the maximum numer of alleles over all loci.
 
-\item File \file{Poisson.process.rate.txt} contains rates of Poisson process
+\item File \file{Poisson.process.rate.txt} contains rates of Poisson
+process
+
+\item File \file{hidden.coord.txt} contains the coordinates of each
+individual as updated along the chain if those given as input are not
+considered as exact coordinates (which is specified by 
+\code{delta.coord} to a non zero value).
 
 \item File \file{log.likelihood.txt} contains log-likelihood of data
 for the current state of parameters of the Markov chain.
@@ -158,36 +148,32 @@ Estoup, Mortier, Cosson, Genetics, 2005
 
 
   #  first look for a place to write
-  #  simulated data and MCMC outputs
+  #  MCMC outputs
 if(.Platform$OS == "unix"){
-path.data = "/tmp/"
 path.mcmc= "/tmp/"
 }
 
 if(.Platform$OS == "windows"){
-path.data = "/temp/"
 path.mcmc= "/temp/"
 }
 
  # Simulation of a dataset made of 2 populations
  # 2 loci and 2 alleles per locus
-simFmodel(nindiv=100,
-          slim=c(0,1,0,1),
-          npp=2,
+sim = simFmodel(nindiv=100,
+          coord.lim=c(0,1,0,1),
+          number.nuclei=2,
           nloc=5,
           nall=c(5,5,5,5,5),
           npop=2,
           drift=c(.3,.3),
           plots=FALSE,
           ploth=FALSE,
-          seed=12345,
-          write=TRUE,
-          repout=path.data)
+          seed=123)
 
 
   # First run of MCMC algorithm
   # in order to get the posterior mode of the number of populations
-mcmcFmodel(path.data=path.data,
+mcmcFmodel(sim$coordinates,sim$genotypes,sim$allele.numbers,
            path.mcmc=path.mcmc,
            rate.max=100,
            delta.coord=0,
@@ -195,19 +181,19 @@ mcmcFmodel(path.data=path.data,
            npopinit=5,
            npopmax=10,
            nb.nuclei.max=200,
-           nit=5000,
+           nit=10000,
            thinning=10,
            freq.model="Dirichlet",
            varnpop=TRUE,
            spatial=TRUE)
 
- # Trace of number of populations
- # Should display a mode at 2
-Plotnpop(path.data,path.mcmc)
+  # Trace of number of populations
+  # Should display a mode at 2
+Plotnpop(path.mcmc)
 
 
  # Then re-run the chain with fixed number of populations
-mcmcFmodel(path.data=path.data,
+mcmcFmodel(sim$coordinates,sim$genotypes,sim$allele.numbers,
            path.mcmc=path.mcmc,
            rate.max=100,
            delta.coord=0,
@@ -221,25 +207,26 @@ mcmcFmodel(path.data=path.data,
            varnpop=FALSE,
            spatial=TRUE)
 
-  # Post-processing the chain 
-PostProcessChain(path.data=path.data,
-                 path.mcmc=path.mcmc,
-                 nxdom=50,
-                 nydom=50,
-                 burnin=0)
+   # Post-processing the chain 
+PostProcessChain(sim$coordinates,sim$genotypes,sim$allele.numbers,
+                  path.mcmc=path.mcmc,
+                  nxdom=50,
+                  nydom=50,
+                  burnin=0)
 
-  # Plots allele frequencies of allele #1 at locus  #1 in sub-population  #1
-PlotFreq(path.data=path.data,path.mcmc=path.mcmc,ipop=1,iloc=1,iall=1)
+   # Plots allele frequencies of allele #1 at locus  #1 in sub-population  #1
+ PlotFreq(sim$allele.numbers,
+path.mcmc=path.mcmc,ipop=1,iloc=1,iall=1)
 
-  # Map of posterior probabilites
-  # of population membership
-PlotTessellation(path.data=path.data,path.mcmc=path.mcmc)
+   # Map of posterior probabilites
+   # of population membership
+ PlotTessellation(sim$coordinates,path.mcmc=path.mcmc)
 
 
-  # Map of posterior mode 
-  # of population membership
-PosteriorMode(path.data=path.data,path.mcmc=path.mcmc,
-              write=FALSE,plotit=TRUE)
+   # Map of posterior mode 
+   # of population membership
+ PosteriorMode(sim$coordinates,path.mcmc=path.mcmc,
+               write=FALSE,plotit=TRUE)
 
 
 

@@ -9,13 +9,13 @@
 ***********************************************************************
 
 
-      subroutine mcmc(files,filez,filenall,filelambda,
+      subroutine mcmc(s,z,nall,filelambda,
      &     filenpp,fileu,filec,filef,filefa,filedrift,
-     &     filenclass,filelpp,filell,lambdamax,
+     &     filenclass,filet,filelpp,filell,lambdamax,
      &     dt,nchain,stepw,
      &     nindivmax,nlocmax,nlocmax2,nallmax,npp,nppmax,
      &     nclass,nclassmin,nclassmax,
-     &     s,z,t,ttemp,u,utemp,c,ctemp,f,ftemp,fa,drift,drifttemp,nall,
+     &     t,ttemp,u,utemp,c,ctemp,f,ftemp,fa,drift,drifttemp,
      &     indcell,indcelltemp,
      &     distcell,distcelltemp,n,ntemp,a,ptemp,effcl,iclv,
      &     cellclass,listcell,fmodel,kfix,spatial) 
@@ -43,7 +43,7 @@
      &     distcell,du,distcelltemp,a,ttemp,lpp,ll
       character*200 files,filez,filef,filenall,filenpp,
      &     filelambda,filenclass,fileu,filec,
-     &     filefa,filedrift,filelpp,filell
+     &     filefa,filedrift,filelpp,filell,filet
  
 *     dimensionnement 
       dimension s(2,nindivmax),t(2,nindivmax),z(nindivmax,nlocmax2),
@@ -71,31 +71,39 @@
 **************************
 *     read data
 **************************
-      open(10,file=files)
-      do iindiv=1,nindiv
-c         write(*,*) 'coucou'
-         read(10,*) s(1,iindiv), s(2,iindiv)
-      enddo
-      close(10)
+C       open(10,file=files)
+C       do iindiv=1,nindiv
+C c         write(*,*) 'coucou'
+C          read(10,*) s(1,iindiv), s(2,iindiv)
+C       enddo
+C       close(10)
       
-      call limit(nindiv,nindivmax,s,xlim,ylim,dt)
-c      xlim(1) = 0
-c      xlim(2) = 1
-c      ylim(1) = 0
-c      ylim(2) = 1
+C       call limit(nindiv,nindivmax,s,xlim,ylim,dt)
+C c      xlim(1) = 0
+C c      xlim(2) = 1
+C c      ylim(1) = 0
+C c      ylim(2) = 1
         
-      open(10,file=filenall)
-      do iloc=1,nloc
-         read(10,*) nall(iloc)
-      enddo
-      close(10)
+C       open(10,file=filenall)
+C       do iloc=1,nloc
+C          read(10,*) nall(iloc)
+C       enddo
+C       close(10)
 
 
-      open(10,file=filez)
-      do iindiv=1,nindiv
-         read(10,*) (z(iindiv,iloc),iloc=1,2*nloc)
-      enddo
-      close(10)
+C       open(10,file=filez)
+C       do iindiv=1,nindiv
+C          read(10,*) (z(iindiv,iloc),iloc=1,2*nloc)
+C       enddo
+C       close(10)
+
+
+*     look for smallest rectangle enclosing the individuals
+      call limit(nindiv,nindivmax,s,xlim,ylim,dt)
+c      write(*,*) 'fin de limit'
+c      write(*,*) 's=',s
+c      write(*,*) 'z=',z
+c      write(*,*) 'nall=',nall
 
 
 *     Ouverture des fichiers pour l'ecriture des sorties
@@ -109,8 +117,9 @@ c      ylim(2) = 1
       open(16,file=filedrift)
       open(17,file=filelpp)
       open(18,file=filell)
+      open(19,file=filet)
 
-  
+c       write(*,*) 'fin de l ouverture'
 
 ************************
 *     Initialization
@@ -186,7 +195,9 @@ c$$$     &            iall=1,nallmax),iloc=1,nloc)
      &            nall,fmodel)
              write(18,*) ll(z,nindivmax,nlocmax,nlocmax2,nall,nclassmax,
      &     nallmax,nppmax,c,f,indcell)
-             
+             if(dt .gt. 1.e-30) then 
+                write(19,1000) (t(1,iindiv),t(2,iindiv),iindiv=1,nindiv)
+             endif
           endif
 
 
@@ -226,7 +237,7 @@ c$$$     &            iall=1,nallmax),iloc=1,nloc)
      &            indcelltemp,distcelltemp,t,xlim,ylim,du)
              
 *     update t et mise a jour de indcell et distcell
-             if(dt .gt. 1.e-6) then 
+             if(dt .gt. 1.e-30) then 
 *                write(*,*) 'update t'
                 call updt(npp,nppmax,nindiv,
      &               nindivmax,nloc,nlocmax,nlocmax2,nallmax,nclassmax,
@@ -275,6 +286,7 @@ c$$$     &            iall=1,nallmax),iloc=1,nloc)
        close(16)
        close(17)
        close(18)
+       close(19)
 
        
        write(6,*) '          ************************************'

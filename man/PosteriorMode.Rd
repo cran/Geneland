@@ -6,12 +6,13 @@
   color code for each pixel.}
 
 \usage{
-function(path.data,path.mcmc,write=FALSE,plotit=TRUE,
+function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
                           printit=FALSE,file=NULL,main.title=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{path.data}{ Path to input files directory }
+  \item{coordinates}{Spatial coordinates of individuals. A matrix with 2
+    columns and one line per individual.}
   \item{path.mcmc}{ Path to output files directory }
   \item{write}{Logical: if TRUE the modal class of each individual is
     written in a plain ascci file named posterior.mode.txt}

@@ -1,59 +1,49 @@
 "simFmodel" <-
 function(nindiv,
-                      s=NULL,
-                      slim,
-                      npp,
-                      u=NULL,
-                      c=NULL,
+                      coordinates=NULL,
+                      coord.lim,
+                      number.nuclei,
+                      coord.nuclei=NULL,
+                      color.nuclei=NULL,
                       nloc,
                       nall,
                       npop,
                       drift,
                       seed=NULL,
                       plots=TRUE,
-                      ploth=TRUE,
-                      write=FALSE,
-                      repout=NULL)
+                      ploth=TRUE)
+#  ,
+#                      write=FALSE,
+#                      repout=NULL)
   {
     if(!is.null(seed)) { set.seed(seed)}
-                                        # path to output files
-    files <- paste(repout,"coordinates.txt",sep="")
-    filez <- paste(repout,"genotypes.txt",sep="")
-    filenall <- paste(repout,"allele.numbers.txt",sep="")
-    fileu <- paste(repout,"coord.nuclei.txt",sep="")
-    filec <- paste(repout,"color.nuclei.txt",sep="")
-    filef <- paste(repout,"frequencies.",sep="")
-    filefa <- paste(repout,"ancestral.frequencies.txt",sep="")
-    filedrift <- paste(repout,"drifts.txt",sep="")
-    filenall <- paste(repout,"allele.numbers.txt",sep="")
-    fileppvois <- paste(repout,"index.nearest.nucleus.txt",sep="")
     
                                         # spatial coord of indviduals
-    if(is.null(s))
+    if(is.null(coordinates))
       {
-        s <- rbind(runif(min=slim[1],max=slim[2],nindiv),
-                   runif(min=slim[3],max=slim[4],nindiv))
+        coordinates <- rbind(runif(min=coord.lim[1],max=coord.lim[2],nindiv),
+                   runif(min=coord.lim[3],max=coord.lim[4],nindiv))
       }
     
                                         # centers and colors of tiles
-    if(is.null(u))
+    if(is.null(coord.nuclei))
       {
-        u <-  rbind(runif(min=0,max=1,npp),
-                    runif(min=0,max=1,npp))
-        c <- numeric(npp)
-        for(ipp in 1:npp)c[ipp] <- rdiscr(rep(1/npop,npop))
+        coord.nuclei <-  rbind(runif(min=0,max=1,number.nuclei),
+                    runif(min=0,max=1,number.nuclei))
+        color.nuclei <- numeric(number.nuclei)
+        for(ipp in 1:number.nuclei)color.nuclei[ipp] <- rdiscr(rep(1/npop,npop))
                                         # avoid to have only one pop
                                         # assuming we simulate at least two pop
-        if(npp==2) c <- 1:2
+        if(number.nuclei==2) color.nuclei <- 1:2
       } 
     ppvois <- numeric(nindiv)
     for(iindiv in 1:nindiv)
       {
         k <- 1
         dd <- 1e+9
-        for(ipp in 1:npp)
+        for(ipp in 1:number.nuclei)
           {
-            ddnew <- (u[1,ipp]-s[1,iindiv])^2+(u[2,ipp]-s[2,iindiv])^2
+            ddnew <- (coord.nuclei[1,ipp]-coordinates[1,iindiv])^2+(coord.nuclei[2,ipp]-coordinates[2,iindiv])^2
             if(ddnew < dd)
               {
                 k <- ipp
@@ -104,7 +94,7 @@ function(nindiv,
     z <- matrix(nr=nindiv,nc=nloc*2)
     for(iclass in 1:npop)
       {
-        for(iindiv in (1:nindiv)[c[ppvois]==iclass] )
+        for(iindiv in (1:nindiv)[color.nuclei[ppvois]==iclass] )
           {
             for(iloc in 1:nloc)
               {
@@ -117,11 +107,11 @@ function(nindiv,
     if(plots==TRUE)
       { 
         X11()
-        plot(s[1,],s[2,],
+        plot(coordinates[1,],coordinates[2,],
              xlab="x coordinates",ylab="y coordinates")
-        points(u[1,],u[2,],col=2)
-        text(u[1,],u[2,],1:npp,pos=1,col=2,pch=2,cex=1.2)
-        text(s[1,],s[2,],ppvois,pos=1)
+        points(coord.nuclei[1,],coord.nuclei[2,],col=2)
+        text(coord.nuclei[1,],coord.nuclei[2,],1:number.nuclei,pos=1,col=2,pch=2,cex=1.2)
+        text(coordinates[1,],coordinates[2,],ppvois,pos=1)
       }
     if(ploth==TRUE)
       {
@@ -146,8 +136,8 @@ function(nindiv,
             #par(mfrow=c(1,nloc))
             for(iloc in 1:nloc)
               {
-                hist(c(z[c[ppvois]==iclass,2*(iloc-1)+1],
-                       z[c[ppvois]==iclass,2*(iloc-1)+2]),
+                hist(c(z[color.nuclei[ppvois]==iclass,2*(iloc-1)+1],
+                       z[color.nuclei[ppvois]==iclass,2*(iloc-1)+2]),
                      breaks=seq(.5,nall[iloc]+.5,1),
                      prob=TRUE,main=paste("Histogram of freq. in pop.",iclass,
                               ", locus",iloc),
@@ -157,61 +147,15 @@ function(nindiv,
               }
           }
       }
-    if(write==TRUE)
-      {
-        write.table(floor(t(s)*1e+3)*1e-3,
-                    files,
-                    quote=FALSE,
-                    col.names=FALSE,
-                    row.names=FALSE)
-        write.table(z,
-                    filez,
-                    quote=FALSE,
-                    col.names=FALSE,
-                    row.names=FALSE)
-        write.table(nall,
-                    filenall,
-                    quote=FALSE,
-                    col.names=FALSE,
-                    row.names=FALSE)
-        write.table(floor(t(u)*1e+3)*1e-3,
-                    fileu,
-                    quote=FALSE,
-                    col.names=FALSE,
-                    row.names=FALSE)
-        write.table(c,
-                    filec,
-                    quote=FALSE,
-                    col.names=FALSE,
-                    row.names=FALSE)
-        write.table(nall,
-                    filenall,
-                    quote=FALSE,
-                    col.names=FALSE,
-                    row.names=FALSE)
-        write.table(fa,
-                    filefa,
-                    quote=FALSE,
-                    col.names=FALSE,
-                    row.names=FALSE)
-        write.table(floor(drift*1e+3)*1e-3,
-                    filedrift,
-                    quote=FALSE,
-                    col.names=FALSE,
-                    row.names=FALSE)
-        for(iclass in 1:npop)
-          {
-            write.table(freq[iclass,,],
-                        quote=FALSE,
-                        col.names=FALSE,
-                        row.names=FALSE,
-                        paste(filef,"class",iclass,".txt",sep=""))
-          }
-         write.table(ppvois,
-                    fileppvois,
-                    quote=FALSE,
-                    col.names=FALSE,
-                    row.names=FALSE)
-      }
+    list(coordinates=t(coordinates),
+         genotypes=z,
+         allele.numbers=nall,
+         coord.nuclei=t(coord.nuclei),
+         color.nuclei=c,
+         frequencies=freq,
+         ancestral.frequencies=fa,
+         drifts=drift,
+         index.nearest.nucleus=ppvois)
+    
   }
 

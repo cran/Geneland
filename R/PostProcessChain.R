@@ -1,14 +1,10 @@
 "PostProcessChain" <-
-function(path.data,# path to data directory
+function(coordinates,genotypes,allele.numbers,#data
                              path.mcmc, # path to MCMC output directory
                              nxdom,nydom,# resolution
                              burnin # number of iterations of the chain to throw away
                              )
   {
-    files <- paste(path.data,"coordinates.txt",sep="")
-    filez <- paste(path.data,"genotypes.txt",sep="")
-    filenall <- paste(path.data,"allele.numbers.txt",sep="")
-
     filenpop <- paste(path.mcmc,"populations.numbers.txt",sep="")
     filenpp <- paste(path.mcmc,"nuclei.numbers.txt",sep="")
     fileu <- paste(path.mcmc,"coord.nuclei.txt",sep="")
@@ -19,15 +15,15 @@ function(path.data,# path to data directory
     filedom <- paste(path.mcmc,"proba.pop.membership.txt",sep="")
     filedomperm <- paste(path.mcmc,"proba.pop.membership.perm.txt",sep="")
     
-    nindiv <- nrow(read.table(filez))
-    nloc <- ncol(read.table(filez))/2
+    nindiv <- nrow(genotypes)
+    nloc <- length(allele.numbers)
 
     param <- as.matrix(read.table(paste(path.mcmc,"parameters.txt",sep="")))
-    delta.coord <- as.numeric(param[4,3])
-    npopmax <- as.numeric(param[7,3])
-    nb.nuclei.max <- as.numeric(param[10,3])
-    nit <- as.numeric(param[11,3])
-    thinning <- as.numeric(param[12,3])
+    delta.coord <- as.numeric(param[param[,1]=="delta.coord",3])
+    npopmax <- as.numeric(param[param[,1]=="npopmax",3])
+    nb.nuclei.max <- as.numeric(param[param[,1]=="nb.nuclei.max",3])
+    nit <- as.numeric(param[param[,1]=="nit",3])
+    thinning <- as.numeric(param[param[,1]=="thinning",3])
     
     dom <- matrix(nr=nxdom*nydom,nc=npopmax,data=0)
     domperm <- matrix(nr=nxdom*nydom,nc=npopmax,data=0)
@@ -36,11 +32,10 @@ function(path.data,# path to data directory
     distvois <- numeric(nxdom*nydom)
     f11 <- numeric(npopmax)
     orderf11 <- numeric(npopmax)
-    nallmax <- max(scan(filenall))
+    nallmax <- max(allele.numbers)
     s <- matrix(nr=2,nc=nindiv,data=-999)
     u <- matrix(nr=2,nc=nb.nuclei.max,data=-999)
     c <- rep(times=nb.nuclei.max,-999)
-    nall <- scan(filenall)
     
     out.res<- .Fortran(name="postprocesschain",
                        PACKAGE="Geneland",
@@ -53,9 +48,8 @@ function(path.data,# path to data directory
                        as.integer(nloc),
                        as.integer(nindiv),
                        as.integer(nloc),
-                       as.character(filenall),
+                       as.integer(allele.numbers),
                        as.integer(nallmax),
-                       as.character(files),
                        as.single(delta.coord),
                        as.integer(nit/thinning),
                        as.character(filenpp),
@@ -66,7 +60,7 @@ function(path.data,# path to data directory
                        as.character(filefperm),
                        as.character(filedom),
                        as.character(filedomperm),
-                       as.single(s),
+                       as.single(coordinates),
                        as.single(u),
                        as.integer(c),
                        as.single(dom),
@@ -74,7 +68,6 @@ function(path.data,# path to data directory
                        as.single(coorddom),
                        as.integer(indvois),
                        as.single(distvois),
-                       as.integer(nall),
                        as.single(f11),
                        as.single(orderf11))
     param <- c(paste("nxdom :",nxdom),
