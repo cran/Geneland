@@ -364,8 +364,8 @@ C     ..
 C     .. External Functions ..
 C      REAL gengam
 C      EXTERNAL gengam
-      REAL sgamma
-      EXTERNAL sgamma
+      REAL mysgamma
+      EXTERNAL mysgamma
 C     ..
 C     .. Executable Statements ..
       IF (.NOT. (df.LE.0.0)) GO TO 10
@@ -373,9 +373,9 @@ C     .. Executable Statements ..
       WRITE (*,*) 'Value of DF: ',df
       STOP 'DF <= 0 in GENCHI - ABORT'
 
-C     JJV changed this to call sgamma directly
+C     JJV changed this to call mysgamma directly
 C   10 genchi = 2.0*gengam(1.0,df/2.0)
- 10   genchi = 2.0*sgamma(df/2.0)
+ 10   genchi = 2.0*mysgamma(df/2.0)
       RETURN
 
       END
@@ -410,7 +410,7 @@ C
 C                              Method
 C
 C
-C     Renames SEXPO from TOMS as slightly modified by BWB to use RANF
+C     Renames MYSEXPO from TOMS as slightly modified by BWB to use RANF
 C     instead of SUNIF.
 C
 C     For details see:
@@ -425,8 +425,8 @@ C     .. Scalar Arguments ..
       REAL av
 C     ..
 C     .. External Functions ..
-      REAL sexpo
-      EXTERNAL sexpo
+      REAL mysexpo
+      EXTERNAL mysexpo
 C     ..
 C     .. Executable Statements ..
 C     JJV added check to ensure AV >= 0.0 
@@ -435,7 +435,7 @@ C     JJV added check to ensure AV >= 0.0
       WRITE (*,*) 'Value of AV: ',av
       STOP 'AV < 0.0 in GENEXP - ABORT'
 
- 10   genexp = sexpo()*av
+ 10   genexp = mysexpo()*av
       RETURN
 
       END
@@ -477,12 +477,12 @@ C     ..
 C     .. Local Scalars ..
       REAL xden,xnum
 C     ..
-C     JJV changed this code to call sgamma directly
+C     JJV changed this code to call mysgamma directly
 C     .. External Functions ..
 C      REAL genchi
 C      EXTERNAL genchi
-      REAL sgamma
-      EXTERNAL sgamma
+      REAL mysgamma
+      EXTERNAL mysgamma
 C     ..
 C     .. Executable Statements ..
       IF (.NOT. (dfn.LE.0.0.OR.dfd.LE.0.0)) GO TO 10
@@ -490,10 +490,10 @@ C     .. Executable Statements ..
       WRITE (*,*) 'DFN value: ',dfn,'DFD value: ',dfd
       STOP 'Degrees of freedom nonpositive in GENF - abort!'
 
- 10   xnum = 2.0*sgamma(dfn/2.0)/dfn
+ 10   xnum = 2.0*mysgamma(dfn/2.0)/dfn
 
 C      GENF = ( GENCHI( DFN ) / DFN ) / ( GENCHI( DFD ) / DFD )
-      xden = 2.0*sgamma(dfd/2.0)/dfd
+      xden = 2.0*mysgamma(dfd/2.0)/dfd
 C     JJV changed constant so that it will not underflow at compile time
 C     JJV while not slowing generator by using double precision or logs.
 C      IF (.NOT. (xden.LE. (1.0E-38*xnum))) GO TO 20
@@ -540,7 +540,7 @@ C
 C                              Method
 C
 C
-C     Renames SGAMMA from TOMS as slightly modified by BWB to use RANF
+C     Renames MYSGAMMA from TOMS as slightly modified by BWB to use RANF
 C     instead of SUNIF.
 C
 C     For details see:
@@ -551,7 +551,7 @@ C               Modified Rejection Technique.
 C               Comm. ACM, 25,1 (Jan. 1982), 47 - 54.
 C     Algorithm GD
 C
-C     JJV altered the following to reflect sgamma argument ranges
+C     JJV altered the following to reflect mysgamma argument ranges
 C               (Case 0.0 < R < 1.0)
 C               Ahrens, J.H. and Dieter, U.
 C               Computer Methods for Sampling from Gamma,
@@ -564,8 +564,8 @@ C     .. Scalar Arguments ..
       REAL a,r
 C     ..
 C     .. External Functions ..
-      REAL sgamma
-      EXTERNAL sgamma
+      REAL mysgamma
+      EXTERNAL mysgamma
 C     ..
 C     .. Executable Statements ..
 
@@ -577,7 +577,7 @@ C     JJV added argument value checker
       STOP 'Location or shape param out of range in GENGAM - ABORT!'
 C     JJV end addition
 
- 10   gengam = sgamma(r)/a
+ 10   gengam = mysgamma(r)/a
 C      gengam = gengam/a
       RETURN
 
@@ -626,8 +626,8 @@ C     .. Local Scalars ..
       INTEGER i,icount,j,p
 C     ..
 C     .. External Functions ..
-      REAL snorm
-      EXTERNAL snorm
+      REAL mysnorm
+      EXTERNAL mysnorm
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC int
@@ -638,7 +638,7 @@ C
 C     Generate P independent normal deviates - WORK ~ N(0,1)
 C
       DO 10,i = 1,p
-          work(i) = snorm()
+          work(i) = mysnorm()
    10 CONTINUE
       DO 30,i = 1,p
 C
@@ -796,11 +796,11 @@ C     .. Scalar Arguments ..
       REAL df,xnonc
 C     ..
 C     .. External Functions ..
-C     JJV changed these to call SGAMMA and SNORM directly
+C     JJV changed these to call MYSGAMMA and MYSNORM directly
 C      REAL genchi,gennor
 C      EXTERNAL genchi,gennor
-      REAL sgamma,snorm
-      EXTERNAL sgamma,snorm
+      REAL mysgamma,mysnorm
+      EXTERNAL mysgamma,mysnorm
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC sqrt
@@ -812,16 +812,16 @@ C     .. Executable Statements ..
       WRITE (*,*) 'Value of DF: ',df,' Value of XNONC',xnonc
       STOP 'DF < 1 or XNONC < 0 in GENNCH - ABORT'
 
-C     JJV changed this to call SGAMMA and SNORM directly
+C     JJV changed this to call MYSGAMMA and MYSNORM directly
 C      gennch = genchi(df-1.0) + gennor(sqrt(xnonc),1.0)**2
 
  10   IF (df.GE.1.000001) GO TO 20
 C     JJV case DF = 1.0
-      gennch = (snorm() + sqrt(xnonc))**2
+      gennch = (mysnorm() + sqrt(xnonc))**2
       GO TO 30
 
 C     JJV case DF > 1.0
- 20   gennch = 2.0*sgamma((df-1.0)/2.0) + (snorm() + sqrt(xnonc))**2
+ 20   gennch = 2.0*mysgamma((df-1.0)/2.0) + (mysnorm() + sqrt(xnonc))**2
  30   RETURN
       
       END
@@ -872,11 +872,11 @@ C     .. Local Scalars ..
       LOGICAL qcond
 C     ..
 C     .. External Functions ..
-C     JJV changed the code to call SGAMMA and SNORM directly
+C     JJV changed the code to call MYSGAMMA and MYSNORM directly
 C      REAL genchi,gennch
 C      EXTERNAL genchi,gennch
-      REAL sgamma,snorm
-      EXTERNAL sgamma,snorm
+      REAL mysgamma,mysnorm
+      EXTERNAL mysgamma,mysnorm
 C     ..
 C     .. Executable Statements ..
 C     JJV changed the argument checker to allow DFN = 1.0
@@ -891,18 +891,19 @@ C     JJV in the same way as GENNCH was changed.
       STOP 'Degrees of freedom or noncent param out of range in GENNF'
 
 C      GENNF = ( GENNCH( DFN, XNONC ) / DFN ) / ( GENCHI( DFD ) / DFD )
-C     JJV changed this to call SGAMMA and SNORM directly
+C     JJV changed this to call MYSGAMMA and MYSNORM directly
 C     xnum = gennch(dfn,xnonc)/dfn
  10   IF (dfn.GE.1.000001) GO TO 20
 C     JJV case dfn = 1.0 - here I am treating dfn as exactly 1.0
-      xnum = (snorm() + sqrt(xnonc))**2
+      xnum = (mysnorm() + sqrt(xnonc))**2
       GO TO 30
 
 C     JJV case dfn > 1.0
- 20   xnum = (2.0*sgamma((dfn-1.0)/2.0) + (snorm()+sqrt(xnonc))**2)/dfn
+ 20   xnum = (2.0*mysgamma((dfn-1.0)/2.0) + 
+     &     (mysnorm()+sqrt(xnonc))**2)/dfn
 
 C     xden = genchi(dfd)/dfd
- 30   xden = 2.0*sgamma(dfd/2.0)/dfd
+ 30   xden = 2.0*mysgamma(dfd/2.0)/dfd
       
 C     JJV changed constant so that it will not underflow at compile time
 C     JJV while not slowing generator by using double precision or logs.
@@ -953,7 +954,7 @@ C
 C                              Method
 C
 C
-C     Renames SNORM from TOMS as slightly modified by BWB to use RANF
+C     Renames MYSNORM from TOMS as slightly modified by BWB to use RANF
 C     instead of SUNIF.
 C
 C     For details see:
@@ -968,8 +969,8 @@ C     .. Scalar Arguments ..
       REAL av,sd
 C     ..
 C     .. External Functions ..
-      REAL snorm
-      EXTERNAL snorm
+      REAL mysnorm
+      EXTERNAL mysnorm
 C     ..
 C     .. Executable Statements ..
 C     JJV added check to ensure SD >= 0.0 
@@ -978,7 +979,7 @@ C     JJV added check to ensure SD >= 0.0
       WRITE (*,*) 'Value of SD: ',sd
       STOP 'SD < 0.0 in GENNOR - ABORT'
 
- 10   gennor = sd*snorm() + av
+ 10   gennor = sd*mysnorm() + av
       RETURN
 
       END
@@ -1637,12 +1638,12 @@ C     .. Local Scalars ..
       REAL y,a,r
 C     ..
 C     .. External Functions ..
-C     JJV changed to call SGAMMA directly
+C     JJV changed to call MYSGAMMA directly
 C     REAL gengam
-      REAL sgamma
+      REAL mysgamma
       INTEGER ignpoi
 C      EXTERNAL gengam,ignpoi
-      EXTERNAL sgamma,ignpoi
+      EXTERNAL mysgamma,ignpoi
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC real
@@ -1660,7 +1661,7 @@ C     JJV       but gamma (p/(1-p),n) is the equivalent in our code
  10   r = real(n)
       a = p/ (1.0-p)
 C      y = gengam(a,r)
-      y = sgamma(r)/a
+      y = mysgamma(r)/a
 
 C     Generate a random Poisson(y) variable
       ignnbn = ignpoi(y)
@@ -1759,8 +1760,8 @@ C     .. Local Arrays ..
       REAL fact(10),pp(35)
 C     ..
 C     .. External Functions ..
-      REAL ranf,sexpo,snorm
-      EXTERNAL ranf,sexpo,snorm
+      REAL ranf,mysexpo,mysnorm
+      EXTERNAL ranf,mysexpo,mysnorm
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC abs,alog,exp,float,ifix,max0,min0,sign,sqrt
@@ -1800,9 +1801,9 @@ C             IS AN UPPER BOUND TO M(MU) FOR ALL MU >= 10 .
 C
       ll = ifix(mu-1.1484)
 C
-C     STEP N. NORMAL SAMPLE - SNORM(IR) FOR STANDARD NORMAL DEVIATE
+C     STEP N. NORMAL SAMPLE - MYSNORM(IR) FOR STANDARD NORMAL DEVIATE
 C
-   10 g = mu + s*snorm()
+   10 g = mu + s*mysnorm()
       IF (g.LT.0.0) GO TO 20
       ignpoi = ifix(g)
 C
@@ -1845,11 +1846,11 @@ C     STEP Q. QUOTIENT ACCEPTANCE (RARE CASE)
 C
    40 IF (fy-u*fy.LE.py*exp(px-fx)) RETURN
 C
-C     STEP E. EXPONENTIAL SAMPLE - SEXPO(IR) FOR STANDARD EXPONENTIAL
+C     STEP E. EXPONENTIAL SAMPLE - MYSEXPO(IR) FOR STANDARD EXPONENTIAL
 C             DEVIATE E AND SAMPLE T FROM THE LAPLACE 'HAT'
 C             (IF T <= -.6744 THEN PK < FK FOR ALL MU >= 10.)
 C
-   50 e = sexpo()
+   50 e = mysexpo()
       u = ranf()
       u = u + u - 1.0
       t = 1.8 + sign(e,u)
@@ -2912,7 +2913,7 @@ C     Abort unless random number generator initialized
       RETURN
 
       END
-      REAL FUNCTION sexpo()
+      REAL FUNCTION mysexpo()
 C**********************************************************************C
 C                                                                      C
 C                                                                      C
@@ -2976,7 +2977,7 @@ C      IF (u.LE.1.0) GO TO 20
       IF (u.LT.1.0) GO TO 20
    40 u = u - 1.0
       IF (u.GT.q1) GO TO 60
-   50 sexpo = a + u
+   50 mysexpo = a + u
       RETURN
 
    60 i = 1
@@ -2986,11 +2987,11 @@ C      IF (u.LE.1.0) GO TO 20
       IF (ustar.LT.umin) umin = ustar
    80 i = i + 1
       IF (u.GT.q(i)) GO TO 70
-   90 sexpo = a + umin*q1
+   90 mysexpo = a + umin*q1
       RETURN
 
       END
-      REAL FUNCTION sgamma(a)
+      REAL FUNCTION mysgamma(a)
 C**********************************************************************C
 C                                                                      C
 C                                                                      C
@@ -3036,7 +3037,7 @@ C**********************************************************************C
 C
 C
 C     INPUT: A =PARAMETER (MEAN) OF THE STANDARD GAMMA DISTRIBUTION
-C     OUTPUT: SGAMMA = SAMPLE FROM THE GAMMA-(A)-DISTRIBUTION
+C     OUTPUT: MYSGAMMA = SAMPLE FROM THE GAMMA-(A)-DISTRIBUTION
 C
 C     COEFFICIENTS Q(K) - FOR Q0 = SUM(Q(K)*A**(-K))
 C     COEFFICIENTS A(K) - FOR Q = Q0+(T*T/2)*SUM(A(K)*V**K)
@@ -3050,8 +3051,8 @@ C     .. Local Scalars .. (JJV added B0 to fix rare and subtle bug)
      +     q1,q2,q3,q4,q5,q6,q7,r,s,s2,si,sqrt32,t,u,v,w,x
 C     ..
 C     .. External Functions ..
-      REAL ranf,sexpo,snorm
-      EXTERNAL ranf,sexpo,snorm
+      REAL ranf,mysexpo,mysnorm
+      EXTERNAL ranf,mysexpo,mysnorm
 C     ..
 C     .. Intrinsic Functions ..
       INTRINSIC abs,alog,exp,sign,sqrt
@@ -3089,9 +3090,9 @@ C     STEP  2:  T=STANDARD NORMAL DEVIATE,
 C               X=(S,1/2)-NORMAL DEVIATE.
 C               IMMEDIATE ACCEPTANCE (I)
 C
-   10 t = snorm()
+   10 t = mysnorm()
       x = s + 0.5*t
-      sgamma = x*x
+      mysgamma = x*x
       IF (t.GE.0.0) RETURN
 C
 C     STEP  3:  U= 0,1 -UNIFORM SAMPLE. SQUEEZE ACCEPTANCE (S)
@@ -3154,7 +3155,7 @@ C     STEP  8:  E=STANDARD EXPONENTIAL DEVIATE
 C               U= 0,1 -UNIFORM DEVIATE
 C               T=(B,SI)-DOUBLE EXPONENTIAL (LAPLACE) SAMPLE
 C
-   70 e = sexpo()
+   70 e = mysexpo()
       u = ranf()
       u = u + u - 1.0
       t = b + sign(si*e,u)
@@ -3199,7 +3200,7 @@ C               IF T IS REJECTED, SAMPLE AGAIN AT STEP 8
 C
   120 IF (c*abs(u).GT.w*exp(e-0.5*t*t)) GO TO 70
  125  x = s + 0.5*t
-      sgamma = x*x
+      mysgamma = x*x
       RETURN
 C
 C     ALTERNATE METHOD FOR PARAMETERS A BELOW 1  (.3678794=EXP(-1.))
@@ -3216,16 +3217,16 @@ C
  130  b0 = 1.0 + .3678794*a
   140 p = b0*ranf()
       IF (p.GE.1.0) GO TO 150
-      sgamma = exp(alog(p)/a)
-      IF (sexpo().LT.sgamma) GO TO 140
+      mysgamma = exp(alog(p)/a)
+      IF (mysexpo().LT.mysgamma) GO TO 140
       RETURN
 
-  150 sgamma = -alog((b0-p)/a)
-      IF (sexpo().LT. (1.0-a)*alog(sgamma)) GO TO 140
+  150 mysgamma = -alog((b0-p)/a)
+      IF (mysexpo().LT. (1.0-a)*alog(mysgamma)) GO TO 140
       RETURN
 
       END
-      REAL FUNCTION snorm()
+      REAL FUNCTION mysnorm()
 C**********************************************************************C
 C                                                                      C
 C                                                                      C
@@ -3320,8 +3321,8 @@ C
 C                                EXIT   (BOTH CASES)
 C
    50 y = aa + w
-      snorm = y
-      IF (s.EQ.1.0) snorm = -y
+      mysnorm = y
+      IF (s.EQ.1.0) mysnorm = -y
       RETURN
 C
 C                                CENTER CONTINUED

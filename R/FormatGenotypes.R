@@ -26,6 +26,6 @@ function(genotypes)
       }
     genotypes <- as.matrix(genotypes)
     genotypes[is.na(genotypes)] <- -999
-    list(formatted.genotypes=formatted,allele.numbers=nall)
+    list(genotypes=formatted,allele.numbers=nall)
   }
 

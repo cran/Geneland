@@ -1,35 +1,35 @@
 "Fstat" <-
-function(repdat,repmcmc)
+function(path.data,path.mcmc)
   {
-    fileparam <- paste(repmcmc,"parameters.txt",sep="")
+    fileparam <- paste(path.mcmc,"parameters.txt",sep="")
     param <- as.matrix(read.table(fileparam))
-    filez <- paste(repdat,"genotypes.txt",sep="")
-    filenall <- paste(repdat,"allele.numbers.txt",sep="")
-    filepm <- paste(repmcmc,"posterior.mode.txt",sep="")
+    filez <- paste(path.data,"genotypes.txt",sep="")
+    filenall <- paste(path.data,"allele.numbers.txt",sep="")
+    filepm <- paste(path.mcmc,"posterior.mode.txt",sep="")
 
     z <- as.matrix(read.table(filez))
     nindiv <- nrow(z)
     nall <- scan(filenall)
-    nclass <- as.numeric(param[param[,1]=="nclassmax",3])
+    npop <- as.numeric(param[param[,1]=="npopmax",3])
     map <- scan(filepm)
 
 
 #                                         # Global computation
-#     tabindiv <- matrix(nr=nindiv,nc=nclass,data=-999)
-#     kk <- numeric(nclass)
+#     tabindiv <- matrix(nr=nindiv,nc=npop,data=-999)
+#     kk <- numeric(npop)
 #     effcl <- table(map)
-#     nppmax <- nindiv
+#     nb.nuclei.max <- nindiv
 #     nloc <- length(nall)
 #     nloc2 <- 2*nloc
 #     Total.Fis <- Total.Fst <- Total.Fit <- -999
 #     res.glob <- .Fortran(name="fstat",
 #                          PACKAGE="Geneland",
 #                          as.integer(nindiv),
-#                          as.integer(nppmax),
+#                          as.integer(nb.nuclei.max),
 #                          as.integer(nloc),
 #                          as.integer(nloc2),
 #                          as.integer(nall),
-#                          as.integer(nclass),
+#                          as.integer(npop),
 #                          as.integer(effcl),
 #                          as.integer(z),
 #                          as.integer(map),
@@ -41,13 +41,13 @@ function(repdat,repmcmc)
 
 
                                          # Pairwise computations
-     Fis=matrix(nr=nclass,nc=nclass,-999)
-     Fst=matrix(nr=nclass,nc=nclass,-999)
-     Fit=matrix(nr=nclass,nc=nclass,-999)
+     Fis=matrix(nr=npop,nc=npop,-999)
+     Fst=matrix(nr=npop,nc=npop,-999)
+     Fit=matrix(nr=npop,nc=npop,-999)
 
-    for(iclass1 in 1:(nclass-1))
+    for(iclass1 in 1:(npop-1))
       {
-        for(iclass2 in (iclass1+1):nclass)
+        for(iclass2 in (iclass1+1):npop)
           {
             sub1 <- map==iclass1
             sub2 <- map==iclass2
@@ -60,14 +60,14 @@ function(repdat,repmcmc)
               tabindiv <- matrix(nr=nindivtmp,nc=2,data=-999)
               kk <- numeric(2)
               effcl <- table(maptmp)
-              nppmax <- nindivtmp
+              nb.nuclei.max <- nindivtmp
               nloc <- length(nall)
               nloc2 <- 2*nloc
               Fistmp <- Fsttmp <- Fittmp <- -999
               res<- .Fortran(name="fstat",
                              PACKAGE="Geneland",
                              as.integer(nindivtmp),
-                             as.integer(nppmax),
+                             as.integer(nb.nuclei.max),
                              as.integer(nloc),
                              as.integer(nloc2),
                              as.integer(nall),

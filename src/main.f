@@ -153,6 +153,7 @@ c$$$      nclass = rpriornclass(mu,nclassmin,nclassmax)
 * mise a jour iterative 
 ************************
 
+c      write(*,*) 'Starting updates'
       do ichain=1,nchain
 *     ecriture dans les fichiers (tous les stepw)
           if(mod(ichain,stepw) .eq. 0) then

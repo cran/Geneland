@@ -9,12 +9,12 @@
   for allele \code{iall}  of locus \code{iloc}}
 
 \usage{
-PlotFreq(repdat, repmcmc,ipop,iloc,iall,printit=FALSE,path=NULL)
+PlotFreq(path.data, path.mcmc,ipop,iloc,iall,printit=FALSE,path=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-   \item{repdat}{ Path to input files directory }
-   \item{repmcmc}{ Path to output files directory }
+   \item{path.data}{ Path to input files directory }
+   \item{path.mcmc}{ Path to output files directory }
    \item{ipop} {Integer number : index of population}
    \item{iloc}{Integer number : index of locus}
    \item{iall}{Integer number : index of allele}

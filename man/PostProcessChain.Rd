@@ -7,22 +7,28 @@
  of the spatial domain. 
 }
 \usage{
-PostProcessChain(repdat, repmcmc,nxdom, nydom,burnin)
+PostProcessChain(path.data, path.mcmc,nxdom, nydom,burnin)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{repdat}{ Path to input files directory }
-  \item{repmcmc}{ Path to output files directory }
+  \item{path.data}{ Path to input files directory }
+  \item{path.mcmc}{ Path to output files directory }
   \item{nxdom}{Number of pixel for discretization of the spatial domain
     in the horizontal direction}
   \item{nydom}{Number of pixel for discretization of the spatial domain
     in the vertical direction}
-  \item{burnin}{Number of iterations of the chain to throwaway}
+  \item{burnin}{Number of iterations of the chain to throw away.
+    WARNING : this argument should be given the number of stored
+    iterations (and not the number of computed iterations which differ
+    if \code{burnin} !=1). If you have
+    \code{nit}=100000 and \code{thinning}=100, then only 1000 iterations
+    are stored. Then \code{burnin}=10 will throw away 10 stored
+    iterations, namely 1000*10 computed iterations.}
 }
-\details{ \code{repdat} directory should contain at least three files
+\details{ \file{path.data} directory should contain at least three files
   named   exactly :
-  \code{coordinates.txt}, \code{genotypes.txt} and
-  \code{allele.numbers.txt} and containing respectively the spatial
+  \file{coordinates.txt}, \file{genotypes.txt} and
+  \file{allele.numbers.txt} and containing respectively the spatial
   coordinates, the genotypes and the number of alleles per locus.
 
     See format of files simulated by \code{\link{simFmodel}} for an
@@ -31,15 +37,15 @@ PostProcessChain(repdat, repmcmc,nxdom, nydom,burnin)
 }
 \value{
   Posterior probability of population membership for each pixel are
-  written in an ascii file called \code{proba.pop.membership.txt}
+  written in an ascii file called \file{proba.pop.membership.txt}
   (one column per population,
-  \code{nclassmax} values are computed for each pixel, 
+  \code{npopmax} values are computed for each pixel, 
   pixels are stored  row-wise starting from bottom left).
 
-  Another file called \code{proba.pop.membership.perm.txt} tries
+  Another file called \file{proba.pop.membership.perm.txt} tries
   to get rid of label switching
   issues by labelling the population according to a fixed constraint.
-  (This has has proved to be usefull with a small number of loci, (e.g. nloc=3), for well
+  (This has proved to be usefull with a small number of loci, (e.g. nloc=3), for well
   differentiated populations.)
 }
 \references{A spatial statistical model for landscape genetics, Guillot,

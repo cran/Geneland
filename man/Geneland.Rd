@@ -19,7 +19,7 @@ The overall population is viewed as a co-existence of sub-populations at
   the particular case of independent Dirichlet allele frequencies, 
   as described by Pritchard (2000),  is also handled. 
   Individuals within populations are assumed to be randomly 
-  located and  Hardy-Weiberg equilibrium 
+  located and  Hardy-Weinberg equilibrium 
   and linkage equilibrium are assumed.
   
   The main purpose of the program is to perform Bayesian inference of all the parameters involved 
@@ -61,7 +61,7 @@ The overall population is viewed as a co-existence of sub-populations at
    \code{\link{PlotFreq}}: Graphical display of allele frequencies in the
    present time population along MCMC run
    
-   \code{\link{Plotnclass}}: Graphical display of number of populations
+   \code{\link{Plotnpop}}: Graphical display of number of populations
    along MCMC run
    
    \code{\link{Plotntile}}: Graphical display of number of tiles along

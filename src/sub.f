@@ -420,7 +420,7 @@ c            write(*,*) 'a=',a
       real f(nclassmax,nlocmax,nallmax),fa(nlocmax,nallmax),
      &     drift(nclassmax)
       integer iloc,iall1,iall2,iclass
-      real delta,ranf,snorm,sigdelta,fa1,fa2,ratio,lratio,algama,q,u
+      real delta,ranf,mysnorm,sigdelta,fa1,fa2,ratio,lratio,algama,q,u
       parameter(sigdelta = 0.05) 
       
 *     boucle sur les loci
@@ -437,7 +437,7 @@ c            write(*,*) 'dans le while'
          enddo
 
 *     tirage de l'increment
-         delta = snorm()*sigdelta
+         delta = mysnorm()*sigdelta
 
 *     perturbation des deux freq
          fa1 = fa(iloc,iall1) + delta
@@ -487,14 +487,14 @@ c$$$            write(*,*) ''
       real drift(nclassmax),f(nclassmax,nlocmax,nallmax),
      &     fa(nlocmax,nallmax)
       integer iclass,iloc,iall
-      real d,q,qtemp,sigdelta,ratio,lratio,shape1,shape2,sall,snorm,
+      real d,q,qtemp,sigdelta,ratio,lratio,shape1,shape2,sall,mysnorm,
      &     algama,u,ranf
       parameter(sigdelta = 0.01,shape1=2.,shape2=20.) 
 
 *     boucle sur les classes
       do iclass=1,nclass
 *     proposition nouvelle valeur
-         d = drift(iclass) + snorm()*sigdelta
+         d = drift(iclass) + mysnorm()*sigdelta
          q = (1-drift(iclass))/drift(iclass)
          qtemp = (1-d)/d
          if((d .gt. 1e-38) .and. (1-d .gt. 1e-38)) then 
@@ -535,14 +535,14 @@ c     prior beta(shape1,shape2)
       real drift(nclassmax),f(nclassmax,nlocmax,nallmax),
      &     fa(nlocmax,nallmax)
       integer iclass,iloc,iall
-      real d,q,qtemp,sigdelta,ratio,lratio,alpha,sall,snorm,
+      real d,q,qtemp,sigdelta,ratio,lratio,alpha,sall,mysnorm,
      &     algama,u,ranf
       parameter(sigdelta = 0.01,alpha=5000) 
 
 *     boucle sur les classes
       do iclass=1,nclass
 *     proposition nouvelle valeur
-         d = drift(iclass) + snorm()*sigdelta
+         d = drift(iclass) + mysnorm()*sigdelta
          q = (1-drift(iclass))/drift(iclass)
          qtemp = (1-d)/d
          if((d .gt. 1e-38) .and. (1-d .gt. 1e-38)) then 
@@ -621,18 +621,20 @@ c            lratio = -alpha*(d-drift(iclass))
      &     distcelltemp(nindivmax),d
       integer iindiv,ipp
 
-c$$$      write(6,*) 'debut de  vormove'
-c$$$      write(6,*) 'j =', j
-c$$$      write(6,*) 'indcell',indcell
-c$$$      write(6,*)'distcell',distcell
+C       write(6,*) 'debut de  vormove'
+C       write(6,*) 'j =', j
+C       write(6,*) 'indcell',indcell
+C       write(6,*)'distcell',distcell
+C       write(6,*) 'indcelltemp',indcelltemp
+C       write(6,*)'distcelltemp',distcelltemp
 
       do iindiv=1,nindiv
          if(indcell(iindiv) .eq. j) then 
 *     pour les indiv qui etaient dans la cellule j on cherche
 *     la nouvelle cellule
-            d = 1.e+6
+            d = 3.e+37
             indcelltemp(iindiv) = -999
-            distcelltemp(iindiv) = 1.e+6
+            distcelltemp(iindiv) = 3.e+37
             do ipp=1,npp
                d= (s(1,iindiv)-u(1,ipp))**2+(s(2,iindiv)-u(2,ipp))**2
                if( d .lt. distcelltemp(iindiv) ) then 
@@ -677,7 +679,12 @@ c$$$               write(6,*)'distceltmp2',distcelltemp2
 c$$$               stop
 c$$$            endif
 c$$$         enddo
-
+C          write(6,*) 'fin de  vormove'
+C          write(6,*) 'j =', j
+C          write(6,*) 'indcell',indcell
+C          write(6,*)'distcell',distcell
+C          write(6,*) 'indcelltemp',indcelltemp
+C          write(6,*)'distcelltemp',distcelltemp
       end
 
 
@@ -734,7 +741,7 @@ c$$$         enddo
          if(indcell(iindiv) .eq. ipprem) then
 *     si oui on recherche sa nouvelle cellule parmi celles qui restent
 *     (les nouvelles)
-            distcelltemp(iindiv) = 1.e+6
+            distcelltemp(iindiv) = 3.e+37
             do ipp=1,npp-1
                d = (s(1,iindiv)-utemp(1,ipp))**2+
      &              (s(2,iindiv)-utemp(2,ipp))**2
@@ -924,6 +931,8 @@ c$$$         enddo
          enddo
       endif
 
+c      write(*,*) 'npp=', npp
+c      write(*,*) 'u=', u
 
       do ipp=1,npp
 *     proposition d un deplacement d un point de u
@@ -943,6 +952,10 @@ c$$$         enddo
 *     modif de indcell et distcell
          call vormove(nindiv,nindivmax,s,npp,nppmax,utemp,
      &        indcell,distcell,indcelltemp,distcelltemp,ipp)
+
+c         write(*,*) 'apres vormove'
+
+
 
          r = ratio(z,f,c,c,indcell,indcelltemp,
      &     nclassmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
@@ -1006,7 +1019,7 @@ c         write(*,*) 'alpha=',alpha
          ttemp(2,iindiv) = s(2,iindiv) + dt*(ranf()-.5)
 
 *     modif de indcell et distcell
-         distcelltemp(iindiv) = 1.e+6
+         distcelltemp(iindiv) = 3.e+37
          do ipp = 1,npp
             d = (ttemp(1,iindiv)-u(1,ipp))**2+
      &           (ttemp(2,iindiv)-u(2,ipp))**2
@@ -1168,11 +1181,27 @@ c         write(*,*) 'alpha=',alpha
       real f(nclassmax,nlocmax,nallmax)
       integer iindiv,iloc,iall1,iall2,iclass,iclasstemp
 
+c      write(*,*) 'debut de ratio'
+c      write(*,*) 'indcell=',indcell
+c      write(*,*) 'indcelltemp=',indcelltemp
+c      write(*,*) 'c=',c
+c      write(*,*) 'ctemp=',ctemp
+
+
       ratio = 1.
       do iindiv=1,nindiv
+c         write(*,*) 'iindiv=', iindiv
          iclass = c(indcell(iindiv))
          iclasstemp = ctemp(indcelltemp(iindiv))
+C         write(*,*) 'indcell=',indcell
+C          write(*,*) 'indcelltemp=',indcelltemp
+C          write(*,*) 'c=',c
+C          write(*,*) 'ctemp=',ctemp
+C          write(*,*) 'iclass=',iclass
+C          write(*,*) 'iclasstemp=',iclasstemp
+
          do iloc=1,nloc
+c             write(*,*) 'iloc=',iloc
 c            write(6,*) 'z=',z(iindiv,2*iloc-1)
 c            write(6,*) 'z=',z(iindiv,2*iloc)
             iall1 = z(iindiv,2*iloc-1)
@@ -1181,15 +1210,21 @@ c            ratio = ratio*
 c     &           (f(iclasstemp,iloc,iall1)/f(iclass,iloc,iall1))*
 c     &           (f(iclasstemp,iloc,iall2)/f(iclass,iloc,iall2))
             if(iall1 .ne. -999) then 
+c               write(*,*) f(iclasstemp,iloc,iall1)
+c               write(*,*) f(iclass,iloc,iall1)
                ratio = ratio*
      &              (f(iclasstemp,iloc,iall1)/f(iclass,iloc,iall1))
+               
             endif
             if(iall2 .ne. -999) then 
+c               write(*,*) f(iclasstemp,iloc,iall2)
+c               write(*,*) f(iclass,iloc,iall2)
                ratio = ratio*
      &              (f(iclasstemp,iloc,iall2)/f(iclass,iloc,iall2))
             endif
          enddo
       enddo
+c      write(*,*) 'fin de ratio'
       end function ratio
 
 *     calcul du ratio p(z|theta*)/p(z|theta)

@@ -8,7 +8,7 @@
 }
 \usage{
 simFmodel(nindiv, s = NULL, slim, npp, u = NULL, c = NULL,
-nloc, nall, nclass, drift, seed=NULL, plots = TRUE, ploth = TRUE, write = FALSE, repout=NULL)
+nloc, nall, npop, drift, seed=NULL, plots = TRUE, ploth = TRUE, write = FALSE, repout=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,8 +22,8 @@ nloc, nall, nclass, drift, seed=NULL, plots = TRUE, ploth = TRUE, write = FALSE,
   \item{c}{Population labels of the nuclei (vector of integers of size \code{npp})}
   \item{nloc}{ number of loci}
   \item{nall}{ Vector of integers (of size \code{nloc}) giving number of alleles at each locus}
-  \item{nclass}{Number of populations }
-  \item{drift}{Vector (of size \code{nclass}) of drift factors between 0
+  \item{npop}{Number of populations }
+  \item{drift}{Vector (of size \code{npop}) of drift factors between 0
   and 1}
   \item{seed}{Seed to initialize the random number generator}
   \item{plots}{Logical: if TRUE, spatial coordinates are ploted}
@@ -34,7 +34,7 @@ nloc, nall, nclass, drift, seed=NULL, plots = TRUE, ploth = TRUE, write = FALSE,
 \details{ \code{npp} uniform i.i.d points are randomly spread on
   the rectangular domain. These points generates the so called Voronoi
   tessellation of the domain in \code{npp} polygonal sub-domains. Each
-  polygon is given a color uniformly on {1, \code{nclass}}. The union
+  polygon is given a color uniformly on {1, \code{npop}}. The union
   of polygons of the color k gives the domain of population k.
 Then \code{nindiv} uniform i.i.d  points are randomly spread on the
 domain and stand for the locations of individuals.

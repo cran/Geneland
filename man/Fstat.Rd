@@ -6,12 +6,12 @@
   estimators.}
 
 \usage{
-Fstat(repdat, repmcmc)
+Fstat(path.data, path.mcmc)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-   \item{repdat}{ Path to input files directory }
-  \item{repmcmc}{ Path to output files directory }
+   \item{path.data}{ Path to input files directory }
+  \item{path.mcmc}{ Path to output files directory }
 }
 }
 \value{A list with components 

@@ -1,68 +1,68 @@
 "mcmcFmodel" <-
 function(# path to input directory
-                 repdat,
+                 path.data,
                  # path to output directory
-                 repmcmc,
+                 path.mcmc,
                  # hyper-prior parameters
-                 lambdamax,dt,nclassmin,nclassinit,nclassmax,
+                 rate.max,delta.coord,npopmin,npopinit,npopmax,
                  # dimensions
-                 nppmax,
+                 nb.nuclei.max,
                  # options in mcmc computations
-                 nchain,stepw,model,varnclass,spatial)
+                 nit,thinning,freq.model,varnpop,spatial)
   {
     
                                         # input files
-    files <- paste(repdat,"coordinates.txt",sep="")
-    filez <- paste(repdat,"genotypes.txt",sep="")
-    filenall <- paste(repdat,"allele.numbers.txt",sep="")
+    files <- paste(path.data,"coordinates.txt",sep="")
+    filez <- paste(path.data,"genotypes.txt",sep="")
+    filenall <- paste(path.data,"allele.numbers.txt",sep="")
     
                                         # output files
-    filenpp <- paste(repmcmc,"nuclei.numbers.txt",sep="")
-    fileu <- paste(repmcmc,"coord.nuclei.txt",sep="")
-    filec <- paste(repmcmc,"color.nuclei.txt",sep="")
-    filef <- paste(repmcmc,"frequencies.txt",sep="")
-    filefa <- paste(repmcmc,"ancestral.frequencies.txt",sep="")
-    filedrift <- paste(repmcmc,"drifts.txt",sep="")
-    filenclass <- paste(repmcmc,"populations.numbers.txt",sep="")
-    filelambda <- paste(repmcmc,"Poisson.process.rate.txt",sep="")
-    filelpp <- paste(repmcmc,"log.posterior.density.txt",sep="")
-    filell <- paste(repmcmc,"log.likelihood.txt",sep="")
+    filenpp <- paste(path.mcmc,"nuclei.numbers.txt",sep="")
+    fileu <- paste(path.mcmc,"coord.nuclei.txt",sep="")
+    filec <- paste(path.mcmc,"color.nuclei.txt",sep="")
+    filef <- paste(path.mcmc,"frequencies.txt",sep="")
+    filefa <- paste(path.mcmc,"ancestral.frequencies.txt",sep="")
+    filedrift <- paste(path.mcmc,"drifts.txt",sep="")
+    filenpop <- paste(path.mcmc,"populations.numbers.txt",sep="")
+    filelambda <- paste(path.mcmc,"Poisson.process.rate.txt",sep="")
+    filelpp <- paste(path.mcmc,"log.posterior.density.txt",sep="")
+    filell <- paste(path.mcmc,"log.likelihood.txt",sep="")
     
     nindiv <- nrow(read.table(filez))
     nloc <- ncol(read.table(filez))/2
     
     npp <- ifelse(spatial==1,
-                  1+floor(runif(1)*nppmax/2), #avoid large init for npp w.r.t lambda
+                  1+floor(runif(1)*nb.nuclei.max/2), #avoid large init for npp w.r.t lambda
                   nindiv)
-    nallmax <- max(scan(filenall))
+    nallmax <- max(scan(filenall,quiet=TRUE))
     s <- matrix(nr=2,nc=nindiv,data=-999)
     z <- matrix(nr=nindiv,nc=nloc*2,data=-999)
-    u <- matrix(nr=2,nc=nppmax,data=-999)
-    utemp <- matrix(nr=2,nc=nppmax,data=-999)
-    c <- rep(times=nppmax,-999)
-    ctemp <- rep(times=nppmax,-999)
+    u <- matrix(nr=2,nc=nb.nuclei.max,data=-999)
+    utemp <- matrix(nr=2,nc=nb.nuclei.max,data=-999)
+    c <- rep(times=nb.nuclei.max,-999)
+    ctemp <- rep(times=nb.nuclei.max,-999)
     t <-matrix(nr=2,nc=nindiv,data=-999)
     ttemp <-matrix(nr=2,nc=nindiv,data=-999)
-    f <- array(dim=c(nclassmax,nloc,nallmax),data=-999)
-    ftemp <- array(dim=c(nclassmax,nloc,nallmax),data=-999)
-    nall <- scan(filenall)
+    f <- array(dim=c(npopmax,nloc,nallmax),data=-999)
+    ftemp <- array(dim=c(npopmax,nloc,nallmax),data=-999)
+    nall <- scan(filenall,quiet=TRUE)
     fa <- array(dim=c(nloc,nallmax),data=-999)
-    drift <- rep(-999,nclassmax)
-    drifttemp <- rep(-999,nclassmax)
+    drift <- rep(-999,npopmax)
+    drifttemp <- rep(-999,npopmax)
     indcell <- rep(times=nindiv,-999)
     indcelltemp <- rep(times=nindiv,-999)
     distcell <- rep(times=nindiv,-999)
     distcelltemp <- rep(times=nindiv,-999)
-    n <-  array(dim=c(nclassmax,nloc,nallmax),data=-999)
-    ntemp <-  array(dim=c(nclassmax,nloc,nallmax),data=-999)
+    n <-  array(dim=c(npopmax,nloc,nallmax),data=-999)
+    ntemp <-  array(dim=c(npopmax,nloc,nallmax),data=-999)
     a <- rep(times=nallmax,-999)
     ptemp <- rep(times=nallmax,-999)
-    effcl <- rep(times=nclassmax,-999)
-    iclv <- rep(times=nclassmax,-999)
-    cellclass <- rep(times=nppmax,-999)
-    listcell <- rep(times=nppmax,-999)
-    fmodel <- ifelse(model=="Falush",1,0) # Falush or Dirichlet model
-    kfix <- 1-as.integer(varnclass)
+    effcl <- rep(times=npopmax,-999)
+    iclv <- rep(times=npopmax,-999)
+    cellclass <- rep(times=nb.nuclei.max,-999)
+    listcell <- rep(times=nb.nuclei.max,-999)
+    fmodel <- ifelse(freq.model=="Falush",1,0) # Falush or Dirichlet model
+    kfix <- 1-as.integer(varnpop)
     spatial <- as.integer(spatial)
     
 
@@ -78,22 +78,22 @@ function(# path to input directory
                        as.character(filef),
                        as.character(filefa),
                        as.character(filedrift),
-                       as.character(filenclass),
+                       as.character(filenpop),
                        as.character(filelpp),
                        as.character(filell),
-                       as.single(lambdamax),
-                       as.single(dt),
-                       as.integer(nchain),
-                       as.integer(stepw),
+                       as.single(rate.max),
+                       as.single(delta.coord),
+                       as.integer(nit),
+                       as.integer(thinning),
                        as.integer(nindiv),
                        as.integer(nloc),
                        as.integer(nloc*2),
                        as.integer(nallmax),
                        as.integer(npp),
-                       as.integer(nppmax),
-                       as.integer(nclassinit),
-                       as.integer(nclassmin),
-                       as.integer(nclassmax),
+                       as.integer(nb.nuclei.max),
+                       as.integer(npopinit),
+                       as.integer(npopmin),
+                       as.integer(npopmax),
                        as.single(s),
                        as.integer(z),
                        as.single(t),
@@ -125,24 +125,24 @@ function(# path to input directory
                        as.integer(spatial))
 
                                         # write parameters of the run in an ascii file
-    param <- c(paste("repdat :",repdat),
-               paste("repmcmc :",repmcmc),
-               paste("lambdamax :",lambdamax),
-               paste("dt :",dt),
-               paste("nclassmin :",nclassmin),
-               paste("nclassinit :",nclassinit),
-               paste("nclassmax :",nclassmax),
+    param <- c(paste("path.data :",path.data),
+               paste("path.mcmc :",path.mcmc),
+               paste("rate.max :",rate.max),
+               paste("delta.coord :",delta.coord),
+               paste("npopmin :",npopmin),
+               paste("npopinit :",npopinit),
+               paste("npopmax :",npopmax),
                paste("nindiv :",nindiv),
                paste("nloc :",nloc),
-               paste("nppmax :",nppmax),
-               paste("nchain :",nchain),
-               paste("stepw :",stepw),
-               paste("model :",model),
-               paste("varnclass :",varnclass),
+               paste("nb.nuclei.max :",nb.nuclei.max),
+               paste("nit :",nit),
+               paste("thinning :",thinning),
+               paste("freq.model :",freq.model),
+               paste("varnpop :",varnpop),
                paste("spatial :",spatial))
-    write.table(param,file=paste(repmcmc,"parameters.txt",sep=""),
+    write.table(param,file=paste(path.mcmc,"parameters.txt",sep=""),
                 quote=FALSE,row.name=FALSE,col.name=FALSE)
-    NULL               
+#    NULL               
                    
 }
 

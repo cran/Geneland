@@ -1,18 +1,18 @@
 "PlotFreqA" <-
-function(repdat,repmcmc,iloc,iall,printit=FALSE,path=NULL)
+function(path.data,path.mcmc,iloc,iall,printit=FALSE,path=NULL)
   {
-    fileparam <- paste(repmcmc,"parameters.txt",sep="/")
+    fileparam <- paste(path.mcmc,"parameters.txt",sep="/")
     param <- as.matrix(read.table(fileparam))
-    stepw <- as.numeric(param[12,3])
+    thinning <- as.numeric(param[12,3])
 
      
-    nall <- scan(paste(repdat,"allele.numbers.txt",sep=""))
+    nall <- scan(paste(path.data,"allele.numbers.txt",sep=""))
     nloc <- length(nall)
-    filefa <-  paste(repmcmc,"ancestral.frequencies.txt",sep="")
+    filefa <-  paste(path.mcmc,"ancestral.frequencies.txt",sep="")
     fa <- as.matrix(read.table(filefa))
     X11()
     plot(fa[,(iloc-1)*max(nall)+iall],
-         xlab=paste("Index of MCMC iteration"," (x ",stepw,")",sep=""),
+         xlab=paste("Index of MCMC iteration"," (x ",thinning,")",sep=""),
          ylab=paste("Frequency of allele",
            iall,"at locus",iloc),type="l")
     title(main=ifelse(iall==1,
@@ -22,7 +22,7 @@ function(repdat,repmcmc,iloc,iall,printit=FALSE,path=NULL)
       {
         postscript(file=paste(path,"freq.ancestral.pop.loc",iloc,".ps",sep=""))
         plot(fa[,(iloc-1)*max(nall)+iall],
-             xlab=paste("Index of MCMC iteration"," (x ",stepw,")",sep=""),
+             xlab=paste("Index of MCMC iteration"," (x ",thinning,")",sep=""),
              ylab=paste("Frequency of allele",
                iall,"at locus",iloc),type="l")
         title(main=ifelse(iall==1,

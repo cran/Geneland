@@ -1,30 +1,30 @@
 "PlotDrift" <-
-function(repmcmc,printit=FALSE,file=NULL)
+function(path.mcmc,printit=FALSE,file=NULL)
   {
-    fileparam <- paste(repmcmc,"parameters.txt",sep="/")
+    fileparam <- paste(path.mcmc,"parameters.txt",sep="/")
     param <- as.matrix(read.table(fileparam))
-    stepw <- as.numeric(param[12,3])
+    thinning <- as.numeric(param[12,3])
     
-    filedrift <-  paste(repmcmc,"drifts.txt",sep="")
+    filedrift <-  paste(path.mcmc,"drifts.txt",sep="")
     drift <- as.matrix(read.table(filedrift))
-    nclassmax <- ncol(drift)
+    npopmax <- ncol(drift)
     if(printit == TRUE){
       postscript(file=file)
-      par(mfrow=c(nclassmax,1))
-      for(iclass in 1:nclassmax)
+      par(mfrow=c(npopmax,1))
+      for(iclass in 1:npopmax)
         {
           plot(drift[,iclass],
-               xlab=paste("Index of MCMC iteration"," (x ",stepw,")",sep=""),
+               xlab=paste("Index of MCMC iteration"," (x ",thinning,")",sep=""),
                ylab=paste("Drift of population",iclass))
         }
       dev.off()
     }
     X11()
-    par(mfrow=c(nclassmax,1))
-    for(iclass in 1:nclassmax)
+    par(mfrow=c(npopmax,1))
+    for(iclass in 1:npopmax)
       {
         plot(drift[,iclass],
-             xlab=paste("Index of MCMC iteration"," (x ",stepw,")",sep=""),
+             xlab=paste("Index of MCMC iteration"," (x ",thinning,")",sep=""),
              ylab=paste("Drift of population",iclass))
       }
   }

@@ -20,9 +20,12 @@ FormatGenotypes(genotypes)
 }
 
 \value{
-  A matrix with
+  A list with elements : 
+  \item{\code{genotypes}} : a  matrix with
   one line per individual and two columns per locus,
-  with alleles coded by integers}
+  with alleles coded by integers
+  \item{\code{allele.numbers}} : a vector giving the number of possible
+  alleles per locus}
 
 
 \author{Gilles Guillot}

@@ -7,7 +7,7 @@ function(nindiv,
                       c=NULL,
                       nloc,
                       nall,
-                      nclass,
+                      npop,
                       drift,
                       seed=NULL,
                       plots=TRUE,
@@ -41,7 +41,7 @@ function(nindiv,
         u <-  rbind(runif(min=0,max=1,npp),
                     runif(min=0,max=1,npp))
         c <- numeric(npp)
-        for(ipp in 1:npp)c[ipp] <- rdiscr(rep(1/nclass,nclass))
+        for(ipp in 1:npp)c[ipp] <- rdiscr(rep(1/npop,npop))
                                         # avoid to have only one pop
                                         # assuming we simulate at least two pop
         if(npp==2) c <- 1:2
@@ -74,8 +74,8 @@ function(nindiv,
 
     
                                         # alleles frequencies in present time population
-    freq <- array(dim=c(nclass,nloc,max(nall)),data=-999)
-    for(iclass in 1:nclass)
+    freq <- array(dim=c(npop,nloc,max(nall)),data=-999)
+    for(iclass in 1:npop)
       {
         for(iloc in 1:nloc)
           {
@@ -89,7 +89,7 @@ function(nindiv,
       }
     
                                         # impose condition on  freqs :  f111 > f211
-    if(nclass > 1)
+    if(npop > 1)
       {
         if(freq[1,1,1] < freq[2,1,1])
           {
@@ -102,7 +102,7 @@ function(nindiv,
     
                                         # genotypes     
     z <- matrix(nr=nindiv,nc=nloc*2)
-    for(iclass in 1:nclass)
+    for(iclass in 1:npop)
       {
         for(iindiv in (1:nindiv)[c[ppvois]==iclass] )
           {
@@ -137,8 +137,8 @@ function(nindiv,
                      main="Frequencies in ancestral population")
               }
         #X11()
-        #par(mfrow=c(nclass,nloc))
-        for(iclass in 1:nclass)
+        #par(mfrow=c(npop,nloc))
+        for(iclass in 1:npop)
           {
             X11()
             par(mfrow=c(floor(sqrt(nloc)+1),
@@ -199,7 +199,7 @@ function(nindiv,
                     quote=FALSE,
                     col.names=FALSE,
                     row.names=FALSE)
-        for(iclass in 1:nclass)
+        for(iclass in 1:npop)
           {
             write.table(freq[iclass,,],
                         quote=FALSE,

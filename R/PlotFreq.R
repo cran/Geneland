@@ -1,19 +1,19 @@
 "PlotFreq" <-
-function(repdat,repmcmc,ipop,iloc,iall,printit=FALSE,path=NULL)
+function(path.data,path.mcmc,ipop,iloc,iall,printit=FALSE,path=NULL)
   {
     cat(paste("Reading file of frequencies ",
-                repmcmc,
+                path.mcmc,
                 "frequencies.txt",sep=""))
                                         # get informations about the MCMC run 
-    fileparam <- paste(repmcmc,"parameters.txt",sep="")
+    fileparam <- paste(path.mcmc,"parameters.txt",sep="")
     param <- as.matrix(read.table(fileparam))
-    nchain <- as.numeric(param[param[,1]=="nchain",3])
-    stepw <-  as.numeric(param[param[,1]=="stepw",3])
+    nit <- as.numeric(param[param[,1]=="nit",3])
+    thinning <-  as.numeric(param[param[,1]=="thinning",3])
 
-    filef <-  paste(repmcmc,"frequencies.txt",sep="")
+    filef <-  paste(path.mcmc,"frequencies.txt",sep="")
     f <- as.matrix(read.table(filef))
-    nclassmax <- ncol(f)
-    nall <- scan(paste(repdat,"allele.numbers.txt",sep=""))
+    npopmax <- ncol(f)
+    nall <- scan(paste(path.data,"allele.numbers.txt",sep=""))
     nloc <- length(nall)
                                         # extract frequencies
                                         # from messy matrix f
@@ -24,9 +24,9 @@ function(repdat,repmcmc,ipop,iloc,iall,printit=FALSE,path=NULL)
     sub1 <- rep(FALSE,(iloc-1)*max(nall))
     sub2 <- sub
     sub3 <- rep(FALSE,(nloc-iloc)*max(nall))
-    sub <- rep(c(sub1,sub2,sub3),times=nchain/stepw)
+    sub <- rep(c(sub1,sub2,sub3),times=nit/thinning)
     plot(f[sub,ipop],
-         xlab=paste("Index of MCMC iteration"," (x ",stepw,")",sep=""),
+         xlab=paste("Index of MCMC iteration"," (x ",thinning,")",sep=""),
          ylab=paste("Frequency of allele",
            iall,"at locus",iloc),type="l")
     title(main=ifelse(iall==1,
@@ -46,9 +46,9 @@ function(repdat,repmcmc,ipop,iloc,iall,printit=FALSE,path=NULL)
         sub1 <- rep(FALSE,(iloc-1)*max(nall))
         sub2 <- sub
         sub3 <- rep(FALSE,(nloc-iloc)*max(nall))
-        sub <- rep(c(sub1,sub2,sub3),times=nchain/stepw)
+        sub <- rep(c(sub1,sub2,sub3),times=nit/thinning)
         plot(f[sub,ipop],
-             xlab=paste("Index of MCMC iteration"," (x ",stepw,")",sep=""),
+             xlab=paste("Index of MCMC iteration"," (x ",thinning,")",sep=""),
              ylab=paste("Frequency of allele",
                iall,"at locus",iloc),type="l")
         title(main=ifelse(iall==1,

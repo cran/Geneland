@@ -6,11 +6,11 @@
   along the MCMC run}
 
 \usage{
-Plotntile(repmcmc,printit=FALSE,file=NULL)
+Plotntile(path.mcmc,printit=FALSE,file=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{repmcmc}{ Path to output files directory }
+  \item{path.mcmc}{ Path to output files directory }
    \item{printit}{Logical : if TRUE, figures are also printed}
   \item{file}{Character : Path to file where figures
     should be printed}

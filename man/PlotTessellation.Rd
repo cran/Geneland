@@ -5,12 +5,12 @@
 \description{Plots maps of posterior probabilities  of population
   membership for each population}
 \usage{
-PlotTessellation(repdat, repmcmc,printit,path)
+PlotTessellation(path.data, path.mcmc,printit,path)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{repdat}{Character : Path to input files directory }
-  \item{repmcmc}{Character : Path to output files directory }
+  \item{path.data}{Character : Path to input files directory }
+  \item{path.mcmc}{Character : Path to output files directory }
   \item{printit}{Logical : if TRUE, figures are also printed}
   \item{path}{Character : Path to directory where figures
       should be printed}
