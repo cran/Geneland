@@ -110,7 +110,7 @@ c            write(6,*) 'iydom=',iydom
          enddo
       enddo
 
- 2000 format (10(f8.3,1x))
+ 2000 format (1000(f8.3,1x))
 
       do idom=1,nxdommax*nydommax
          write(15,2000) (dom(idom,iclass), iclass=1,nclassmax)

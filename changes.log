@@ -1,7 +1,18 @@
-Changes from version 0.4 :
+Changes from version 0.5:
 
+* path.mcmc not written any longer in parameter file parameter.txt
+(in order to avoid issues with path containing spaces).
 
-* In Fortran subroutine mcmc (called by mcmcFmodel): 
-true coordinates are written on an ascci file named hidden.coord.txt
+* transform input data (coordinates, genotypes and allele.numbers)
+  into matrices 
+(to avoid issues with data frames).
 
-* input data passed to functions as R objects instead of path to ascci files
+* warning message of setplot function avoided by replacing last
+instruction return (xlim, ylim, oldpin, newpin) by 
+list(xlim, ylim, oldpin, newpin).
+
+* carriage return after the tenth column in files 
+  proba.pop.membership.txt and proba.pop.membership.perm.txt removed
+  (now correct writing with up to thousand populations).
+
+* path.mcmc now set as paste(tempdir(),"/",sep="") in the example of mcmcFmodel

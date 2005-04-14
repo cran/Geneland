@@ -2,6 +2,7 @@
 function(allele.numbers,
                      path.mcmc,ipop,iloc,iall,printit=FALSE,path=NULL)
   {
+    allele.numbers <- as.matrix(allele.numbers)
                                         # get informations about the MCMC run 
     fileparam <- paste(path.mcmc,"parameters.txt",sep="")
     param <- as.matrix(read.table(fileparam))

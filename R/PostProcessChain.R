@@ -5,6 +5,10 @@ function(coordinates,genotypes,allele.numbers,#data
                              burnin # number of iterations of the chain to throw away
                              )
   {
+    coordinates <- as.matrix(coordinates)
+    genotypes <- as.matrix(genotypes)
+    allele.numbers <- as.matrix(allele.numbers)
+    
     filenpop <- paste(path.mcmc,"populations.numbers.txt",sep="")
     filenpp <- paste(path.mcmc,"nuclei.numbers.txt",sep="")
     fileu <- paste(path.mcmc,"coord.nuclei.txt",sep="")

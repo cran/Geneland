@@ -1,7 +1,8 @@
 "PlotTessellation" <-
 function(coordinates,path.mcmc,printit=FALSE,path=NULL)
   {
-
+    coordinates <- as.matrix(coordinates)
+      
     param.postprocess <- as.matrix(read.table(paste(path.mcmc,
                                                     "postprocess.parameters.txt",
                                                     sep="")))
@@ -9,7 +10,7 @@ function(coordinates,path.mcmc,printit=FALSE,path=NULL)
     nydom <- as.numeric(param.postprocess[2,3])
 
     param <- as.matrix(read.table(paste(path.mcmc,"parameters.txt",sep="")))
-    delta.coord <- as.numeric(param[3,3])
+    delta.coord <- as.numeric(param[param[,1]=="delta.coord",3])
     
     s <- coordinates
     filedom <- paste(path.mcmc,"proba.pop.membership.txt",sep="")

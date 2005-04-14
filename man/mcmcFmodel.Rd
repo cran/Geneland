@@ -16,7 +16,12 @@ npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial)
     individual and 2 columns per locus}
   \item{allele.numbers}{A vector of integer containing the number of possible
     allele for each locus}
-  \item{path.mcmc}{ Path to output files directory }
+  \item{path.mcmc}{ Path to output files directory. It seems that the
+    path should be given in the Unix style even under Windows (use \/
+    instead of \\).
+    This path *have to*  end with a slash (\/)
+    (e.g. path.mcmc="/home/me/Geneland-stuffs/")
+  }
   \item{rate.max}{Maximum rate of Poisson process  (real number >0).
   Setting \code{rate.max} equal to the number of individuals in the
   dataset has proved to be efficient in many cases.}
@@ -36,10 +41,12 @@ npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial)
     you can reasonably expect for your data.}
   \item{nb.nuclei.max}{Integer: Maximum number of nuclei in the
     Poisson-Voronoi tessellation. A good guess consists in setting this
-    value equal to \code{10*rate.max}. The relevance of this rule can be
+    value equal to \code{3*rate.max}. Lower values
+    can also be used in order to speed up computations. The relevance of
+    the value set can be
     checked by inspection of the MCMC run. The number of tiles should not
     go too close from \code{nb.nuclei.max}. If it does, you should re-run your
-    chain  with a larger value for \code{nb.nuclei.max}}.
+    chain  with a larger value for \code{nb.nuclei.max}.}
   \item{nit}{Number of MCMC iterations}
   \item{thinning}{Number of MCMC iterations between two writing steps (if \code{thinning}=1, all
     states are saved whereas if e.g. \code{thinning}=10 only each 10 iteration is saved)}
@@ -147,15 +154,8 @@ Estoup, Mortier, Cosson, Genetics, 2005
 
 
 
-  #  first look for a place to write
-  #  MCMC outputs
-if(.Platform$OS == "unix"){
-path.mcmc= "/tmp/"
-}
-
-if(.Platform$OS == "windows"){
-path.mcmc= "/temp/"
-}
+  #  define a place for MCMC outputs
+path.mcmc = paste(tempdir(),"/",sep="")
 
  # Simulation of a dataset made of 2 populations
  # 2 loci and 2 alleles per locus

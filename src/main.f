@@ -98,7 +98,7 @@ C       enddo
 C       close(10)
 
 
-*     look for smallest rectangle enclosing the individuals
+*     look for smallest rectangle enclosing the spatial domain
       call limit(nindiv,nindivmax,s,xlim,ylim,dt)
 c      write(*,*) 'fin de limit'
 c      write(*,*) 's=',s
@@ -274,8 +274,8 @@ c$$$     &            iall=1,nallmax),iloc=1,nloc)
             endif
          endif
 
-       enddo
-       
+      enddo
+      
        close(9)
        close(10)
        close(11)

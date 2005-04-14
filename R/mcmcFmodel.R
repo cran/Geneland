@@ -10,6 +10,9 @@ function(# input data
                  # options in mcmc computations
                  nit,thinning,freq.model,varnpop,spatial)
   {
+    coordinates <- as.matrix(coordinates)
+    genotypes <- as.matrix(genotypes)
+    allele.numbers <- as.matrix(allele.numbers)
     
                                         # output files
     filenpp <- paste(path.mcmc,"nuclei.numbers.txt",sep="")
@@ -116,8 +119,8 @@ function(# input data
                        as.integer(kfix),
                        as.integer(spatial))
 
-                                        # write parameters of the run in an ascii file
-    param <- c(paste("path.mcmc :",path.mcmc),
+                                        # write parameters of the present run in an ascii file
+    param <- c(#paste("path.mcmc :",path.mcmc),
                paste("rate.max :",rate.max),
                paste("delta.coord :",delta.coord),
                paste("npopmin :",npopmin),

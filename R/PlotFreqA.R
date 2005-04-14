@@ -1,6 +1,10 @@
 "PlotFreqA" <-
 function(allele.numbers,path.mcmc,iloc,iall,printit=FALSE,path=NULL)
   {
+    coordinates <- as.matrix(coordinates)
+    genotypes <- as.matrix(genotypes)
+    allele.numbers <- as.matrix(allele.numbers)
+    
     fileparam <- paste(path.mcmc,"parameters.txt",sep="/")
     param <- as.matrix(read.table(fileparam))
     thinning <- as.numeric(param[param[,1]=="thinning",3])

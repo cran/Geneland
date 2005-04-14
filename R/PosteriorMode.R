@@ -2,6 +2,8 @@
 function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
                           printit=FALSE,file=NULL,main.title=NULL)
   {
+    coordinates <- as.matrix(coordinates)
+      
                                         # get informations about the MCMC run 
     fileparam <- paste(path.mcmc,"parameters.txt",sep="")
     param <- as.matrix(read.table(fileparam))

@@ -1,9 +1,9 @@
 Package: Geneland
 Title: A package for landscape genetics
-Version: 0.5
+Version: 0.6
 Author: Gilles Guillot
-Description: Detection of spatial structure from genetic data. Model and MCMC inference as described in [Guillot, Estoup, Mortier, Cosson, Genetics, 2005]
+Description: Detection of spatial structure from genetic data. 
 Maintainer: Gilles Guillot <Gilles.Guillot@inapg.inra.fr>
 URL: http://www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html
 License: GPL
-Packaged: Fri Feb  4 12:09:45 2005; guillot
+Packaged: Thu Apr 14 13:02:59 2005; guillot

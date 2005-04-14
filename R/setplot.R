@@ -46,6 +46,6 @@ function(xdata, ydata, pretty.call = TRUE, maxdim, axes = FALSE)
 #        warning("Plot limits changed.  Reset before making new plots!")
 #        warning(paste("Old limits: ", paste(oldpin, collapse = "  ")))
 #        warning(paste("New limits: ", paste(newpin, collapse = "  ")))
-        return(xlim, ylim, oldpin, newpin)
+        list(xlim, ylim, oldpin, newpin)
 }
 
