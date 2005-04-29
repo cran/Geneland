@@ -5,7 +5,7 @@
      &     s,u,c,dom,domperm,coorddom,indvois,distvois,f,orderf)
       implicit none
 
-      character*200 files,fileu,filec,filenpp,
+      character*256 files,fileu,filec,filenpp,
      &     filenclass,filedom,filedomperm,filenall,filef,filefperm
       
       integer nchain,npp,nclass,ichain,nindiv,nindivmax,nxdommax,
@@ -28,10 +28,14 @@
 **************************
 *     lecture des données
 **************************
-      write(6,*) '          *******************************'
-      write(6,*) '          ***   postprocesschain      ***'
-      write(6,*) '          *******************************'
-
+      write(6,*) '      *****************************************'
+      write(6,*) '      *  Computing posterior probabilities     '
+      write(6,*) '      *  of population membership for pixels   '
+      write(6,*) '      *****************************************'
+      write(6,*) ''
+      write(6,*) ''
+      write(6,*) ''
+      write(6,*) ''
 
       call limit(nindiv,nindivmax,s,xlim,ylim,dt)
 
@@ -66,7 +70,7 @@ c            write(6,*) 'iydom=',iydom
 
       do ichain=1,nchain
  100     format(f7.3,' %')
-         write(6,100)float(ichain)/float(nchain)*100.
+c         write(6,100)float(ichain)/float(nchain)*100.
          
          read(9,*) nclass
          
@@ -125,11 +129,75 @@ c            write(6,*) 'iydom=',iydom
       close(14)
       close(15)
       close(16)
-      
-      write(6,*) '          ***********************************'
-      write(6,*) '          *** End of  postprocesschain    ***'
-      write(6,*) '          ***********************************'
+ 
       end subroutine postprocesschain
+
+*
+*     posterior probability of population membership for individuals
+*
+      subroutine  pppmindiv(nindiv,s,npopmax,nppmax,
+     &     indcell,distcell,u,c,pmp,filenpp,fileu,filec,nit,
+     &     burn)
+      implicit none
+ 
+      integer npopmax,nppmax,nindiv,indcell,npp,c,
+     &     nit,burn
+      real pmp,distcell,u,s
+
+      integer iit,ipp,iindiv,nppcur,ccur,ipop
+      real xlim(2),ylim(2),ucur,dt
+      character*256 files,fileu,filec,filenpp,
+     &     filenclass,filedom,filedomperm,filenall,filef,filefperm
+      
+
+      dimension indcell(nindiv),distcell(nindiv),
+     &     pmp(nindiv,npopmax),u(2,nppmax),c(nppmax),s(2,nindiv)
+      write(6,*) '      **********************************************'
+      write(6,*) '      *  Computing posterior probabilities          '
+      write(6,*) '      *  of population membership for individuals   '
+      write(6,*) '      **********************************************'
+
+      
+      open(10,file=filenpp)
+      open(11,file=fileu)
+      open(12,file=filec)
+
+*     sequentially processes states of the chain
+      do iit=1,nit
+10000    format(f7.3,' %')
+c         write(6,10000)float(iit)/float(nit)*100.
+         
+         read(10,*) npp
+         do ipp=1,nppmax
+            read(11,*) u(1,ipp),u(2,ipp)
+            read(12,*) c(ipp)
+         enddo
+         
+         if(iit .gt. burn)  then
+            call calccell(nindiv,nindiv,s,npp,nppmax,u,indcell,distcell)
+            do iindiv=1,nindiv
+               ipop = c(indcell(iindiv))
+               pmp(iindiv,ipop) =  pmp(iindiv,ipop) + 1.
+            enddo
+         endif 
+      enddo
+      
+c      write(*,*) 'pmp=',pmp
+      do iindiv=1,nindiv 
+         do ipop=1,npopmax
+            pmp(iindiv,ipop) = pmp(iindiv,ipop)/float(nit-burn)
+         enddo
+      enddo
+c      write(*,*) 'pmp=',pmp
+      close(10)
+      close(11)
+      close(12)
+      end subroutine  pppmindiv
+
+
+      
+ 
+ 
 
 
 

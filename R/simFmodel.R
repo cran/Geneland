@@ -106,7 +106,7 @@ function(nindiv,
     
     if(plots==TRUE)
       { 
-        X11()
+        get(getOption("device"))()
         plot(coordinates[1,],coordinates[2,],
              xlab="x coordinates",ylab="y coordinates")
         points(coord.nuclei[1,],coord.nuclei[2,],col=2)
@@ -115,7 +115,7 @@ function(nindiv,
       }
     if(ploth==TRUE)
       {
-        X11()
+        get(getOption("device"))()
         par(mfrow=c(floor(sqrt(nloc)+1),
                   floor(sqrt(nloc))))
             #par(mfrow=c(1,nloc))
@@ -126,11 +126,11 @@ function(nindiv,
                      sub=paste("Locus",iloc),ylim=c(0,1),
                      main="Frequencies in ancestral population")
               }
-        #X11()
+        get(getOption("device"))()
         #par(mfrow=c(npop,nloc))
         for(iclass in 1:npop)
           {
-            X11()
+            get(getOption("device"))()
             par(mfrow=c(floor(sqrt(nloc)+1),
                   floor(sqrt(nloc))))
             #par(mfrow=c(1,nloc))
@@ -151,7 +151,7 @@ function(nindiv,
          genotypes=z,
          allele.numbers=nall,
          coord.nuclei=t(coord.nuclei),
-         color.nuclei=c,
+         color.nuclei=color.nuclei,
          frequencies=freq,
          ancestral.frequencies=fa,
          drifts=drift,

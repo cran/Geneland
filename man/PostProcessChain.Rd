@@ -31,34 +31,42 @@ path.mcmc,nxdom, nydom,burnin)
     are stored. Then \code{burnin}=10 will throw away 10 stored
     iterations, namely 100*10 computed iterations.}
 }
-\details{ \file{path.data} directory should contain at least three files
-  named   exactly :
-  \file{coordinates.txt}, \file{genotypes.txt} and
-  \file{allele.numbers.txt} and containing respectively the spatial
-  coordinates, the genotypes and the number of alleles per locus.
 
-    See format of files simulated by \code{\link{simFmodel}} for an
-  example. 
-  
-}
 \value{
-  Posterior probability of population membership for each pixel are
-  written in an ascii file called \file{proba.pop.membership.txt}
-  (one column per population,
-  \code{npopmax} values are computed for each pixel, 
-  pixels are stored  row-wise starting from bottom left).
-
-  Another file called \file{proba.pop.membership.perm.txt} tries
-  to get rid of label switching
-  issues by labelling the population according to a fixed constraint.
-  (This has proved to be usefull with a small number of loci, (e.g. nloc=3), for well
-  differentiated populations.)
+  \item{Posterior probability of population membership for each pixel:}{
+    They  are
+    written in an ascii file called \file{proba.pop.membership.txt}
+    (one column per population,
+    \code{npopmax} values are computed for each pixel.
+    Images in each column of \file{proba.pop.membership.txt} are stored
+    column-wise starting from the bottom left pixel.
+    First line of \file{proba.pop.membership.txt}  = bottom left pixel ,
+    second line of \file{proba.pop.membership.txt} = upward neighboor of
+    the previous pixel, etc...)
+    
+    Another file called \file{proba.pop.membership.perm.txt} tries
+    to get rid of label switching
+    issues by labelling the population according to a fixed constraint.
+    (This has proved to be usefull with a small number of loci, (e.g. nloc=3), for well
+    differentiated populations.)}
+  
+  
+  \item{Posterior probability of population membership for each
+    individual:}{ They are written in a file named
+    \file{proba.pop.membership.indiv.txt}.
+  }
+  
+  
+  \item{Label of modal population for individuals:}{
+    They are written in a file named \file{modal.pop.indiv.txt}. 
+    See the example section  of function \code{\link{mcmcFmodel}} to see
+    how they can be added in a plot.}
 }
 \references{A spatial statistical model for landscape genetics, Guillot,
 Estoup, Mortier, Cosson, Genetics, 2005
   
- Guillot, G., Geneland : A program for landscape genetics.
- Molecular Ecology  Notes, submited.}
+ Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
+ Molecular Ecology  Notes, 2005.}
 \author{Gilles Guillot  }
 
 

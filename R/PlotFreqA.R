@@ -12,7 +12,7 @@ function(allele.numbers,path.mcmc,iloc,iall,printit=FALSE,path=NULL)
     nloc <- length(allele.numbers)
     filefa <-  paste(path.mcmc,"ancestral.frequencies.txt",sep="")
     fa <- as.matrix(read.table(filefa))
-    X11()
+    get(getOption("device"))()
     plot(fa[,(iloc-1)*max(allele.numbers)+iall],
          xlab=paste("Index of MCMC iteration"," (x ",thinning,")",sep=""),
          ylab=paste("Frequency of allele",

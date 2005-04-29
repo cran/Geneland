@@ -19,7 +19,7 @@ function(path.mcmc,printit=FALSE,file=NULL)
         }
       dev.off()
     }
-    X11()
+    get(getOption("device"))()
     par(mfrow=c(npopmax,1))
     for(iclass in 1:npopmax)
       {

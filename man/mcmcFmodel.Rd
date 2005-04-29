@@ -137,8 +137,8 @@ current state of parameters in the Markov chain.
 \references{A spatial statistical model for landscape genetics, Guillot,
 Estoup, Mortier, Cosson, Genetics, 2005
   
- Guillot, G., Geneland : A program for landscape genetics.
- Molecular Ecology  Notes, submited.}
+ Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
+ Molecular Ecology  Notes, 2005.}
 \author{Gilles Guillot  }
 
 
@@ -153,23 +153,34 @@ Estoup, Mortier, Cosson, Genetics, 2005
   # and loaded by library("Geneland")
 
 
-
-  #  define a place for MCMC outputs
-path.mcmc = paste(tempdir(),"/",sep="")
-
  # Simulation of a dataset made of 2 populations
- # 2 loci and 2 alleles per locus
+ # 5 loci and 10 alleles per locus
+ # on a spatial domain enclosed in a rectangle
+ # (x coord. in [0,3], y coord. in [0,1])
+ # domain of populations are centered around 
+ # points (0.5,0.5) and (2.5,0.5) respectively 
+ # (so that the boundary is the vertical line x = 1.5)
 sim = simFmodel(nindiv=100,
-          coord.lim=c(0,1,0,1),
+          coord.lim=c(0,3,0,1),
           number.nuclei=2,
+          coord.nuclei=cbind(c(0.5,0.5),c(2.5,0.5)),
+          color.nuclei=c(1,2),
           nloc=5,
-          nall=c(5,5,5,5,5),
+          nall=rep(10,5),
           npop=2,
           drift=c(.3,.3),
           plots=FALSE,
           ploth=FALSE,
           seed=123)
 
+
+  # you can check the simulated dataset by
+ls()  ## gives a list of existing objects
+
+summary(sim) ## describes roughly what object sim actually contains
+
+  #  define a place for MCMC outputs
+path.mcmc = paste(tempdir(),"/",sep="")
 
   # First run of MCMC algorithm
   # in order to get the posterior mode of the number of populations
@@ -181,8 +192,8 @@ mcmcFmodel(sim$coordinates,sim$genotypes,sim$allele.numbers,
            npopinit=5,
            npopmax=10,
            nb.nuclei.max=200,
-           nit=10000,
-           thinning=10,
+           nit=50000,
+           thinning=50,
            freq.model="Dirichlet",
            varnpop=TRUE,
            spatial=TRUE)
@@ -228,6 +239,12 @@ path.mcmc=path.mcmc,ipop=1,iloc=1,iall=1)
  PosteriorMode(sim$coordinates,path.mcmc=path.mcmc,
                write=FALSE,plotit=TRUE)
 
+
+ # read the estimated population for indivuals
+ pppm.indiv <- scan(paste(path.mcmc,"modal.pop.indiv.txt",sep=""))
+
+ # add a plot of the individual colored as their estimated population of origin
+points(sim$coordinates,col=pppm.indiv,pch=16)
 
 
 

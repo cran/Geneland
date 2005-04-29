@@ -6,7 +6,7 @@
   color code for each pixel.}
 
 \usage{
-function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
+PosteriorMode(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
                           printit=FALSE,file=NULL,main.title=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -26,8 +26,8 @@ function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
 \references{A spatial statistical model for landscape genetics, Guillot,
   Estoup, Mortier, Cosson, Genetics, 2005
   
- Guillot, G., Geneland : A program for landscape genetics.
- Molecular Ecology  Notes, submited.
+ Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
+ Molecular Ecology  Notes, 2005.
 
 }
 \author{Gilles Guillot  }

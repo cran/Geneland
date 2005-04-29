@@ -37,10 +37,12 @@ function(coordinates,genotypes,allele.numbers,#data
     f11 <- numeric(npopmax)
     orderf11 <- numeric(npopmax)
     nallmax <- max(allele.numbers)
-    s <- matrix(nr=2,nc=nindiv,data=-999)
+    #s <- matrix(nr=2,nc=nindiv,data=-999)
     u <- matrix(nr=2,nc=nb.nuclei.max,data=-999)
     c <- rep(times=nb.nuclei.max,-999)
-    
+
+    ## computes posterior probabilities of population membership
+    ## for pixels of the grid
     out.res<- .Fortran(name="postprocesschain",
                        PACKAGE="Geneland",
                        as.integer(nindiv),
@@ -64,7 +66,7 @@ function(coordinates,genotypes,allele.numbers,#data
                        as.character(filefperm),
                        as.character(filedom),
                        as.character(filedomperm),
-                       as.single(coordinates),
+                       as.single(t(coordinates)),
                        as.single(u),
                        as.integer(c),
                        as.single(dom),
@@ -78,5 +80,48 @@ function(coordinates,genotypes,allele.numbers,#data
                paste("nydom :",nydom))
     write.table(param,file=paste(path.mcmc,"postprocess.parameters.txt",sep=""),
                 quote=FALSE,row.name=FALSE,col.name=FALSE)
+
+    
+    ## prepare arrays for call to pppmindiv
+    indvois <- numeric(nindiv)
+    distvois <- numeric(nindiv)
+    u <- matrix(nr=2,nc=nb.nuclei.max,data=-999)
+    c <- rep(times=nb.nuclei.max,-999)
+    pmp <- matrix(nr=nindiv,nc=npopmax,data=0)
+    
+    ## computes posterior probabilities of population membership
+    ## for individuals
+    out.res<- .Fortran(name="pppmindiv",
+                       PACKAGE="Geneland",
+                       as.integer(nindiv),
+                       as.single(t(coordinates)),
+                       as.integer(npopmax),
+                       as.integer(nb.nuclei.max),
+                       as.integer(indvois),
+                       as.single(distvois),
+                       as.single(u),
+                       as.integer(c),
+                       as.single(pmp),
+                       as.character(filenpp),
+                       as.character(fileu),
+                       as.character(filec),
+                       as.integer(nit/thinning),
+                       as.integer(burnin))
+    pmp <- matrix(nr=nindiv,nc=npopmax,data=out.res[[9]])
+    mod.pop.indiv <- numeric(nindiv)
+    for(iindiv in 1:nindiv)
+      {
+        mod.pop.indiv[iindiv] <-  order(pmp[iindiv,],decreasing=TRUE)[1]
+      }
+      
+    write.table(pmp,
+                file=paste(path.mcmc,"proba.pop.membership.indiv.txt",sep=""),
+                quote=FALSE,row.name=FALSE,col.name=FALSE)
+    write.table(mod.pop.indiv,
+                file=paste(path.mcmc,"modal.pop.indiv.txt",sep=""),
+                quote=FALSE,row.name=FALSE,col.name=FALSE)
+
+    
+
   }
 

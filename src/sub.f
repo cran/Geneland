@@ -214,7 +214,8 @@
 
 *     tirage des frequences dans toutes les classes
 *     a tous les locus
-      subroutine rpriorf(nclass,nclassmax,nloc,nlocmax,nall,nallmax,f)
+      subroutine rpriorf(nclass,nclassmax,nloc,nlocmax,nall,nallmax,f,
+     &     ptemp)
       implicit none
       integer nclass,nclassmax,nloc,nlocmax,nall(nlocmax),nallmax
       real f(nclassmax,nlocmax,nallmax)
@@ -241,7 +242,7 @@
 
 *     tirage des frequences dans la pop ancestrale 
 *     a tous les locus
-      subroutine rpriorfa(nloc,nlocmax,nall,nallmax,fa,fmodel)
+      subroutine rpriorfa(nloc,nlocmax,nall,nallmax,fa,fmodel,ptemp)
       implicit none
       integer nloc,nlocmax,nall(nlocmax),nallmax,fmodel
       real fa(nlocmax,nallmax)
@@ -1718,7 +1719,7 @@ c$$$     &                           n(iclass,iloc,iall)
 c$$$                         enddo
 c$$$                      enddo
 c$$$                   enddo
-c$$$                   do iclass=1,nclassmax
+*c$$$                   do iclass=1,nclassmax
 c$$$                      do iloc=1,nlocmax
 c$$$                         do iall=1,nall(iloc)
 c$$$                            write(*,*) 

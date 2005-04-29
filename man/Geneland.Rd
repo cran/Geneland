@@ -117,8 +117,8 @@ On the model (and sub-models) implemented in \code{Geneland}
 - Guillot G. A. Estoup, F. Mortier, J.F. Cosson, A spatial statistical model for
 landscape genetics, Genetics, 2005
 
-- Guillot, G., Geneland : A program for landscape genetics.
-Molecular Ecology   Notes, submited.
+- Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
+Molecular Ecology   Notes, 2005.
 
 
 

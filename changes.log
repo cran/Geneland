@@ -1,18 +1,38 @@
-Changes from version 0.5:
+Changes from version 0.6 to version 0.7:
+----------------------------------------
 
-* path.mcmc not written any longer in parameter file parameter.txt
-(in order to avoid issues with path containing spaces).
+        --    NO SYNTAXIC CHANGE  -- 
 
-* transform input data (coordinates, genotypes and allele.numbers)
-  into matrices 
-(to avoid issues with data frames).
+* Function simFmodel now returns a list containing element color.nuclei
 
-* warning message of setplot function avoided by replacing last
-instruction return (xlim, ylim, oldpin, newpin) by 
-list(xlim, ylim, oldpin, newpin).
+* call of X11() in functions simfmodel, Plot* and PosteriorMode replaced by
+  get(getOption("device"))() 
 
-* carriage return after the tenth column in files 
-  proba.pop.membership.txt and proba.pop.membership.perm.txt removed
-  (now correct writing with up to thousand populations).
+* Documentation of PostProcessChain do not refer any longer to
+  path.data (which no longer exists since version 0.6)
 
-* path.mcmc now set as paste(tempdir(),"/",sep="") in the example of mcmcFmodel
+* Array ptemp now passed as argument in subroutine 
+rpriof and rpriorfa in Fortran
+
+* PostProcessChain passes matrix t(coordinates) instead of
+  coordinates
+
+* Function PlotTesselation and PosteriorMode uses directly coordinates instead of
+  using this useless matrix s 
+
+* Documentation of PostProcessChain() now explains correctly  the
+storage format of images (column wise instead of row wise).
+
+* Example code in mcmcFmodel implemented with 5 loci, 10 alleles/locus
+  on a reactangle domain, on a longer MCMC run
+
+* Character strings for path to the various files now declared in
+  Fortran as character*256 instead of character*200
+
+* Remove declaration of useless matrix s in PostProcessChain
+
+* Additional functionality in PostProcessChain:
+now  also computes posterior probabilities of population membership 
+for individuals and writes them in file named proba.pop.membership.indiv.txt" 
+The modal population for individual is written in a file named 
+"modal.pop.indiv.txt" 

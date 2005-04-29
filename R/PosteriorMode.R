@@ -43,38 +43,38 @@ function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
     if(write) write.table(map,file=filepm,quote=FALSE,row.name=FALSE,col.name=FALSE)
 
     map.dom <- t(apply(dom.post,1,order))[,npopmax]
-    s <- coordinates
+    #s <- coordinates
     
     if(plotit) {
-      X11()
-      setplot(seq(min(s[,1]-delta.coord/2),max(s[,1]+delta.coord/2),length=nxdom),
-              seq(min(s[,2]-delta.coord/2),max(s[,2]+delta.coord/2),length=nydom))
-      frame <- max(max(s[,1])-min(s[,1]),max(s[,2])-min(s[,2]))/40
-      image(seq(min(s[,1]-delta.coord/2),max(s[,1]+delta.coord/2),length=nxdom),
-            seq(min(s[,2]-delta.coord/2),max(s[,2]+delta.coord/2),length=nydom),
+      get(getOption("device"))()
+      setplot(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
+              seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom))
+      frame <- max(max(coordinates[,1])-min(coordinates[,1]),max(coordinates[,2])-min(coordinates[,2]))/40
+      image(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
+            seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom),
             matrix(map.dom,nr=nxdom,nc=nydom,byrow=TRUE),
             xlab="x coordinates ",ylab="y coordinates",
             main="",cex=1.5,cex.lab=1.5,col=terrain.colors(npopmax),
-            xlim=c(min(s[,1]-delta.coord/2-frame),max(s[,1]+delta.coord/2+frame)),
-            ylim=c(min(s[,2]-delta.coord/2-frame),max(s[,2]+delta.coord/2+frame)),
+            xlim=c(min(coordinates[,1]-delta.coord/2-frame),max(coordinates[,1]+delta.coord/2+frame)),
+            ylim=c(min(coordinates[,2]-delta.coord/2-frame),max(coordinates[,2]+delta.coord/2+frame)),
             sub="Map of posterior mode of population membership")
       title(main.title)
-      points(s,pch=16)
+      points(coordinates,pch=16)
     }
     if(printit){
       postscript(file)
-      setplot(seq(min(s[,1]-delta.coord/2),max(s[,1]+delta.coord/2),length=nxdom),
-              seq(min(s[,2]-delta.coord/2),max(s[,2]+delta.coord/2),length=nydom))
-      frame <- max(max(s[,1])-min(s[,1]),max(s[,2])-min(s[,2]))/40
-      image(seq(min(s[,1]-delta.coord/2),max(s[,1]+delta.coord/2),length=nxdom),
-            seq(min(s[,2]-delta.coord/2),max(s[,2]+delta.coord/2),length=nydom),
+      setplot(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
+              seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom))
+      frame <- max(max(coordinates[,1])-min(coordinates[,1]),max(coordinates[,2])-min(coordinates[,2]))/40
+      image(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
+            seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom),
             matrix(map.dom,nr=nxdom,nc=nydom,byrow=TRUE),
             xlab="x coordinates ",ylab="y coordinates",
             main="",cex=1.5,cex.lab=1.5,col=terrain.colors(npopmax),
-            xlim=c(min(s[,1]-delta.coord/2-frame),max(s[,1]+delta.coord/2+frame)),
-            ylim=c(min(s[,2]-delta.coord/2-frame),max(s[,2]+delta.coord/2+frame)),
+            xlim=c(min(coordinates[,1]-delta.coord/2-frame),max(coordinates[,1]+delta.coord/2+frame)),
+            ylim=c(min(coordinates[,2]-delta.coord/2-frame),max(coordinates[,2]+delta.coord/2+frame)),
             sub="Map of posterior mode of population membership")
-      points(s,pch=16)
+      points(coordinates,pch=16)
       title(main.title)
       dev.off()
     }

@@ -41,7 +41,7 @@
      &     cellclasshost,ntemp,fmodel,kfix,spatial
       real ptemp,xlim(2),ylim(2),ranf,rpostlamb,
      &     distcell,du,distcelltemp,a,ttemp,lpp,ll
-      character*200 files,filez,filef,filenall,filenpp,
+      character*256 files,filez,filef,filenall,filenpp,
      &     filelambda,filenclass,fileu,filec,
      &     filefa,filedrift,filelpp,filell,filet
  
@@ -151,9 +151,9 @@ c$$$      nclass = rpriornclass(mu,nclassmin,nclassmax)
       
       call rpriordrift(nclass,nclassmax,drift,fmodel)
 
-      call rpriorfa(nloc,nlocmax,nall,nallmax,fa,fmodel)
+      call rpriorfa(nloc,nlocmax,nall,nallmax,fa,fmodel,ptemp)
        
-      call rpriorf(nclass,nclassmax,nloc,nlocmax,nall,nallmax,f)
+      call rpriorf(nclass,nclassmax,nloc,nlocmax,nall,nallmax,f,ptemp)
 
       
 

@@ -26,8 +26,8 @@ PlotFreqA(allele.numbers, path.mcmc,iloc,iall,printit=FALSE,path=NULL)
 \references{A spatial statistical model for landscape genetics, Guillot,
   Estoup, Mortier, Cosson, Genetics, 2005
   
- Guillot, G., Geneland : A program for landscape genetics.
- Molecular Ecology  Notes, submited.}
+ Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
+ Molecular Ecology  Notes, 2005.}
 \author{Gilles Guillot  }
 
 
