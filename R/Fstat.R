@@ -48,9 +48,9 @@ function(genotypes,allele.numbers,path.mcmc)
                              as.integer(maptmp),
                              as.integer(tabindiv),
                              as.integer(kk),
-                             as.single(Fistmp),
-                             as.single(Fsttmp),
-                             as.single(Fittmp))
+                             as.double(Fistmp),
+                             as.double(Fsttmp),
+                             as.double(Fittmp))
               Fis[iclass1,iclass2] <- res[[12]][1]
               Fst[iclass1,iclass2] <- res[[13]][1]
               Fit[iclass1,iclass2] <- res[[14]][1]

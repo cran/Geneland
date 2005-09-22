@@ -4,7 +4,7 @@
 \title{ Inference in a  spatial statistical model  }
 \description{ Markov Chain Monte-Carlo inference in the spatial F-model}
 \usage{
-mcmcFmodel(coordinates,genotypes,allele.numbers,
+mcmcFmodel(coordinates,genotypes,ploidy,
 path.mcmc, rate.max, delta.coord, npopmin, npopinit,
 npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial)
 }
@@ -14,12 +14,12 @@ npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial)
     columns and one line per individual.}
   \item{genotypes}{Genotypes of individuals. A matrix with one line per
     individual and 2 columns per locus}
-  \item{allele.numbers}{A vector of integer containing the number of possible
-    allele for each locus}
+  \item{ploidy}{An integer equal to 1 for haploid data and 2 for diploid
+  data.}
   \item{path.mcmc}{ Path to output files directory. It seems that the
     path should be given in the Unix style even under Windows (use \/
     instead of \\).
-    This path *have to*  end with a slash (\/)
+    This path *has to*  end with a slash (\/)
     (e.g. path.mcmc="/home/me/Geneland-stuffs/")
   }
   \item{rate.max}{Maximum rate of Poisson process  (real number >0).
@@ -66,8 +66,7 @@ npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial)
     populations. If FALSE, all clustering receive equal prior
     probability. In this case spatial information (i.e coordinates)
     are not used  and the locations of  the nuclei are initialized and
-    kept fixed at the locations of individuals.}
-   
+    kept fixed at the locations of individuals.}   
 }
 
 
@@ -134,11 +133,13 @@ current state of parameters in the Markov chain.
 
 }
 
-\references{A spatial statistical model for landscape genetics, Guillot,
-Estoup, Mortier, Cosson, Genetics, 2005
-  
- Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
- Molecular Ecology  Notes, 2005.}
+\references{ G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+  model for landscape genetics. Genetics, 170, 1261-1280, 2005.
+
+  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
+  genetics. Molecular Ecology Notes, 5, 712-715, 2005.}
+
+
 \author{Gilles Guillot  }
 
 
@@ -146,8 +147,8 @@ Estoup, Mortier, Cosson, Genetics, 2005
 \seealso{ \code{\link{simFmodel}}}
 
 \examples{
-  # Below is a complete sequence 
-  # of commands using Geneland functions
+  # Below is a sequence 
+  # of R commands using Geneland functions
 
   # we assume that Geneland is installed
   # and loaded by library("Geneland")
@@ -165,7 +166,6 @@ sim = simFmodel(nindiv=100,
           number.nuclei=2,
           coord.nuclei=cbind(c(0.5,0.5),c(2.5,0.5)),
           color.nuclei=c(1,2),
-          nloc=5,
           nall=rep(10,5),
           npop=2,
           drift=c(.3,.3),
@@ -182,9 +182,12 @@ summary(sim) ## describes roughly what object sim actually contains
   #  define a place for MCMC outputs
 path.mcmc = paste(tempdir(),"/",sep="")
 
+\dontrun{
   # First run of MCMC algorithm
   # in order to get the posterior mode of the number of populations
-mcmcFmodel(sim$coordinates,sim$genotypes,sim$allele.numbers,
+
+mcmcFmodel(sim$coordinates,
+           sim$genotypes,
            path.mcmc=path.mcmc,
            rate.max=100,
            delta.coord=0,
@@ -204,7 +207,8 @@ Plotnpop(path.mcmc)
 
 
  # Then re-run the chain with fixed number of populations
-mcmcFmodel(sim$coordinates,sim$genotypes,sim$allele.numbers,
+mcmcFmodel(sim$coordinates,
+           sim$genotypes,
            path.mcmc=path.mcmc,
            rate.max=100,
            delta.coord=0,
@@ -246,7 +250,7 @@ path.mcmc=path.mcmc,ipop=1,iloc=1,iall=1)
  # add a plot of the individual colored as their estimated population of origin
 points(sim$coordinates,col=pppm.indiv,pch=16)
 
-
+}
 
 }
 

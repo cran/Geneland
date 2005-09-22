@@ -15,11 +15,7 @@ Plotntile(path.mcmc,printit=FALSE,file=NULL)
   \item{file}{Character : Path to file where figures
     should be printed}
 }
-\references{A spatial statistical model for landscape genetics, Guillot,
-Estoup, Mortier, Cosson, Genetics, 2005
-  
- Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
- Molecular Ecology  Notes, 2005.}
+
 \author{Gilles Guillot  }
 
 

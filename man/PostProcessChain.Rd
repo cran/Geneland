@@ -7,7 +7,7 @@
  of the spatial domain. 
 }
 \usage{
-PostProcessChain(coordinates,genotypes,allele.numbers,
+PostProcessChain(coordinates,genotypes,
 path.mcmc,nxdom, nydom,burnin)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -16,8 +16,6 @@ path.mcmc,nxdom, nydom,burnin)
     columns and one line per individual.}
   \item{genotypes}{Genotypes of individuals. A matrix with one line per
     individual and 2 columns per locus}
-  \item{allele.numbers}{A vector of integer containing the number of possible
-    allele for each locus}
   \item{path.mcmc}{ Path to output files directory }
   \item{nxdom}{Number of pixel for discretization of the spatial domain
     in the horizontal direction}
@@ -62,11 +60,12 @@ path.mcmc,nxdom, nydom,burnin)
     See the example section  of function \code{\link{mcmcFmodel}} to see
     how they can be added in a plot.}
 }
-\references{A spatial statistical model for landscape genetics, Guillot,
-Estoup, Mortier, Cosson, Genetics, 2005
-  
- Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
- Molecular Ecology  Notes, 2005.}
+\references{G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+  model for landscape genetics. Genetics, 170, 1261-1280, 2005.
+
+  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
+  genetics. Molecular Ecology Notes, 5, 712-715, 2005.}
+
 \author{Gilles Guillot  }
 
 

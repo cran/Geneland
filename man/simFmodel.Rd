@@ -9,7 +9,7 @@
 \usage{
 simFmodel(nindiv, coordinates = NULL, coord.lim, number.nuclei,
 coord.nuclei = NULL, color.nuclei = NULL,
-nloc, nall, npop, drift, seed=NULL, plots = TRUE, ploth = TRUE)
+nall, npop, drift, seed=NULL, plots = TRUE, ploth = TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -21,8 +21,7 @@ nloc, nall, npop, drift, seed=NULL, plots = TRUE, ploth = TRUE)
   \item{number.nuclei}{ Integer: number of nuclei in the Voronoi tessellation}
   \item{coord.nuclei}{Coordinates of nuclei of Voronoi tessellation}
   \item{color.nuclei}{Population labels of the nuclei (vector of integers of size \code{number.nuclei})}
-  \item{nloc}{ number of loci}
-  \item{nall}{ Vector of integers (of size \code{nloc}) giving number of alleles at each locus}
+  \item{nall}{ Vector of integers giving number of alleles at each locus}
   \item{npop}{Number of populations }
   \item{drift}{Vector (of size \code{npop}) of drift factors between 0
   and 1}
@@ -56,11 +55,12 @@ frequencies,  ancestral.frequencies, drifts, index.nearest.nucleus}
   Linked loci and correlated allele frequencies, Genetics, pp 1567-1587,
   vol 164, 2003
 
-  A spatial statistical model for landscape genetics, Guillot,
-Estoup, Mortier, Cosson, Genetics, 2005
-  
- Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
- Molecular Ecology  Notes, 2005.}
+ G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+  model for landscape genetics. Genetics, 170, 1261-1280, 2005.
+
+  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
+  genetics. Molecular Ecology Notes, 5, 712-715, 2005.}
+
 \author{Gilles Guillot  }
 
 

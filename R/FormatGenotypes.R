@@ -9,7 +9,6 @@ function(genotypes)
     
     for(ic in 1:(ncol(genotypes)/2))
       {
-        print(ic)
         ens <- sort(unique(c(genotypes[,2*ic-1],genotypes[,2*ic])))
         max.ens <- length(ens)
         for(il in 1:(dim(genotypes)[1]))
@@ -24,8 +23,8 @@ function(genotypes)
           }
         nall[ic] <- max.ens
       }
-    genotypes <- as.matrix(genotypes)
-    genotypes[is.na(genotypes)] <- -999
+    formatted <- as.matrix(formatted)
+    formatted[is.na(formatted)] <- -999
     list(genotypes=formatted,allele.numbers=nall)
   }
 

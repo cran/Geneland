@@ -73,12 +73,12 @@ The overall population is viewed as a co-existence of sub-populations at
    \code{\link{Fstat}}: Computations of pairwise F statistics between
    inferred subpopulations 
 
-   \code{\link{FormatGenotypes}}: Transform a file of genotypes into
+   \code{\link{FormatGenotypes}}: Internal function. 
+   Transform a file of genotypes into
    a format suitable for function \code{\link{mcmcFmodel}}
 
    \code{\link{setplot}}: Internal function
 
-   \code{\link{rdiscr}}: Internal function
 }
 
 
@@ -114,21 +114,24 @@ Molecular Ecology, 2002, 11, 2571-2581
 
 On the model (and sub-models) implemented in \code{Geneland}
 
-- Guillot G. A. Estoup, F. Mortier, J.F. Cosson, A spatial statistical model for
-landscape genetics, Genetics, 2005
-
-- Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
-Molecular Ecology   Notes, 2005.
+- G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+model for landscape genetics. Genetics, 170, 1261-1280, 2005.
 
 
-
+- G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
+genetics. Molecular Ecology Notes, 5, 712-715, 2005.
 
 }
 
 \author{Gilles Guillot
 
-\url{http://www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html}
+  \url{ww.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html}
 
+  See also
+  
+  \url{ww.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/Geneland.html}
+
+  
 }
 
 

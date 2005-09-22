@@ -5,7 +5,6 @@ function(nindiv,
                       number.nuclei,
                       coord.nuclei=NULL,
                       color.nuclei=NULL,
-                      nloc,
                       nall,
                       npop,
                       drift,
@@ -29,9 +28,12 @@ function(nindiv,
     if(is.null(coord.nuclei))
       {
         coord.nuclei <-  rbind(runif(min=0,max=1,number.nuclei),
-                    runif(min=0,max=1,number.nuclei))
-        color.nuclei <- numeric(number.nuclei)
-        for(ipp in 1:number.nuclei)color.nuclei[ipp] <- rdiscr(rep(1/npop,npop))
+                               runif(min=0,max=1,number.nuclei))
+
+        ##color.nuclei <- numeric(number.nuclei)
+        ##for(ipp in 1:number.nuclei)color.nuclei[ipp] <- rdiscr(rep(1/npop,npop))
+        color.nuclei <- sample(x=1:npop,size=number.nuclei,replace=TRUE)
+        
                                         # avoid to have only one pop
                                         # assuming we simulate at least two pop
         if(number.nuclei==2) color.nuclei <- 1:2
@@ -53,6 +55,7 @@ function(nindiv,
         ppvois[iindiv] <- k
       }
 
+    nloc <- length(nall)
                                         # alleles frequencies in ancestral population
     fa <- matrix(nr=nloc,nc=max(nall),data=-999)
     for(iloc in 1:nloc)
@@ -94,13 +97,18 @@ function(nindiv,
     z <- matrix(nr=nindiv,nc=nloc*2)
     for(iclass in 1:npop)
       {
-        for(iindiv in (1:nindiv)[color.nuclei[ppvois]==iclass] )
+                                        #for(iindiv in (1:nindiv)[color.nuclei[ppvois]==iclass] )
+                                        #{
+        subclass <- (1:nindiv)[color.nuclei[ppvois]==iclass]
+        for(iloc in 1:nloc)
           {
-            for(iloc in 1:nloc)
-              {
-                z[iindiv,2*iloc-1] <- rdiscr(freq[iclass,iloc,1:nall[iloc]])
-                z[iindiv,2*iloc]   <- rdiscr(freq[iclass,iloc,1:nall[iloc]])
-              }
+            z[subclass,c(2*iloc-1,2*iloc)] <- sample(x=1:nall[iloc],
+                                                     size=2*length(subclass),
+                                                     prob=freq[iclass,iloc,1:nall[iloc]],
+                                                     replace=TRUE)
+                #z[iindiv,2*iloc-1] <- rdiscr(freq[iclass,iloc,1:nall[iloc]])
+                #z[iindiv,2*iloc]   <- rdiscr(freq[iclass,iloc,1:nall[iloc]])
+                                        #              }
           }
       }
     

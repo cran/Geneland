@@ -1,13 +1,14 @@
 "PostProcessChain" <-
-function(coordinates,genotypes,allele.numbers,#data
+function(coordinates,genotypes,#data
                              path.mcmc, # path to MCMC output directory
                              nxdom,nydom,# resolution
                              burnin # number of iterations of the chain to throw away
                              )
   {
     coordinates <- as.matrix(coordinates)
-    genotypes <- as.matrix(genotypes)
-    allele.numbers <- as.matrix(allele.numbers)
+    data.tmp <- FormatGenotypes(as.matrix(genotypes))
+    genotypes <- data.tmp$genotypes
+    allele.numbers <- data.tmp$allele.numbers
     
     filenpop <- paste(path.mcmc,"populations.numbers.txt",sep="")
     filenpp <- paste(path.mcmc,"nuclei.numbers.txt",sep="")
@@ -56,7 +57,7 @@ function(coordinates,genotypes,allele.numbers,#data
                        as.integer(nloc),
                        as.integer(allele.numbers),
                        as.integer(nallmax),
-                       as.single(delta.coord),
+                       as.double(delta.coord),
                        as.integer(nit/thinning),
                        as.character(filenpp),
                        as.character(filenpop),
@@ -66,16 +67,16 @@ function(coordinates,genotypes,allele.numbers,#data
                        as.character(filefperm),
                        as.character(filedom),
                        as.character(filedomperm),
-                       as.single(t(coordinates)),
-                       as.single(u),
+                       as.double(t(coordinates)),
+                       as.double(u),
                        as.integer(c),
-                       as.single(dom),
-                       as.single(domperm),
-                       as.single(coorddom),
+                       as.double(dom),
+                       as.double(domperm),
+                       as.double(coorddom),
                        as.integer(indvois),
-                       as.single(distvois),
-                       as.single(f11),
-                       as.single(orderf11))
+                       as.double(distvois),
+                       as.double(f11),
+                       as.double(orderf11))
     param <- c(paste("nxdom :",nxdom),
                paste("nydom :",nydom))
     write.table(param,file=paste(path.mcmc,"postprocess.parameters.txt",sep=""),
@@ -94,14 +95,14 @@ function(coordinates,genotypes,allele.numbers,#data
     out.res<- .Fortran(name="pppmindiv",
                        PACKAGE="Geneland",
                        as.integer(nindiv),
-                       as.single(t(coordinates)),
+                       as.double(t(coordinates)),
                        as.integer(npopmax),
                        as.integer(nb.nuclei.max),
                        as.integer(indvois),
-                       as.single(distvois),
-                       as.single(u),
+                       as.double(distvois),
+                       as.double(u),
                        as.integer(c),
-                       as.single(pmp),
+                       as.double(pmp),
                        as.character(filenpp),
                        as.character(fileu),
                        as.character(filec),

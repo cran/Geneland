@@ -7,9 +7,9 @@
 *
 *
 ***********************************************************************
+ 
 
-
-      subroutine mcmc(s,z,nall,filelambda,
+      subroutine mcmc(s,z,nall,ploidy,filelambda,
      &     filenpp,fileu,filec,filef,filefa,filedrift,
      &     filenclass,filet,filelpp,filell,lambdamax,
      &     dt,nchain,stepw,
@@ -18,32 +18,33 @@
      &     t,ttemp,u,utemp,c,ctemp,f,ftemp,fa,drift,drifttemp,
      &     indcell,indcelltemp,
      &     distcell,distcelltemp,n,ntemp,a,ptemp,effcl,iclv,
-     &     cellclass,listcell,fmodel,kfix,spatial) 
+     &     cellclass,listcell,fmodel,kfix,spatial)
       implicit none 
 
 *     les donnees
       integer nindiv,nindivmax,nloc,nlocmax,nlocmax2,
-     &     nall,nallmax,z
-      real s
+     &     nall,nallmax,z,ploidy
+      double precision s
 
 *     parametres des priors 
-      real lambdamax,dt
+      double precision lambdamax,dt
 
 *     les parametres a inferer (et valeurs maximales)
       integer npp,nppmax,nclass,nclassmin,nclassmax,
      &     c,ctemp
-      real lambda,u,utemp,f,t,fa,drift,ftemp,drifttemp
+      double precision lambda,u,utemp,f,t,fa,drift,ftemp,drifttemp
 
 *     variables de travail
       integer iloc,iindiv,ichain,nchain,
      &     ipp,iclass,iall,stepw,indcell,indcelltemp,
      &     n,effcl,iclv,cellclass,listcell,
      &     cellclasshost,ntemp,fmodel,kfix,spatial
-      real ptemp,xlim(2),ylim(2),ranf,rpostlamb,
+      double precision ptemp,xlim(2),ylim(2),ggrunif,rpostlamb,
      &     distcell,du,distcelltemp,a,ttemp,lpp,ll
       character*256 files,filez,filef,filenall,filenpp,
      &     filelambda,filenclass,fileu,filec,
      &     filefa,filedrift,filelpp,filell,filet
+      character*1 prchar
  
 *     dimensionnement 
       dimension s(2,nindivmax),t(2,nindivmax),z(nindivmax,nlocmax2),
@@ -58,52 +59,26 @@
      &     ftemp(nclassmax,nlocmax,nallmax),drifttemp(nclassmax),
      &     cellclass(nppmax),listcell(nppmax),cellclasshost(nppmax)
 
+      parameter(prchar='*')
 
 
-      write(6,*) '          *****************************'
-      write(6,*) '          ***    MCMC inference     ***'
-      write(6,*) '          *****************************'
 
+      call intpr(' ',-1,':',0) 
+      call intpr(' ',-1,':',0) 
+      call intpr('************************************',-1,'*',0)
+      call intpr('***  Starting MCMC inference     ***',-1,'*',0)
+      call intpr('************************************',-1,'*',0)
+
+************************************************************************
+*     init RNG
+      call rndstart()
 
       nindiv = nindivmax
       nloc = nlocmax
 
-**************************
-*     read data
-**************************
-C       open(10,file=files)
-C       do iindiv=1,nindiv
-C c         write(*,*) 'coucou'
-C          read(10,*) s(1,iindiv), s(2,iindiv)
-C       enddo
-C       close(10)
-      
-C       call limit(nindiv,nindivmax,s,xlim,ylim,dt)
-C c      xlim(1) = 0
-C c      xlim(2) = 1
-C c      ylim(1) = 0
-C c      ylim(2) = 1
-        
-C       open(10,file=filenall)
-C       do iloc=1,nloc
-C          read(10,*) nall(iloc)
-C       enddo
-C       close(10)
-
-
-C       open(10,file=filez)
-C       do iindiv=1,nindiv
-C          read(10,*) (z(iindiv,iloc),iloc=1,2*nloc)
-C       enddo
-C       close(10)
-
 
 *     look for smallest rectangle enclosing the spatial domain
       call limit(nindiv,nindivmax,s,xlim,ylim,dt)
-c      write(*,*) 'fin de limit'
-c      write(*,*) 's=',s
-c      write(*,*) 'z=',z
-c      write(*,*) 'nall=',nall
 
 
 *     Ouverture des fichiers pour l'ecriture des sorties
@@ -119,21 +94,16 @@ c      write(*,*) 'nall=',nall
       open(18,file=filell)
       open(19,file=filet)
 
-c       write(*,*) 'fin de l ouverture'
 
 ************************
 *     Initialization
 ************************
-      du = sqrt((xlim(2)-xlim(1))*(ylim(2)-ylim(1))/nindiv)
-      lambda = lambdamax*ranf()
-
-c$$$      npp = 1+ignpoi(lambda)
-c$$$      lambda = lambdamax
-c$$$      nclass = rpriornclass(mu,nclassmin,nclassmax)
+      du = dsqrt((xlim(2)-xlim(1))*(ylim(2)-ylim(1))/dble(nindiv))
+      lambda = lambdamax*ggrunif(0.d0,1.d0)
 
       do iindiv=1,nindiv
-         t(1,iindiv) = s(1,iindiv) + dt*(ranf()-.5)
-         t(2,iindiv) = s(2,iindiv) + dt*(ranf()-.5)
+         t(1,iindiv) = s(1,iindiv) + dt*(ggrunif(0.d0,1.d0)-.5)
+         t(2,iindiv) = s(2,iindiv) + dt*(ggrunif(0.d0,1.d0)-.5)
       enddo
          
       if(spatial .eq. 1) then 
@@ -145,6 +115,8 @@ c$$$      nclass = rpriornclass(mu,nclassmin,nclassmax)
          enddo
       endif
 
+
+
       call rpriorc(npp,nppmax,nclass,c)
 
       call calccell(nindiv,nindivmax,t,npp,nppmax,u,indcell,distcell)
@@ -155,24 +127,29 @@ c$$$      nclass = rpriornclass(mu,nclassmin,nclassmax)
        
       call rpriorf(nclass,nclassmax,nloc,nlocmax,nall,nallmax,f,ptemp)
 
+
       
-
-
 ************************
 * mise a jour iterative 
 ************************
+      call intpr(' ',-1,':',0) 
+      call intpr(' ',-1,':',0) 
+      call intpr('Percentage of iterations:',-1,':',0) 
+      call intpr('-------------------------',-1,':',0) 
 
-c      write(*,*) 'Starting updates'
       do ichain=1,nchain
 *     ecriture dans les fichiers (tous les stepw)
           if(mod(ichain,stepw) .eq. 0) then
  100         format(f7.3,' %')
 *             write(*,*) ''
-             write(6,100)float(ichain)/float(nchain)*100.
+c             write(6,100)float(ichain)/float(nchain)*100.
+
+             call realpr('', -1,float(ichain)/float(nchain)*100,1)
+
              write(9,*) lambda
              write(10,*) npp
              write(11,*) nclass
- 1000        format (2(1x,e15.8,1x))
+ 1000        format (2(1x,d15.8,1x))
              write(12,1000) (u(1,ipp),u(2,ipp), ipp=1,nppmax)
              do ipp=1,nppmax
                 write(13,*) c(ipp)
@@ -180,14 +157,14 @@ c      write(*,*) 'Starting updates'
 c$$$ 2000        format (2(e10.5,1x))
 c$$$             write(14,2000) (((f(iclass,iloc,iall),iclass=1,nclassmax),
 c$$$     &            iall=1,nallmax),iloc=1,nloc)
- 2000        format (300(1x,e15.8,1x))
+ 2000        format (300(1x,d15.8,1x))
              do iloc=1,nlocmax
                 do iall=1,nallmax
                    write(14,2000) (f(iclass,iloc,iall),
      &                  iclass=1,nclassmax)
                 enddo
              enddo
- 3000        format (300(1x,e15.8,1x))
+ 3000        format (300(1x,d15.8,1x))
              write(15,3000) ((fa(iloc,iall),iall=1,nallmax),iloc=1,nloc)
              write(16,2000) (drift(iclass),iclass=1,nclassmax)
              write(17,*) lpp(lambda,z,nclass,npp,drift,f,fa,c,nppmax,
@@ -195,14 +172,15 @@ c$$$     &            iall=1,nallmax),iloc=1,nloc)
      &            nall,fmodel)
              write(18,*) ll(z,nindivmax,nlocmax,nlocmax2,nall,nclassmax,
      &     nallmax,nppmax,c,f,indcell)
-             if(dt .gt. 1.e-30) then 
+             if(dt .gt. 1.d-30) then 
                 write(19,1000) (t(1,iindiv),t(2,iindiv),iindiv=1,nindiv)
              endif
           endif
 
 
 *     update lambda
-*          write(*,*) 'update lambda'
+c          write(*,*) 'update lambda'
+
           lambda = rpostlamb(lambdamax,npp)
 
           if(fmodel .eq. 1) then 
@@ -217,83 +195,103 @@ c$$$     &            iall=1,nallmax),iloc=1,nloc)
           endif
 
 *     update f
-*          write(*,*) 'update f'
+c          write(*,*) 'update f'
           call rpostf2(nclass,nclassmax,nloc,nlocmax,nall,nallmax,
      &         f,fa,drift,
      &         nindiv,nindivmax,nlocmax2,z,npp,nppmax,c,indcell,
-     &         n,a,ptemp)
+     &         n,a,ptemp,ploidy)
           
 *     update c 
-*          write(*,*) 'update c'
-          call updc(npp,nppmax,c,ctemp,z,nindiv,nindivmax,nloc,nlocmax,
-     &         nlocmax2,nallmax,nclass,nclassmax,f,indcell)
+c          write(*,*) 'update c'
+c          call updc(npp,nppmax,c,ctemp,z,nindiv,nindivmax,nloc,nlocmax,
+c     &         nlocmax2,nallmax,nclass,nclassmax,f,indcell)
+
+*     joint update of c anf f
+c          write(*,*) 'update c and f'
+          if(fmodel .eq. 0) then 
+             call  udcf(nclass,nclassmin,nclassmax,f,fa,drift,
+     &            nloc,nlocmax,nlocmax2,
+     &            nall,nallmax,indcell,nindiv,nindivmax,npp,nppmax,
+     &            c,ctemp,a,ptemp,ftemp,drifttemp,z,n,ntemp,ploidy)
+          else
+             call udcf2(nclass,nclassmin,nclassmax,f,fa,drift,
+     &            nloc,nlocmax,nlocmax2,
+     &            nall,nallmax,indcell,nindiv,nindivmax,npp,nppmax,
+     &            c,ctemp,a,ptemp,ftemp,drifttemp,z,n,ntemp,ploidy)
+          endif
 
 
           if(spatial .eq. 1) then 
 *     update u et mise a jour de indcell et distcell
-*             write(*,*) 'update u'
+c             write(*,*) 'update u'
              call updurw(npp,nppmax,c,u,z,nindiv,nindivmax,nloc,nlocmax,
      &            nlocmax2,nallmax,nclass,nclassmax,f,indcell,distcell,
-     &            indcelltemp,distcelltemp,t,xlim,ylim,du)
-             
+     &            indcelltemp,distcelltemp,t,xlim,ylim,du,ploidy)
 *     update t et mise a jour de indcell et distcell
-             if(dt .gt. 1.e-30) then 
+             if(dt .gt. 1.d-200) then 
 *                write(*,*) 'update t'
                 call updt(npp,nppmax,nindiv,
      &               nindivmax,nloc,nlocmax,nlocmax2,nallmax,nclassmax,
      &               t,ttemp,dt,s,c,indcell,distcell,
-     &               indcelltemp,distcelltemp,u,z,f)
+     &               indcelltemp,distcelltemp,u,z,f,ploidy)
              endif
 
 *     birth/death des points du pp
-*             write(*,*) 'update npp'
+c             write(*,*) 'update npp'
              call bdpp(nindiv,nindivmax,u,c,utemp,ctemp,
      &            nclass,nclassmax,nloc,nlocmax,
      &            nlocmax2,nallmax,npp,nppmax,z,f,t,xlim,ylim,indcell,
-     &            distcell,indcelltemp,distcelltemp,lambda)
+     &            distcell,indcelltemp,distcelltemp,lambda,ploidy)
+
           endif
 
 
-*     birth/death de classes vides
+*     birth/death de pop
          if(kfix .eq. 0) then 
-*            write(*,*) 'update nclass'
+c            write(*,*) 'begin update nclass'
 * split/merge avec prop de f selon cond. complete dans les deux sens
             if(fmodel .eq. 0) then 
 *     avec drift=0.5 et fa=1 pour court-circuiter le F-model
-               call bdclass7bis(nclass,nclassmin,nclassmax,f,fa,drift,
+               call bdclass8bis(nclass,nclassmin,nclassmax,f,fa,drift,
      &              nloc,nlocmax,nlocmax2,
      &              nall,nallmax,indcell,nindiv,nindivmax,npp,nppmax,c,
      &              ctemp,a,ptemp,ftemp,drifttemp,z,cellclass,listcell,
-     &              cellclasshost,n,ntemp)
+     &              cellclasshost,n,ntemp,ploidy)
             else
-               call bdclass7(nclass,nclassmin,nclassmax,f,fa,drift,
+               call bdclass8(nclass,nclassmin,nclassmax,f,fa,drift,
      &              nloc,nlocmax,nlocmax2,
      &              nall,nallmax,indcell,nindiv,nindivmax,npp,nppmax,c,
      &              ctemp,a,ptemp,ftemp,drifttemp,z,cellclass,listcell,
-     &              cellclasshost,n,ntemp)
+     &              cellclasshost,n,ntemp,ploidy)
             endif
+c            write(*,*) 'end update nclass'
          endif
 
       enddo
+      call rndend()  
       
-       close(9)
-       close(10)
-       close(11)
-       close(12)
-       close(13)
-       close(14)
-       close(15)
-       close(16)
-       close(17)
-       close(18)
-       close(19)
+      close(9)
+      close(10)
+      close(11)
+      close(12)
+      close(13)
+      close(14)
+      close(15)
+      close(16)
+      close(17)
+      close(18)
+      close(19)
 
        
-       write(6,*) '          ************************************'
-       write(6,*) '          ***    End of MCMC inference     ***'
-       write(6,*) '          ************************************'
+      call intpr('***************************************',-1,'*',0)
+      call intpr('***    End of MCMC computations     ***',-1,'*',0)
+      call intpr('***************************************',-1,'*',0)
+
+c      write(6,*) '          ************************************'
+c      write(6,*) '          ***    End of MCMC inference     ***'
+c      write(6,*) '          ************************************'
+       
       end
-      
-c      include 'sub.f'
-      
+
+c      include './sub.f'
 

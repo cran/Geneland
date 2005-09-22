@@ -1,6 +1,7 @@
 "mcmcFmodel" <-
-function(# input data
-                 coordinates,genotypes,allele.numbers,
+function(
+                                        # input data
+                 coordinates,genotypes,ploidy=2,
                  # path to output directory
                  path.mcmc,
                  # hyper-prior parameters
@@ -8,11 +9,39 @@ function(# input data
                  # dimensions
                  nb.nuclei.max,
                  # options in mcmc computations
-                 nit,thinning,freq.model,varnpop,spatial)
+                 nit,thinning=1,freq.model="Dirichlet",varnpop,spatial=TRUE)
   {
+    ## check parameters
+    if((nit %% thinning) != 0)
+      {
+        stop('nit/thinning is not an integer')
+      }
+    if(file.exists(path.mcmc) != TRUE)
+      {
+        stop('The output directory does not exist')
+      }
+    
+
+    ##
+    ## Reformatting data
+    if(ploidy == 1)
+      {
+        ## diploidize the data
+        data.tmp <- matrix(nrow=nrow(genotypes),
+                            ncol=ncol(genotypes)*2)
+        data.tmp[,seq(1,ncol(genotypes)*2-1,2)] <- genotypes
+        data.tmp[,seq(2,ncol(genotypes)*2,2)] <- genotypes
+        genotypes <- data.tmp
+      }
+    data.tmp <- FormatGenotypes(as.matrix(genotypes))
     coordinates <- as.matrix(coordinates)
-    genotypes <- as.matrix(genotypes)
-    allele.numbers <- as.matrix(allele.numbers)
+    genotypes <- data.tmp$genotypes
+    allele.numbers <- data.tmp$allele.numbers
+
+    
+
+    ##
+    ## Initializing variables
     
                                         # output files
     filenpp <- paste(path.mcmc,"nuclei.numbers.txt",sep="")
@@ -61,13 +90,16 @@ function(# input data
     fmodel <- ifelse(freq.model=="Falush",1,0) # Falush or Dirichlet model
     kfix <- 1-as.integer(varnpop)
     spatial <- as.integer(spatial)
-    
+
+    ##
+    ## Starting MCMC computations
 
     out.res<- .Fortran(name="mcmc",
                        PACKAGE="Geneland",
-                       as.single(t(coordinates)),
+                       as.double(t(coordinates)),
                        as.integer(genotypes),
                        as.integer(allele.numbers),
+                       as.integer(ploidy),
                        as.character(filelambda),
                        as.character(filenpp),
                        as.character(fileu),
@@ -79,8 +111,8 @@ function(# input data
                        as.character(filet),
                        as.character(filelpp),
                        as.character(filell),
-                       as.single(rate.max),
-                       as.single(delta.coord),
+                       as.double(rate.max),
+                       as.double(delta.coord),
                        as.integer(nit),
                        as.integer(thinning),
                        as.integer(nindiv),
@@ -92,25 +124,25 @@ function(# input data
                        as.integer(npopinit),
                        as.integer(npopmin),
                        as.integer(npopmax),
-                       as.single(t),
-                       as.single(ttemp),
-                       as.single(u),
-                       as.single(utemp),
+                       as.double(t),
+                       as.double(ttemp),
+                       as.double(u),
+                       as.double(utemp),
                        as.integer(c),
                        as.integer(ctemp),
-                       as.single(f),
-                       as.single(ftemp),
-                       as.single(fa),
-                       as.single(drift),
-                       as.single(drifttemp),
+                       as.double(f),
+                       as.double(ftemp),
+                       as.double(fa),
+                       as.double(drift),
+                       as.double(drifttemp),
                        as.integer(indcell),
                        as.integer(indcelltemp),
-                       as.single(distcell),
-                       as.single(distcelltemp),
+                       as.double(distcell),
+                       as.double(distcelltemp),
                        as.integer(n),
                        as.integer(ntemp),
-                       as.single(a),
-                       as.single(ptemp),
+                       as.double(a),
+                       as.double(ptemp),
                        as.integer(effcl),
                        as.integer(iclv),
                        as.integer(cellclass),

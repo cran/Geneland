@@ -23,13 +23,13 @@ PosteriorMode(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
   \item{main.title}{Character : Title to appear on top of the graphic}
 }
 
-\references{A spatial statistical model for landscape genetics, Guillot,
-  Estoup, Mortier, Cosson, Genetics, 2005
-  
- Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
- Molecular Ecology  Notes, 2005.
+\references{G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+  model for landscape genetics. Genetics, 170, 1261-1280, 2005.
 
-}
+  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
+  genetics. Molecular Ecology Notes, 5, 712-715, 2005.}
+
+
 \author{Gilles Guillot  }
 
 \keyword{}
