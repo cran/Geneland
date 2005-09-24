@@ -16,10 +16,11 @@ function(
       {
         stop('nit/thinning is not an integer')
       }
-    if(file.exists(path.mcmc) != TRUE)
-      {
-        stop('The output directory does not exist')
-      }
+                                        # next lines don't work under M$-Windows
+                                        #     if(file.exists(path.mcmc) != TRUE)
+                                        #       {
+                                        #         stop('The output directory does not exist')
+                                        #       }
     
 
     ##

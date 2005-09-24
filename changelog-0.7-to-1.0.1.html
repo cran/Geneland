@@ -9,26 +9,25 @@
 <div style="text-align: center;">
 <h3 style="text-decoration: underline;">Changes from version 0.7 to
 version 1.0.1</h3>
+&nbsp;
 <br>
 <div style="text-align: left;"><br>
 1) New type of move proposed in MCMC algorithm embedded in mcmcFmodel<br>
 Now makes joint updates of c and f, instead of separate block updates<br>
 of c and f.<br>
-It&nbsp; improves mixing of the chain nad avoids (or at least enhance
+It&nbsp; improves mixing of the chain and avoids (or at least enhance
 w.r.t) troubles with ghost populations;<br>
 <br>
 <br>
 2) Function simFmodel no longer makes use of argument nloc (numer of
-loci)<br>
-It was obviously redundant with argument allele.number<br>
-and now nloc is evaluated inside simFmodel by<br>
-nloc=lengh(allele.number)<br>
+loci). It was obviously redundant with argument allele.number and now
+nloc is evaluated inside simFmodel by nloc=lengh(allele.number)<br>
 <br>
 <br>
 3) Update of the number of population (subroutines bdclass7) slightly
 corrected in order to process populations whatever the number of tiles
-or individuals they currently contain. <br>
-This is implemented in fortran subroutines bdclass8 and bdclass8bis.<br>
+or individuals they currently contain. This is implemented in fortran
+subroutines bdclass8 and bdclass8bis.<br>
 <br>
 <br>
 4) All computations now carried out in double precision<br>
@@ -44,19 +43,20 @@ mcmcFmodel. <br>
 7) Use R function sample instead of my function rdiscr<br>
 <br>
 <br>
-8) Handle haploid datasets:<br>
-haploid data are first ploidized in function mcmcFmodel<br>
-all computations are identical to the diploid case except the
-evaluation of the likelihood <br>
-for which the squared root is taken.<br>
+8) Handle haploid datasets: haploid data are first ploidized in
+function mcmcFmodel all computations are identical to the diploid case
+except the evaluation of the likelihood for which the squared root is
+taken. Function mcmcFmodel requires now an extra argument 'ploidy' ste
+to 2 (diploid) by default. <br>
 &nbsp;<br>
 <br>
 <br>
 <br>
 <span style="text-decoration: underline;">SYNTAXIC CHANGES:</span><br>
+&nbsp;
 <br>
 <br>
-See points (2), (3) above.<br>
+See points (2), (6), (8)&nbsp; above as documented in the on-line help.<br>
 </div>
 <br>
 </div>

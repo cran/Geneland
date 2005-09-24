@@ -125,11 +125,11 @@ genetics. Molecular Ecology Notes, 5, 712-715, 2005.
 
 \author{Gilles Guillot
 
-  \url{ww.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html}
+  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html}
 
   See also
   
-  \url{ww.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/Geneland.html}
+  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/Geneland.html}
 
   
 }
