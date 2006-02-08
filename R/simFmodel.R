@@ -7,13 +7,11 @@ function(nindiv,
                       color.nuclei=NULL,
                       nall,
                       npop,
-                      drift,
+                      freq.model="Dirichlet",
+                      drift=NULL,
                       seed=NULL,
-                      plots=TRUE,
-                      ploth=TRUE)
-#  ,
-#                      write=FALSE,
-#                      repout=NULL)
+                      plots=FALSE,
+                      ploth=FALSE)
   {
     if(!is.null(seed)) { set.seed(seed)}
     
@@ -30,13 +28,8 @@ function(nindiv,
         coord.nuclei <-  rbind(runif(min=0,max=1,number.nuclei),
                                runif(min=0,max=1,number.nuclei))
 
-        ##color.nuclei <- numeric(number.nuclei)
-        ##for(ipp in 1:number.nuclei)color.nuclei[ipp] <- rdiscr(rep(1/npop,npop))
         color.nuclei <- sample(x=1:npop,size=number.nuclei,replace=TRUE)
         
-                                        # avoid to have only one pop
-                                        # assuming we simulate at least two pop
-        if(number.nuclei==2) color.nuclei <- 1:2
       } 
     ppvois <- numeric(nindiv)
     for(iindiv in 1:nindiv)
@@ -56,15 +49,25 @@ function(nindiv,
       }
 
     nloc <- length(nall)
-                                        # alleles frequencies in ancestral population
-    fa <- matrix(nr=nloc,nc=max(nall),data=-999)
-    for(iloc in 1:nloc)
+
+
+                                        # drift and freq in ancestral pop
+    if(freq.model == "Falush")
+      {
+        # drift parameters
+        if(is.null(drift))
+          {
+            drift <- rbeta(shape1=2,shape2=20,npop)
+          }
+        # alleles frequencies in ancestral population
+        fa <- matrix(nr=nloc,nc=max(nall),data=-999)
+        for(iloc in 1:nloc)
           {
             fa[iloc,1:nall[iloc]] <- rexp(n=nall[iloc])
             fa[iloc,1:nall[iloc]] <- fa[iloc,1:nall[iloc]] /
               sum(fa[iloc,1:nall[iloc]])
           }
-
+      }
     
                                         # alleles frequencies in present time population
     freq <- array(dim=c(npop,nloc,max(nall)),data=-999)
@@ -72,12 +75,23 @@ function(nindiv,
       {
         for(iloc in 1:nloc)
           {
-            freq[iclass,iloc,1:nall[iloc]] <- rgamma(n=nall[iloc],
-                                                   scale=1,
-                                                   shape=fa[iloc,(1:nall[iloc])]*
-                                                   (1-drift[iclass])/drift[iclass])
-            freq[iclass,iloc,1:nall[iloc]] <- freq[iclass,iloc,1:nall[iloc]] /
-              sum(freq[iclass,iloc,1:nall[iloc]])
+            if(freq.model == "Dirichlet")
+              {
+                freq[iclass,iloc,1:nall[iloc]] <- rgamma(n=nall[iloc],
+                                                         scale=1,
+                                                         shape=1)
+                freq[iclass,iloc,1:nall[iloc]] <- freq[iclass,iloc,1:nall[iloc]] /
+                  sum(freq[iclass,iloc,1:nall[iloc]])
+              }
+            if(freq.model == "Falush")
+              {
+                freq[iclass,iloc,1:nall[iloc]] <- rgamma(n=nall[iloc],
+                                                         scale=1,
+                                                         shape=fa[iloc,(1:nall[iloc])]*
+                                                         (1-drift[iclass])/drift[iclass])
+                freq[iclass,iloc,1:nall[iloc]] <- freq[iclass,iloc,1:nall[iloc]] /
+                  sum(freq[iclass,iloc,1:nall[iloc]])
+              }
           }
       }
     
@@ -117,23 +131,27 @@ function(nindiv,
         get(getOption("device"))()
         plot(coordinates[1,],coordinates[2,],
              xlab="x coordinates",ylab="y coordinates")
-        points(coord.nuclei[1,],coord.nuclei[2,],col=2)
+        points(coord.nuclei[1,],coord.nuclei[2,],col=color.nuclei,cex=2,pch=16)
         text(coord.nuclei[1,],coord.nuclei[2,],1:number.nuclei,pos=1,col=2,pch=2,cex=1.2)
         text(coordinates[1,],coordinates[2,],ppvois,pos=1)
       }
     if(ploth==TRUE)
       {
-        get(getOption("device"))()
-        par(mfrow=c(floor(sqrt(nloc)+1),
+        if(freq.model=="Falush")
+          {
+            get(getOption("device"))()
+            par(mfrow=c(floor(sqrt(nloc)+1),
                   floor(sqrt(nloc))))
-            #par(mfrow=c(1,nloc))
+                                        #par(mfrow=c(1,nloc))
             for(iloc in 1:nloc)
               {
                 plot(1:nall[iloc],fa[iloc,1:nall[iloc]],
-                       type="h",col=2,xlab="",axes=FALSE,
+                     type="h",col=2,xlab="",axes=FALSE,
                      sub=paste("Locus",iloc),ylim=c(0,1),
                      main="Frequencies in ancestral population")
               }
+          }
+        
         get(getOption("device"))()
         #par(mfrow=c(npop,nloc))
         for(iclass in 1:npop)
@@ -155,15 +173,32 @@ function(nindiv,
               }
           }
       }
-    list(coordinates=t(coordinates),
-         genotypes=z,
-         allele.numbers=nall,
-         coord.nuclei=t(coord.nuclei),
-         color.nuclei=color.nuclei,
-         frequencies=freq,
-         ancestral.frequencies=fa,
-         drifts=drift,
-         index.nearest.nucleus=ppvois)
-    
+    if(freq.model=="Dirichlet")
+      {
+        res <- list(coordinates=t(coordinates),
+                    genotypes=z,
+                    allele.numbers=nall,
+                    number.nuclei=number.nuclei,
+                    coord.nuclei=t(coord.nuclei),
+                    color.nuclei=color.nuclei,
+                    frequencies=freq,
+                    index.nearest.nucleus=ppvois)
+        return(res)
+      }
+    if(freq.model=="Falush")
+      {
+        res <- list(coordinates=t(coordinates),
+                    genotypes=z,
+                    allele.numbers=nall,
+                    number.nuclei=number.nuclei,
+                    coord.nuclei=t(coord.nuclei),
+                    color.nuclei=color.nuclei,
+                    frequencies=freq,
+                    ancestral.frequencies=fa,
+                    drifts=drift,
+                    index.nearest.nucleus=ppvois)
+        return(res)
+      }
+
   }
 

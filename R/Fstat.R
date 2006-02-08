@@ -35,7 +35,7 @@ function(genotypes,allele.numbers,path.mcmc)
               nloc <- length(allele.numbers)
               nloc2 <- 2*nloc
               Fistmp <- Fsttmp <- Fittmp <- -999
-              res<- .Fortran(name="fstat",
+              res<- .Fortran(name="fstae",
                              PACKAGE="Geneland",
                              as.integer(nindivtmp),
                              as.integer(nb.nuclei.max),
@@ -48,9 +48,9 @@ function(genotypes,allele.numbers,path.mcmc)
                              as.integer(maptmp),
                              as.integer(tabindiv),
                              as.integer(kk),
-                             as.double(Fistmp),
-                             as.double(Fsttmp),
-                             as.double(Fittmp))
+                             as.single(Fistmp),
+                             as.single(Fsttmp),
+                             as.single(Fittmp))
               Fis[iclass1,iclass2] <- res[[12]][1]
               Fst[iclass1,iclass2] <- res[[13]][1]
               Fit[iclass1,iclass2] <- res[[14]][1]

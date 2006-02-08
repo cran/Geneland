@@ -56,10 +56,9 @@ function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
             xlab="x coordinates ",ylab="y coordinates",
             main="",cex=1.5,cex.lab=1.5,col=terrain.colors(npopmax),
             xlim=c(min(coordinates[,1]-delta.coord/2-frame),max(coordinates[,1]+delta.coord/2+frame)),
-            ylim=c(min(coordinates[,2]-delta.coord/2-frame),max(coordinates[,2]+delta.coord/2+frame)),
-            sub="Map of posterior mode of population membership")
-      title(main.title)
-      points(coordinates,pch=16)
+            ylim=c(min(coordinates[,2]-delta.coord/2-frame),max(coordinates[,2]+delta.coord/2+frame)))
+      title(sub="Map of posterior mode of population membership")
+      title(main=main.title,coordinates,pch=16)
     }
     if(printit){
       postscript(file)
@@ -72,10 +71,9 @@ function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
             xlab="x coordinates ",ylab="y coordinates",
             main="",cex=1.5,cex.lab=1.5,col=terrain.colors(npopmax),
             xlim=c(min(coordinates[,1]-delta.coord/2-frame),max(coordinates[,1]+delta.coord/2+frame)),
-            ylim=c(min(coordinates[,2]-delta.coord/2-frame),max(coordinates[,2]+delta.coord/2+frame)),
-            sub="Map of posterior mode of population membership")
+            ylim=c(min(coordinates[,2]-delta.coord/2-frame),max(coordinates[,2]+delta.coord/2+frame)))
       points(coordinates,pch=16)
-      title(main.title)
+      title(main=main.title,sub="Map of posterior mode of population membership")
       dev.off()
     }
   }

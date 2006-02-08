@@ -12,7 +12,6 @@ function(coordinates,path.mcmc,printit=FALSE,path=NULL)
     param <- as.matrix(read.table(paste(path.mcmc,"parameters.txt",sep="")))
     delta.coord <- as.numeric(param[param[,1]=="delta.coord",3])
     
-    #s <- coordinates
     filedom <- paste(path.mcmc,"proba.pop.membership.txt",sep="")
     dom.post <- as.matrix(read.table(filedom))
     npopmax <- ncol(dom.post)
@@ -24,8 +23,8 @@ function(coordinates,path.mcmc,printit=FALSE,path=NULL)
         image(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
               seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom),
               matrix(dom.post[,iclass],nr=nxdom,nc=nydom,byrow=TRUE),
-              xlab="x coordinates",ylab="y coordinates",
-              main=paste("Map of posterior probability to belong to class ",
+              xlab="x coordinates",ylab="y coordinates")
+        title(main=paste("Map of posterior probability to belong to class ",
                 iclass))
         contour(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
                 seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom),
@@ -39,8 +38,8 @@ function(coordinates,path.mcmc,printit=FALSE,path=NULL)
           image(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
                 seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom),
                 matrix(dom.post[,iclass],nr=nxdom,nc=nydom,byrow=TRUE),
-                xlab="x coordinates",ylab="y coordinates",
-                main=paste("Map of posterior probability to belong to class ",
+                xlab="x coordinates",ylab="y coordinates")
+          title(main=paste("Map of posterior probability to belong to class ",
                   iclass))
           contour(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
                   seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom),

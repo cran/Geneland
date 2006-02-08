@@ -1,5 +1,11 @@
-\name{Geneland}
+\name{Geneland-package}
+
+\alias{Geneland-package}
+
 \alias{Geneland}
+
+\docType{package}
+
 \title{Simulation and inference of a 
   spatial statistical model for landscape genetics.}
 
@@ -8,9 +14,17 @@
   takes geo-referenced individual multilocus genetic data and tries to detect
   population structure, i.e sub-populations making use of both spatial and genetic information.
 }
-
+}
 \details{
-The overall population is viewed as a co-existence of sub-populations at 
+  \tabular{ll}{
+    Package: \tab Geneland\cr
+    Type: \tab Package\cr
+    Version: \tab 1.0.5\cr
+    Date: \tab 2006-01-10\cr
+    License: \tab GPL\cr
+  }
+  
+  The overall population is viewed as a co-existence of sub-populations at 
   Hardy-Weiberg equilibrium. The sub-populations are supposed to be spatially 
   organised through the so-called 
   colored Poisson-Voronoi tessellation. 
@@ -80,7 +94,14 @@ The overall population is viewed as a co-existence of sub-populations at
    \code{\link{setplot}}: Internal function
 
 }
+\author{Gilles Guillot
 
+  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html}
+
+  See also
+  
+  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/Geneland.html}
+}
 
 \references{
 
@@ -122,17 +143,9 @@ model for landscape genetics. Genetics, 170, 1261-1280, 2005.
 genetics. Molecular Ecology Notes, 5, 712-715, 2005.
 
 }
-
-\author{Gilles Guillot
-
-  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html}
-
-  See also
-  
-  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/Geneland.html}
-
-  
 }
+\keyword{ }
 
+\seealso{}
 
-\keyword{}
+\examples{}

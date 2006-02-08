@@ -4,9 +4,9 @@
 \title{ Inference in a  spatial statistical model  }
 \description{ Markov Chain Monte-Carlo inference in the spatial F-model}
 \usage{
-mcmcFmodel(coordinates,genotypes,ploidy,
+mcmcFmodel(coordinates,genotypes,allele.numbers,ploidy,
 path.mcmc, rate.max, delta.coord, npopmin, npopinit,
-npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial)
+npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial,jcf)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -14,6 +14,9 @@ npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial)
     columns and one line per individual.}
   \item{genotypes}{Genotypes of individuals. A matrix with one line per
     individual and 2 columns per locus}
+  \item{allele.numbers}{Number of observed alleles at each loci. Default
+  value is NULL and then the numbers used are the observed number
+  computed by FormatGenotypes.}
   \item{ploidy}{An integer equal to 1 for haploid data and 2 for diploid
   data.}
   \item{path.mcmc}{ Path to output files directory. It seems that the
@@ -66,7 +69,8 @@ npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial)
     populations. If FALSE, all clustering receive equal prior
     probability. In this case spatial information (i.e coordinates)
     are not used  and the locations of  the nuclei are initialized and
-    kept fixed at the locations of individuals.}   
+    kept fixed at the locations of individuals.}
+  \item{jcf}{Logical: if true update of c and f are performed jointly}
 }
 
 
@@ -177,7 +181,7 @@ sim = simFmodel(nindiv=100,
   # you can check the simulated dataset by
 ls()  ## gives a list of existing objects
 
-summary(sim) ## describes roughly what object sim actually contains
+summary(sim) ## describes what object sim actually contains
 
   #  define a place for MCMC outputs
 path.mcmc = paste(tempdir(),"/",sep="")
@@ -223,7 +227,7 @@ mcmcFmodel(sim$coordinates,
            spatial=TRUE)
 
    # Post-processing the chain 
-PostProcessChain(sim$coordinates,sim$genotypes,sim$allele.numbers,
+PostProcessChain(sim$coordinates,sim$genotypes,
                   path.mcmc=path.mcmc,
                   nxdom=50,
                   nydom=50,

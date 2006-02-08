@@ -8,8 +8,7 @@
 }
 \usage{
 simFmodel(nindiv, coordinates = NULL, coord.lim, number.nuclei,
-coord.nuclei = NULL, color.nuclei = NULL,
-nall, npop, drift, seed=NULL, plots = TRUE, ploth = TRUE)
+coord.nuclei = NULL, color.nuclei = NULL,nall, npop, freq.model="Dirichlet",drift=NULL, seed=NULL, plots = FALSE, ploth = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -23,8 +22,9 @@ nall, npop, drift, seed=NULL, plots = TRUE, ploth = TRUE)
   \item{color.nuclei}{Population labels of the nuclei (vector of integers of size \code{number.nuclei})}
   \item{nall}{ Vector of integers giving number of alleles at each locus}
   \item{npop}{Number of populations }
+  \item{freq.model}{model for frequencies:"Falush" or "Dirichlet" }
   \item{drift}{Vector (of size \code{npop}) of drift factors between 0
-  and 1}
+  and 1 (only for the Falush model)}
   \item{seed}{Seed to initialize the random number generator}
   \item{plots}{Logical: if TRUE, spatial coordinates are ploted}
   \item{ploth}{Logical: if TRUE, barplots for allele frequencies are ploted}
@@ -47,7 +47,7 @@ equilibrium and linkage equilibrium.}
 
 \value{A list of variables involved in the simulation. The elements of
   this list are: 
-coordinates, genotypes, allele.numbers, coord.nuclei, color.nuclei, 
+coordinates, genotypes, allele.numbers, number.nuclei, coord.nuclei, color.nuclei, 
 frequencies,  ancestral.frequencies, drifts, index.nearest.nucleus}
 
 \references{Falush D., M. Stephens, J.K. Pritchard, 
