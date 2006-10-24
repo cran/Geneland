@@ -1,6 +1,6 @@
 *     Calcul du Fst d'apres programme en Turbo Pascal d'Arnaud Estoup
 *     le vecteur c contient la variable de classe
-*     les effectifs des classes doivent etre donnees en entree
+*     les effectifs des pop doivent etre donnees en entree
 
       subroutine fstae(nindiv,nppmax,nloc,nloc2,nall,npop,effcl,z,c,
      &     tabindiv,kk,Fistot,Fsttot,Fittot)
@@ -13,7 +13,7 @@
       real s1,s2,s3,s1l,s2l,s3l,ni,sni,sni2,sniA,sniAA,s2A,nA,AA,
      &     nc,MSG,MSI,MSP,s2G,s2I,s2P,Fst,Fit,Fis
 
-*     Recherche des indices des indiv de chaque pope 
+*     Recherche des indices des indiv de chaque pop
       do ipop=1,npop
          kk(ipop) = 1
       enddo

@@ -892,9 +892,9 @@ c         write(*,*) 'ipp=',ipp
          ipop2 = ctemp(ipp)
 *     counting alleles for both states of c
          call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &        nppmax,nall,nallmax,z,n,indcell,c)
+     &        nppmax,nall,nallmax,z,n,indcell,c,ploidy)
          call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &        nppmax,nall,nallmax,z,ntemp,indcell,ctemp)
+     &        nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
 
 
 c         write(*,*) 'n=',n
@@ -1009,9 +1009,9 @@ c         write(*,*) 'ipp=',ipp
          ipop2 = ctemp(ipp)
 *     counting alleles for both states of c
          call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &        nppmax,nall,nallmax,z,n,indcell,c)
+     &        nppmax,nall,nallmax,z,n,indcell,c,ploidy)
          call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &        nppmax,nall,nallmax,z,ntemp,indcell,ctemp)
+     &        nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
          
 *     sample new frequencies
          call samplef(npop,npopmax,nloc,nlocmax,
@@ -1389,42 +1389,42 @@ c      write(*,*) 'fin de ratio'
 
 
 
-
-*     calcul du ratio p(z|theta*)/p(z|theta)
-*     quand f est  modifié
-      real function ratiobd(z,f,ftemp,c,ctemp,indcell,indcelltemp,
-     &     npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
-     &     nppmax)
-      implicit none
-      integer npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
-     &     nppmax,z(nindivmax,nlocmax2),c(nppmax),ctemp(nppmax),
-     &     indcell(nindivmax),indcelltemp(nindivmax)
-      real f(npopmax,nlocmax,nallmax),ftemp(npopmax,nlocmax,nallmax)
-      integer iindiv,iloc,iall1,iall2,ipop,ipoptemp
-
-      ratiobd = 1.
-      do iindiv=1,nindiv
-         ipop = c(indcell(iindiv))
-         ipoptemp = ctemp(indcelltemp(iindiv))
-         do iloc=1,nloc
-            iall1 = z(iindiv,2*iloc-1)
-            iall2 = z(iindiv,2*iloc)
-            if(iall1 .ne. -999) then 
-               ratiobd = ratiobd*
-     &              (ftemp(ipoptemp,iloc,iall1)/f(ipop,iloc,iall1))
-            endif
-            if(iall2 .ne. -999) then 
-               ratiobd = ratiobd*
-     &              (ftemp(ipoptemp,iloc,iall2)/f(ipop,iloc,iall2))
-            endif
-         enddo
-      enddo
-c      write(*,*) 'f=',f
-c      write(*,*) 'ftemp=',ftemp
-c      write(*,*) 'c=',c
-c      write(*,*) 'ctemp=',ctemp
-c      write(*,*) 'ratiobd=',ratiobd
-      end function ratiobd
+c$$$
+c$$$*     calcul du ratio p(z|theta*)/p(z|theta)
+c$$$*     quand f est  modifié
+c$$$      real function ratiobd(z,f,ftemp,c,ctemp,indcell,indcelltemp,
+c$$$     &     npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
+c$$$     &     nppmax)
+c$$$      implicit none
+c$$$      integer npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
+c$$$     &     nppmax,z(nindivmax,nlocmax2),c(nppmax),ctemp(nppmax),
+c$$$     &     indcell(nindivmax),indcelltemp(nindivmax)
+c$$$      real f(npopmax,nlocmax,nallmax),ftemp(npopmax,nlocmax,nallmax)
+c$$$      integer iindiv,iloc,iall1,iall2,ipop,ipoptemp
+c$$$
+c$$$      ratiobd = 1.
+c$$$      do iindiv=1,nindiv
+c$$$         ipop = c(indcell(iindiv))
+c$$$         ipoptemp = ctemp(indcelltemp(iindiv))
+c$$$         do iloc=1,nloc
+c$$$            iall1 = z(iindiv,2*iloc-1)
+c$$$            iall2 = z(iindiv,2*iloc)
+c$$$            if(iall1 .ne. -999) then 
+c$$$               ratiobd = ratiobd*
+c$$$     &              (ftemp(ipoptemp,iloc,iall1)/f(ipop,iloc,iall1))
+c$$$            endif
+c$$$            if(iall2 .ne. -999) then 
+c$$$               ratiobd = ratiobd*
+c$$$     &              (ftemp(ipoptemp,iloc,iall2)/f(ipop,iloc,iall2))
+c$$$            endif
+c$$$         enddo
+c$$$      enddo
+c$$$c      write(*,*) 'f=',f
+c$$$c      write(*,*) 'ftemp=',ftemp
+c$$$c      write(*,*) 'c=',c
+c$$$c      write(*,*) 'ctemp=',ctemp
+c$$$c      write(*,*) 'ratiobd=',ratiobd
+c$$$      end function ratiobd      C
 
 
 
@@ -1748,12 +1748,12 @@ c$$$            endif
 
 
 *
-*     comptage des alleles dans chaque pope pour c
+*     comptage des alleles dans chaque pop pour c
 *
       subroutine countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &     nppmax,nall,nallmax,z,n,indcell,c)
+     &     nppmax,nall,nallmax,z,n,indcell,c,ploidy)
       implicit none
-      integer  nindiv,nlocmax,nlocmax2,npopmax,nppmax,nallmax,
+      integer  nindiv,nlocmax,nlocmax2,npopmax,nppmax,nallmax,ploidy,
      &     z(nindiv,nlocmax2),nall(nlocmax),
      &     n(npopmax,nlocmax,nallmax),c(nppmax),indcell(nindiv)
       integer ipop,iloc,iall,iindiv
@@ -1778,11 +1778,13 @@ c      write(*,*) 'n=',n
 c               write(*,*) 'n=',
 c     &              n(c(indcell(iindiv)),iloc,z(iindiv,2*iloc-1)) 
             endif
-            if(z(iindiv,2*iloc) .ne. -999) then 
-               n(c(indcell(iindiv)),iloc,z(iindiv,2*iloc)) = 
-     &              n(c(indcell(iindiv)),iloc,z(iindiv,2*iloc)) + 1 
-c                write(*,*) 'n=',
+            if(ploidy .eq. 2) then
+               if(z(iindiv,2*iloc) .ne. -999) then 
+                  n(c(indcell(iindiv)),iloc,z(iindiv,2*iloc)) = 
+     &                 n(c(indcell(iindiv)),iloc,z(iindiv,2*iloc)) + 1 
+c     write(*,*) 'n=',
 c     &              n(c(indcell(iindiv)),iloc,z(iindiv,2*iloc-1)) 
+               endif
             endif
          enddo
       enddo
@@ -1886,9 +1888,10 @@ c             write(*,*) 'naissance'
 
 *     comptage des alleles sur chaque locus pour c puis ctemp
                    call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &                  nppmax,nall,nallmax,z,n,indcell,c)
+     &                  nppmax,nall,nallmax,z,n,indcell,c,ploidy)
                    call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &                  nppmax,nall,nallmax,z,ntemp,indcell,ctemp)
+     &                  nppmax,nall,nallmax,z,ntemp,indcell,ctemp,
+     &                  ploidy)
 
 *     proposition nouvelle freq et derive 
 c                    call addfreq5(isplit,npop,npopmax,nloc,nlocmax,
@@ -2024,9 +2027,9 @@ c             write(*,*) 'mort'
 
 *     comptage des alleles sur chaque locus pour c puis ctemp
                call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &              nppmax,nall,nallmax,z,n,indcell,c)
+     &              nppmax,nall,nallmax,z,n,indcell,c,ploidy)
                call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &              nppmax,nall,nallmax,z,ntemp,indcell,ctemp)
+     &              nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
 
 *     propostion du nouveau tableau de freq et de derives
 c               call remfreq5(ipoprem,ipophost,npop,npopmax,
@@ -2195,9 +2198,10 @@ c             write(*,*) 'naissance'
 
 *     comptage des alleles sur chaque locus pour c puis ctemp
                    call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &                  nppmax,nall,nallmax,z,n,indcell,c)
+     &                  nppmax,nall,nallmax,z,n,indcell,c,ploidy)
                    call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &                  nppmax,nall,nallmax,z,ntemp,indcell,ctemp)
+     &                  nppmax,nall,nallmax,z,ntemp,indcell,ctemp,
+     &                  ploidy)
 
 *     proposition nouvelle freq et derive 
 c                    call addfreq5(isplit,npop,npopmax,nloc,nlocmax,
@@ -2333,9 +2337,9 @@ c             write(*,*) 'mort'
 
 *     comptage des alleles sur chaque locus pour c puis ctemp
                call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &              nppmax,nall,nallmax,z,n,indcell,c)
+     &              nppmax,nall,nallmax,z,n,indcell,c,ploidy)
                call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &              nppmax,nall,nallmax,z,ntemp,indcell,ctemp)
+     &              nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
 
 *     propostion du nouveau tableau de freq et de derives
 c               call remfreq5(ipoprem,ipophost,npop,npopmax,
@@ -2523,9 +2527,9 @@ c             write(*,*) 'naissance'
 
 *     comptage des alleles sur chaque locus pour c puis ctemp
              call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &            nppmax,nall,nallmax,z,n,indcell,c)
+     &            nppmax,nall,nallmax,z,n,indcell,c,ploidy)
              call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &            nppmax,nall,nallmax,z,ntemp,indcell,ctemp)
+     &            nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
              
 *     proposition nouvelle freq et derive 
 c     call addfreq5(isplit,npop,npopmax,nloc,nlocmax,
@@ -2660,9 +2664,9 @@ c             write(*,*) 'mort'
 
 *     comptage des alleles sur chaque locus pour c puis ctemp
                call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &              nppmax,nall,nallmax,z,n,indcell,c)
+     &              nppmax,nall,nallmax,z,n,indcell,c,ploidy)
                call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &              nppmax,nall,nallmax,z,ntemp,indcell,ctemp)
+     &              nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
 
 *     propostion du nouveau tableau de freq et de derives
 c               call remfreq5(ipoprem,ipophost,npop,npopmax,
@@ -2851,9 +2855,9 @@ c                  write(*,*) 'z(67,10)=',z(67,10)
 *     comptage des alleles sur chaque locus pour c puis ctemp
 c            write(*,*) 'comptage des alleles'
             call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &           nppmax,nall,nallmax,z,n,indcell,c)
+     &           nppmax,nall,nallmax,z,n,indcell,c,ploidy)
             call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &           nppmax,nall,nallmax,z,ntemp,indcell,ctemp)
+     &           nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
 c            write(*,*) 'apres count'
 c            write(*,*) 'z(67,9)=',z(67,9)
 c            write(*,*) 'z(67,10)=',z(67,10)
@@ -3003,9 +3007,9 @@ c      write(*,*) 'mort'
             
 *     comptage des alleles sur chaque locus pour c puis ctemp
             call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &           nppmax,nall,nallmax,z,n,indcell,c)
+     &           nppmax,nall,nallmax,z,n,indcell,c,ploidy)
             call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &           nppmax,nall,nallmax,z,ntemp,indcell,ctemp)
+     &           nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
 
 *     propostion du nouveau tableau de freq et de derives
             call remfreq7bis(ipoprem,ipophost,

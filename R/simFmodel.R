@@ -44,7 +44,7 @@ function(nindiv,
                 k <- ipp
                 dd <- ddnew
               }
-          }
+          } 
         ppvois[iindiv] <- k
       }
 
