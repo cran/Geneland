@@ -4,7 +4,7 @@
 
   
   cat('*********************************************************************************',fill=T)
-  cat('*   Geneland-1.0.6 is loaded                                                    *',fill=T)
+  cat('*   Geneland-1.0.7 is loaded                                                    *',fill=T)
   cat('*                                                                               *',fill=T)
   cat('*   Use help(Geneland) for a quick overview.                                    *',fill=T)
   cat('*                                                                               *',fill=T)

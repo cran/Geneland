@@ -19,8 +19,8 @@
   \tabular{ll}{
     Package: \tab Geneland\cr
     Type: \tab Package\cr
-    Version: \tab 1.0.6\cr
-    Date: \tab 2006-01-10\cr
+    Version: \tab 1.0.7\cr
+    Date: \tab 2006-12-01\cr
     License: \tab GPL\cr
   }
   
@@ -51,6 +51,11 @@
   
   \code{\link{simFmodel}}: simulation from the prior of the spatial
   F-model
+
+  \code{\link{simIBD}}: Simulation of georeferenced genotypes under an IBD + barrier
+  model
+
+   \code{\link{show.simIBD}}:  Graphical display of data simulated by simIBD
   
   \code{\link{mcmcFmodel}}: Full Bayesian Markov Chain Monte Carlo
   inference of parameters in the spatial F-model
@@ -85,14 +90,21 @@
    mode in the posterior distribution of class membership at each pixel
    
    \code{\link{Fstat}}: Computations of pairwise F statistics between
+   known subpopulations of a dataset
+
+    \code{\link{Fstat.output}}: Computations of pairwise F statistics between
    inferred subpopulations 
 
+    \code{\link{nullify}}: Alter genotpyes of a dataset by simulating
+    null alleles.
+    
    \code{\link{FormatGenotypes}}: Internal function. 
    Transform a file of genotypes into
    a format suitable for function \code{\link{mcmcFmodel}}
 
    \code{\link{setplot}}: Internal function
 
+   
 }
 \author{Gilles Guillot
 

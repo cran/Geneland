@@ -1,4 +1,4 @@
-      subroutine  postprocesschain(nindivmax,nxdommax,nydommax,burn,
+      subroutine  postprocesschain(nxdommax,nydommax,burn,
      &     npopmax,nppmax,
      &     nlocmax,nindiv,nloc,nallmax,dt,nchain,filenpp,
      &     filenpop,fileu,filec,filef,filefperm,filedom,filedomperm,
@@ -8,7 +8,7 @@
       character*256 fileu,filec,filenpp,
      &     filenpop,filedom,filedomperm,filef,filefperm
       
-      integer nchain,npp,npop,ichain,nindiv,nindivmax,nxdommax,
+      integer nchain,npp,npop,ichain,nindiv,nxdommax,
      &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indvois,
      &     ipop,nloc, nlocmax,nallmax,ijunk,orderf,ipopperm,burn
       real s,u,xlim(2),ylim(2),coorddom,dom,domperm,distvois,f,dt
@@ -16,7 +16,7 @@
 *     dimensionnement 
 *     PENSER AU FORMAT D ECRITURE DES FREQUENCES 
 *     QUI DEPEND DE NPOPMAX
-      dimension s(2,nindivmax),u(2,nppmax),c(nppmax),
+      dimension s(2,nindiv),u(2,nppmax),c(nppmax),
      &     dom(nxdommax*nydommax,npopmax),
      &     domperm(nxdommax*nydommax,npopmax),
      &     coorddom(2,nxdommax*nydommax),indvois(nxdommax*nydommax),
@@ -36,7 +36,7 @@
       write(6,*) ''
       write(6,*) ''
 
-      call limit(nindiv,nindivmax,s,xlim,ylim,dt)
+      call limit(nindiv,s,xlim,ylim,dt)
 
 
 *     coordonnées de la grille 
@@ -91,7 +91,7 @@ c         write(6,100)float(ichain)/float(nchain)*100.
          
          
          
-         call calccell(nxdommax*nydommax,nxdommax*nydommax,coorddom,
+         call calccell(nxdommax*nydommax,coorddom,
      &        npp,nppmax,u,indvois,distvois)
          
          if(ichain .gt. burn)  then
@@ -171,7 +171,7 @@ c         write(6,10000)float(iit)/float(nit)*100.
          enddo
          
          if(iit .gt. burn)  then
-            call calccell(nindiv,nindiv,s,npp,nppmax,u,indcell,distcell)
+            call calccell(nindiv,s,npp,nppmax,u,indcell,distcell)
             do iindiv=1,nindiv
                ipop = c(indcell(iindiv))
                pmp(iindiv,ipop) =  pmp(iindiv,ipop) + 1.

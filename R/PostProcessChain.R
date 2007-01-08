@@ -46,7 +46,6 @@ function(coordinates,genotypes,#data
     ## for pixels of the grid
     out.res<- .Fortran(name="postprocesschain",
                        PACKAGE="Geneland",
-                       as.integer(nindiv),
                        as.integer(nxdom),
                        as.integer(nydom),
                        as.integer(burnin),
@@ -64,7 +63,7 @@ function(coordinates,genotypes,#data
                        as.character(filec),
                        as.character(filef),
                        as.character(filefperm),
-                       as.character(filedom),
+                       as.character(filedom), 
                        as.character(filedomperm),
                        as.single(t(coordinates)),
                        as.single(u),

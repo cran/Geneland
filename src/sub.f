@@ -1,8 +1,8 @@
 *     limites du rectangle contenant les coordonnees
-      subroutine limit(nindiv,nindivmax,s,xlim,ylim,dt)
+      subroutine limit(nindiv,s,xlim,ylim,dt)
       implicit none
-      integer nindiv,nindivmax
-      real s(2,nindivmax),xlim(2),ylim(2),dt
+      integer nindiv
+      real s(2,nindiv),xlim(2),ylim(2),dt
       integer iindiv
       xlim(1) = 1.e+30
       xlim(2) = -1.e+30
@@ -272,14 +272,14 @@ c$$$      end
 *     (Cf Green 95, p738) 
 *     (et on fait comme si on avait 2*n individus haploides) 
       subroutine rpostf(npop,npopmax,nloc,nlocmax,nall,nallmax,f,
-     &     nindiv,nindivmax,nlocmax2,z,nppmax,c,indcell,n,a,f11temp)
+     &     nindiv,nlocmax2,z,nppmax,c,indcell,n,a,f11temp)
       implicit none 
       integer npop,npopmax,nloc,nlocmax,nall(nlocmax),nallmax,
-     &     nindiv,nindivmax,nlocmax2,nppmax,c(nppmax),
-     &     indcell(nindivmax)
+     &     nindiv,nlocmax2,nppmax,c(nppmax),
+     &     indcell(nindiv)
       real f(npopmax,nlocmax,nallmax)
       integer ipop,iloc,iindiv,iall,n(npopmax,nlocmax,nallmax),
-     &     z(nindivmax,nlocmax2)
+     &     z(nindiv,nlocmax2)
       real a(nallmax),f11temp(nallmax)
 
 *     comptage des effectifs
@@ -326,16 +326,16 @@ c$$$      end
 *     (Cf Falush P. 26)
       subroutine rpostf2 (npop,npopmax,nloc,nlocmax,nall,nallmax,
      &     f,fa,drift,
-     &     nindiv,nindivmax,nlocmax2,z,nppmax,c,indcell,n,a,ptemp,
+     &     nindiv,nlocmax2,z,nppmax,c,indcell,n,a,ptemp,
      &     ploidy)
       implicit none 
       integer npop,npopmax,nloc,nlocmax,nall(nlocmax),nallmax,
-     &     nindiv,nindivmax,nlocmax2,nppmax,c(nppmax),
-     &     indcell(nindivmax),ploidy
+     &     nindiv,nlocmax2,nppmax,c(nppmax),
+     &     indcell(nindiv),ploidy
       real f(npopmax,nlocmax,nallmax),fa(nlocmax,nallmax),
      &     drift(npopmax)
       integer ipop,iloc,iindiv,iall,n(npopmax,nlocmax,nallmax),
-     &     z(nindivmax,nlocmax2)
+     &     z(nindiv,nlocmax2)
       real a(nallmax),ptemp(nallmax)
 
 c$$$      write(*,*) ''
@@ -351,7 +351,7 @@ c$$$      write(*,*) 'f=',f
 c$$$      write(*,*) 'fa=',fa
 c$$$      write(*,*) 'drift=',drift
 c$$$      write(*,*) 'nindiv=',nindiv
-c$$$      write(*,*) 'nindivmax=',nindivmax
+c$$$      write(*,*) 'nindiv=',nindiv
 c$$$      write(*,*) 'nlocmax2=',nlocmax2
 c$$$      write(*,*) 'z=',z
 c$$$      write(*,*) 'npp=',npp
@@ -587,12 +587,12 @@ c            lratio = -alpha*(d-drift(ipop))
 *     recherche la cellule de chaque individu
 *     stockage des indices dans indcell
 *     stockage des carres des distances dans distcell
-      subroutine calccell(nindiv,nindivmax,s,npp,nppmax,u,
+      subroutine calccell(nindiv,s,npp,nppmax,u,
      &     indcell,distcell)
       implicit none
-      integer nindiv,nindivmax,npp,nppmax,indcell(nindivmax)
-      real distcell(nindivmax)
-      real s(2,nindivmax),u(2,nppmax)
+      integer nindiv,npp,nppmax,indcell(nindiv)
+      real distcell(nindiv)
+      real s(2,nindiv),u(2,nppmax)
       integer iindiv,ipp
       real d
       do iindiv=1,nindiv
@@ -607,12 +607,6 @@ c            lratio = -alpha*(d-drift(ipop))
             endif
          enddo
       enddo
-      if(nindivmax .gt. nindiv) then 
-         do iindiv=nindiv+1,nindivmax
-            indcell(iindiv) = -999
-            distcell(iindiv) = -999.
-         enddo
-      endif
       end
 
 
@@ -620,13 +614,13 @@ c            lratio = -alpha*(d-drift(ipop))
 
 *     mise a jour de indcell et distcell
 *     apres le deplacement d'un point de u (celui d'indice j)
-      subroutine vormove(nindiv,nindivmax,s,npp,nppmax,u,
+      subroutine vormove(nindiv,s,npp,nppmax,u,
      &     indcell,distcell,indcelltemp,distcelltemp,j)
       implicit none
-      integer nindiv,nindivmax,npp,nppmax,indcell(nindivmax),
-     &     indcelltemp(nindivmax),j
-      real s(2,nindivmax),u(2,nppmax),distcell(nindivmax),
-     &     distcelltemp(nindivmax),d
+      integer nindiv,npp,nppmax,indcell(nindiv),
+     &     indcelltemp(nindiv),j
+      real s(2,nindiv),u(2,nppmax),distcell(nindiv),
+     &     distcelltemp(nindiv),d
       integer iindiv,ipp
 
 C       write(6,*) 'debut de  vormove'
@@ -662,15 +656,8 @@ C       write(6,*)'distcelltemp',distcelltemp
             endif
          endif
       enddo
-         if(nindivmax .gt. nindiv) then
-            do iindiv=nindiv+1,nindivmax
-               indcelltemp(iindiv) = -999
-               distcelltemp(iindiv) = -999.
-            enddo
-         endif
-         
 
-c$$$         call calccell(nindiv,nindivmax,s,npp,nppmax,u,
+c$$$         call calccell(nindiv,s,npp,nppmax,u,
 c$$$     &        indcelltemp2,distcelltemp2)
 c$$$         do iindiv=1,nindiv
 c$$$            if((indcelltemp2(iindiv) .ne. indcelltemp(iindiv)) .or. 
@@ -701,12 +688,12 @@ C          write(6,*)'distcelltemp',distcelltemp
 *     apres naissance d'un point de u 
       subroutine voradd(s,utemp,
      &     indcell,distcell,indcelltemp,distcelltemp,
-     &     nindiv,nindivmax,npp,nppmax)
+     &     nindiv,npp,nppmax)
       implicit none 
-      integer nindiv,nindivmax,npp,nppmax,indcell(nindivmax),
-     &     indcelltemp(nindivmax),iindiv
-      real s(2,nindivmax),distcell(nindivmax),
-     &     distcelltemp(nindivmax),d,utemp(2,nppmax)
+      integer nindiv,npp,nppmax,indcell(nindiv),
+     &     indcelltemp(nindiv),iindiv
+      real s(2,nindiv),distcell(nindiv),
+     &     distcelltemp(nindiv),d,utemp(2,nppmax)
       
       do iindiv =1,nindiv
 *     est-ce que le nouveau point s'est intercale ?
@@ -720,12 +707,6 @@ C          write(6,*)'distcelltemp',distcelltemp
             indcelltemp(iindiv) = indcell(iindiv) 
          endif
       enddo
-      if(nindivmax .gt. nindiv) then
-         do iindiv=nindiv+1,nindivmax
-            indcelltemp(iindiv) = -999
-            distcelltemp(iindiv) = -999.
-         enddo
-      endif
       end 
 
  
@@ -736,12 +717,12 @@ C          write(6,*)'distcelltemp',distcelltemp
 *     apres mort d'un point de u 
       subroutine vorrem(s,utemp,ipprem,
      &     indcell,distcell,indcelltemp,distcelltemp,
-     &     nindiv,nindivmax,npp,nppmax)
+     &     nindiv,npp,nppmax)
       implicit none
-      integer nindiv,nindivmax,npp,nppmax,indcell(nindivmax),
-     &     indcelltemp(nindivmax),ipprem,iindiv
-      real s(2,nindivmax),utemp(2,nppmax),
-     &     distcell(nindivmax),distcelltemp(nindivmax),d
+      integer nindiv,npp,nppmax,indcell(nindiv),
+     &     indcelltemp(nindiv),ipprem,iindiv
+      real s(2,nindiv),utemp(2,nppmax),
+     &     distcell(nindiv),distcelltemp(nindiv),d
       integer ipp
       
       do iindiv =1,nindiv
@@ -768,12 +749,6 @@ C          write(6,*)'distcelltemp',distcelltemp
             endif
          endif
       enddo
-      if(nindivmax .gt. nindiv) then
-         do iindiv=nindiv+1,nindivmax
-            indcelltemp(iindiv) = -999
-            distcelltemp(iindiv) = -999.
-         enddo
-      endif
       end
 
 
@@ -806,12 +781,12 @@ C          write(6,*)'distcelltemp',distcelltemp
 *     
 *     Mise a jour de c sans modif de npp
 *
-      subroutine updc(npp,nppmax,c,ctemp,z,nindiv,nindivmax,nloc,
+      subroutine updc(npp,nppmax,c,ctemp,z,nindiv,nloc,
      &     nlocmax,nlocmax2,nallmax,npop,npopmax,f,indcell,ploidy)
       implicit none 
-      integer npp, nppmax,c(nppmax),nindiv,nindivmax,nloc,nlocmax,
-     &     nlocmax2,npop,nallmax,npopmax,z(nindivmax,nlocmax2),
-     &     indcell(nindivmax),ploidy
+      integer npp, nppmax,c(nppmax),nindiv,nloc,nlocmax,
+     &     nlocmax2,npop,nallmax,npopmax,z(nindiv,nlocmax2),
+     &     indcell(nindiv),ploidy
       real f(npopmax,nlocmax,nallmax)
       integer ipp,ctemp(nppmax),ignbin,bern
       real ranf,r,alpha,ratio
@@ -827,7 +802,7 @@ C          write(6,*)'distcelltemp',distcelltemp
       do ipp=1,npp
          ctemp(ipp) = 1 + int(aint(float(npop)*ranf()))
          r = ratio(z,f,c,ctemp,indcell,indcell,
-     &     npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
+     &     npopmax,nlocmax,nallmax,nindiv,nloc,nlocmax2,
      &     nppmax,ploidy)
 
          alpha = amin1(1.,r)
@@ -850,12 +825,12 @@ C          write(6,*)'distcelltemp',distcelltemp
 *     new f is proposed according to full conditionnal pi(f*|c*,z)
       subroutine udcf(npop,npopmax,f,fa,drift,
      &     nloc,nlocmax,nlocmax2,
-     &     nall,nallmax,indcell,nindiv,nindivmax,npp,nppmax,c,ctemp,
+     &     nall,nallmax,indcell,nindiv,npp,nppmax,c,ctemp,
      &     a,ptemp,ftemp,z,n,ntemp,ploidy)
       implicit none
       integer npop,npopmax,nloc,nlocmax,nall(nlocmax),
-     &     nallmax,nindiv,nindivmax,npp,nppmax,indcell(nindivmax),
-     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindivmax,nlocmax2),
+     &     nallmax,nindiv,npp,nppmax,indcell(nindiv),
+     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindiv,nlocmax2),
      &     n(npopmax,nloc,nallmax),ntemp(npopmax,nloc,nallmax),
      &     ploidy
       real f(npopmax,nlocmax,nallmax),drift(npopmax),
@@ -864,6 +839,9 @@ C          write(6,*)'distcelltemp',distcelltemp
       integer ipop,ipp,ipop1,ipop2,iloc,iall,ignbin
       real alpha,ranf,lrpf,lratio,llr6
       integer bern
+      integer iipp
+      real junk,termf9bis
+c      write(*,*) 'begin udcf'
 
 *     init. temp. vector of population membership
       do ipp=1,npp
@@ -885,11 +863,15 @@ C          write(6,*)'distcelltemp',distcelltemp
       enddo
 
       do ipp=1,npp
-c         write(*,*) 'ipp=',ipp
+c         write(*,*) ''
+c         write(*,*) 'dans udcf ipp=',ipp
 *     propose new labeling of a tile
          ctemp(ipp) = 1 + int(aint(float(npop)*ranf()))
          ipop1 = c(ipp)
          ipop2 = ctemp(ipp)
+c         write(*,*) 'ipop1=',ipop1
+c         write(*,*) 'ipop2=',ipop2
+
 *     counting alleles for both states of c
          call countn(nindiv,nlocmax,nlocmax2,npopmax,
      &        nppmax,nall,nallmax,z,n,indcell,c,ploidy)
@@ -903,26 +885,50 @@ c         write(*,*) 'ntemp=',ntemp
 *     sample new frequencies
          call samplef(npop,npopmax,nloc,nlocmax,
      &     nall,nallmax,ipop1,ipop2,f,ftemp,
-     &     fa,drift,a,ptemp,ntemp)
+     &     fa,drift,a,ptemp,ntemp) 
 
-c         write(*,*) 'f=',f
-c         write(*,*) 'ftemp=',ftemp
-
+ 
 
 
 *     compute M-H ratio
 *     likelihood
          lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
      &                  indcell,npopmax,nlocmax,nallmax,
-     &                  nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &                  nindiv,nloc,nlocmax2,nppmax,ploidy)
 
+c         write(*,*) 'c=',(c(iipp),iipp=1,2)
+c         write(*,*) 'ctemp=',(ctemp(iipp),iipp=1,2)
+c         write(*,*) 'f=',f
+c         write(*,*) 'ftemp=',ftemp
 c         write(*,*) 'lratio =',lratio
 
 *     contrib proposals
          lratio = lratio + lrpf(npopmax,nloc,nall,nallmax,n,ntemp,
      &        f,ftemp,ipop1,ipop2)
 
-c          write(*,*) 'lratio =',lratio
+
+c         write(*,*) 'lrpf=',lrpf(npopmax,nloc,nall,nallmax,n,ntemp,
+c     &        f,ftemp,ipop1,ipop2)
+
+c         junk = termf9bis(npopmax,nloc,nall,nallmax,n,f,ipop1) 
+c     &       + termf9bis(npopmax,nloc,nall,nallmax,n,f,ipop2)
+c     &       - termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,ipop1)
+c     &       - termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,ipop2)
+c         write(*,*) 'junk=',junk
+
+         junk = termf9bis(npopmax,nloc,nall,nallmax,n,f,ipop1) 
+c     &       + termf9bis(npopmax,nloc,nall,nallmax,n,f,ipop2)
+     &       - termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,ipop1)
+     &       - termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,ipop2)
+c$$$         write(*,*) 'tbdpop9=',junk
+c$$$         write(*,*) 'terme ipop1=',
+c$$$     &        termf9bis(npopmax,nloc,nall,nallmax,n,f,ipop1) 
+c$$$         write(*,*) 'terme ipop2=',
+c$$$     &        termf9bis(npopmax,nloc,nall,nallmax,n,f,ipop2) 
+c$$$         write(*,*) 'terme temp ipop1=',
+c$$$     &        termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,ipop1) 
+c$$$         write(*,*) 'terme temp ipop2=',
+c$$$     &        termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,ipop2) 
 
          lratio = amin1(0.,lratio)
          alpha = exp(lratio)
@@ -931,9 +937,10 @@ c         write(*,*) 'alpha=',alpha
 
          bern = ignbin(1,alpha)
 
-c         write(*,*) 'bern=',bern
+c        write(*,*) 'bern=',bern
 
          if(bern .eq. 1) then
+c            write(*,*) 'coucou'
             c(ipp) = ctemp(ipp)
             do iloc=1,nloc
                do iall=1,nall(iloc)
@@ -951,6 +958,8 @@ c         write(*,*) 'bern=',bern
             enddo
          endif
       enddo
+c      write(*,*) 'end udcf'
+
       end subroutine udcf
 ***********************************************************************
 
@@ -966,12 +975,12 @@ c         write(*,*) 'bern=',bern
 *     new f is proposed according to full conditionnal pi(f*|c*,z)
       subroutine udcf2(npop,npopmax,f,fa,drift,
      &     nloc,nlocmax,nlocmax2,
-     &     nall,nallmax,indcell,nindiv,nindivmax,npp,nppmax,c,ctemp,
+     &     nall,nallmax,indcell,nindiv,npp,nppmax,c,ctemp,
      &     a,ptemp,ftemp,z,n,ntemp,ploidy)
       implicit none
       integer npop,npopmax,nloc,nlocmax,nall(nlocmax),
-     &     nallmax,nindiv,nindivmax,npp,nppmax,indcell(nindivmax),
-     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindivmax,nlocmax2),
+     &     nallmax,nindiv,npp,nppmax,indcell(nindiv),
+     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindiv,nlocmax2),
      &     n(npopmax,nloc,nallmax),ntemp(npopmax,nloc,nallmax),
      &     ploidy
       real f(npopmax,nlocmax,nallmax),drift(npopmax),
@@ -1022,7 +1031,7 @@ c         write(*,*) 'ipp=',ipp
 *     likelihood
          lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
      &        indcell,npopmax,nlocmax,nallmax,
-     &        nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &        nindiv,nloc,nlocmax2,nppmax,ploidy)
          
 *     contrib prior and proposals
          lratio = lratio + lrppf(npopmax,nloc,nall,nallmax,n,
@@ -1061,18 +1070,18 @@ c         write(*,*) 'bern=',bern
 *     composante par composante 
 *     avec proposal uniforme sur un carre de cote du 
 *     centre sur le point courant (random walk)
-      subroutine updurw(npp,nppmax,c,u,z,nindiv,nindivmax,nloc,nlocmax,
+      subroutine updurw(npp,nppmax,c,u,z,nindiv,nloc,nlocmax,
      &     nlocmax2,nallmax,npopmax,f,indcell,distcell,
      &     indcelltemp,distcelltemp,
      &     s,xlim,ylim,du,ploidy)
       implicit none 
-      integer npp, nppmax,c(nppmax),nindiv,nindivmax,nloc,nlocmax,
-     &     nlocmax2,nallmax,npopmax,z(nindivmax,nlocmax2),
-     &     indcell(nindivmax),ploidy
+      integer npp, nppmax,c(nppmax),nindiv,nloc,nlocmax,
+     &     nlocmax2,nallmax,npopmax,z(nindiv,nlocmax2),
+     &     indcell(nindiv),ploidy
       real u(2,nppmax),f(npopmax,nlocmax,nallmax),
-     &     distcell(nindivmax),s(2,nindivmax),xlim(2),ylim(2),du
-      integer ipp,iindiv,ignbin,bern,indcelltemp(nindivmax)
-      real utemp(2,nppmax),ranf,r,alpha,distcelltemp(nindivmax),
+     &     distcell(nindiv),s(2,nindiv),xlim(2),ylim(2),du
+      integer ipp,iindiv,ignbin,bern,indcelltemp(nindiv)
+      real utemp(2,nppmax),ranf,r,alpha,distcelltemp(nindiv),
      &     surf,surftemp,dx,dy,ratio
 
 *     initialisation du tableau temporaire
@@ -1106,7 +1115,7 @@ c      write(*,*) 'u=', u
          surftemp = (dx+du/2.)*(dy+du/2.)
 
 *     modif de indcell et distcell
-         call vormove(nindiv,nindivmax,s,npp,nppmax,utemp,
+         call vormove(nindiv,s,npp,nppmax,utemp,
      &        indcell,distcell,indcelltemp,distcelltemp,ipp)
 
 c         write(*,*) 'apres vormove'
@@ -1114,7 +1123,7 @@ c         write(*,*) 'apres vormove'
 
 
          r = ratio(z,f,c,c,indcell,indcelltemp,
-     &     npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
+     &     npopmax,nlocmax,nallmax,nindiv,nloc,nlocmax2,
      &     nppmax,ploidy)
 c         write(*,*) 'r=',r
          r = r*surf/surftemp
@@ -1143,17 +1152,17 @@ c         write(*,*) 'alpha=',alpha
 *     mise a jour de t    
 * 
       subroutine updt(npp,nppmax,nindiv,
-     &     nindivmax,nloc,nlocmax,nlocmax2,nallmax,npopmax,
+     &     nloc,nlocmax,nlocmax2,nallmax,npopmax,
      &     t,ttemp,dt,s,c,indcell,distcell,indcelltemp,distcelltemp,
      &     u,z,f,ploidy)
       implicit none 
-      integer npp,nppmax,nindiv,nindivmax,nloc,nlocmax,nlocmax2,nallmax,
-     &     npopmax,c(nppmax),indcell(nindivmax),z(nindivmax,nlocmax2),
+      integer npp,nppmax,nindiv,nloc,nlocmax,nlocmax2,nallmax,
+     &     npopmax,c(nppmax),indcell(nindiv),z(nindiv,nlocmax2),
      &     ploidy
-      real t(2,nindivmax),s(2,nindivmax),distcell(nindivmax),
+      real t(2,nindiv),s(2,nindiv),distcell(nindiv),
      &     u(2,nppmax),f(npopmax,nlocmax,nallmax),dt
-      integer iindiv,ipp,accept,ignbin,indcelltemp(nindivmax)
-      real ranf,d,ttemp(2,nindivmax),r,alpha,distcelltemp(nindivmax),
+      integer iindiv,ipp,accept,ignbin,indcelltemp(nindiv)
+      real ranf,d,ttemp(2,nindiv),r,alpha,distcelltemp(nindiv),
      &     ratio
 
 *     initialisation
@@ -1163,12 +1172,6 @@ c         write(*,*) 'alpha=',alpha
          indcelltemp(iindiv) = indcell(iindiv)
          distcelltemp(iindiv) = distcell(iindiv)
       enddo
-      if(nindivmax .gt. nindiv) then 
-         do iindiv = nindiv+1,nindivmax
-            ttemp(1,iindiv) = -999.
-            ttemp(2,iindiv) = -999.
-         enddo
-      endif
 
       do iindiv = 1,nindiv
 *     proposition d'une modif de t
@@ -1189,7 +1192,7 @@ c         write(*,*) 'alpha=',alpha
 *     proba d'acceptation
          if(indcelltemp(iindiv) .ne. indcell(iindiv)) then 
             r = ratio(z,f,c,c,indcell,indcelltemp,
-     &           npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,
+     &           npopmax,nlocmax,nallmax,nindiv,nloc,
      &           nlocmax2,nppmax,ploidy)
          else 
             r = 1.
@@ -1214,20 +1217,20 @@ c         write(*,*) 'alpha=',alpha
 *
 *     naissance ou mort d'une cellule
 *     avec prior Poisson(lambda) tronquée :   1 < m < nppmax
-      subroutine bdpp(nindiv,nindivmax,u,c,utemp,ctemp,npop,npopmax,
+      subroutine bdpp(nindiv,u,c,utemp,ctemp,npop,npopmax,
      &     nloc,nlocmax,nlocmax2,nallmax,npp,nppmax,z,f,s,xlim,ylim,
      &     indcell,distcell,indcelltemp,distcelltemp,lambda,ploidy)
       implicit none 
-      integer nindiv,nindivmax,nloc,nlocmax,nlocmax2,
+      integer nindiv,nloc,nlocmax,nlocmax2,
      &     npop,npopmax,
-     &     nallmax,npp,nppmax,z(nindivmax,nlocmax2),c(nppmax),
-     &     indcell(nindivmax),ploidy
-      real u(2,nindivmax),f(npopmax,nlocmax,nallmax),xlim(2),
-     &     ylim(2),s(2,nindivmax),distcell(nindivmax),lambda
+     &     nallmax,npp,nppmax,z(nindiv,nlocmax2),c(nppmax),
+     &     indcell(nindiv),ploidy
+      real u(2,nindiv),f(npopmax,nlocmax,nallmax),xlim(2),
+     &     ylim(2),s(2,nindiv),distcell(nindiv),lambda
 
-      integer ignbin,b,ctemp(nppmax),indcelltemp(nindivmax),ipp,npptemp,
+      integer ignbin,b,ctemp(nppmax),indcelltemp(nindiv),ipp,npptemp,
      &     accept,iindiv,ipprem
-      real utemp(2,nppmax),distcelltemp(nindivmax),ranf,
+      real utemp(2,nppmax),distcelltemp(nindiv),ranf,
      &     ratio,r,alpha
       
 *     naissance ou mort ?
@@ -1254,15 +1257,15 @@ c         write(*,*) 'alpha=',alpha
             endif
             
             call voradd(s,utemp,indcell,distcell,indcelltemp,
-     &           distcelltemp,nindiv,nindivmax,npp,nppmax)
+     &           distcelltemp,nindiv,npp,nppmax)
             r = ratio(z,f,c,ctemp,indcell,indcelltemp,npopmax,nlocmax,
-     &           nallmax,nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &           nallmax,nindiv,nloc,nlocmax2,nppmax,ploidy)
             r = r*lambda/float(npp+1)
             alpha = amin1(1.,r)
             accept = ignbin(1,alpha)
             if(accept .eq. 1) then 
                npp = npptemp
-               do iindiv=1,nindivmax
+               do iindiv=1,nindiv
                   indcell(iindiv) = indcelltemp(iindiv)
                   distcell(iindiv) = distcelltemp(iindiv)
                enddo
@@ -1298,16 +1301,16 @@ c         write(*,*) 'alpha=',alpha
             enddo
 
             call vorrem(s,utemp,ipprem,indcell,distcell,
-     &           indcelltemp,distcelltemp,nindiv,nindivmax,npp,nppmax)
+     &           indcelltemp,distcelltemp,nindiv,npp,nppmax)
 
             r = ratio(z,f,c,ctemp,indcell,indcelltemp,npopmax,nlocmax,
-     &           nallmax,nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &           nallmax,nindiv,nloc,nlocmax2,nppmax,ploidy)
             r = r*float(npp)/lambda
             alpha = amin1(1.,r)
             accept = ignbin(1,alpha)
             if(accept .eq. 1) then 
                npp = npp-1
-               do iindiv=1,nindivmax
+               do iindiv=1,nindiv
                   indcell(iindiv) = indcelltemp(iindiv)
                   distcell(iindiv) = distcelltemp(iindiv)
                enddo
@@ -1329,12 +1332,12 @@ c         write(*,*) 'alpha=',alpha
 *     calcul du ratio p(z|theta*)/p(z|theta)
 *     ca ne depend pas de lambda
       real function ratio(z,f,c,ctemp,indcell,indcelltemp,
-     &     npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
+     &     npopmax,nlocmax,nallmax,nindiv,nloc,nlocmax2,
      &     nppmax,ploidy)
       implicit none
-      integer npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
-     &     nppmax,z(nindivmax,nlocmax2),c(nppmax),ctemp(nppmax),
-     &     indcell(nindivmax),indcelltemp(nindivmax),ploidy
+      integer npopmax,nlocmax,nallmax,nindiv,nloc,nlocmax2,
+     &     nppmax,z(nindiv,nlocmax2),c(nppmax),ctemp(nppmax),
+     &     indcell(nindiv),indcelltemp(nindiv),ploidy
       real f(npopmax,nlocmax,nallmax)
       integer iindiv,iloc,iall1,iall2,ipop,ipoptemp
 
@@ -1393,12 +1396,12 @@ c$$$
 c$$$*     calcul du ratio p(z|theta*)/p(z|theta)
 c$$$*     quand f est  modifié
 c$$$      real function ratiobd(z,f,ftemp,c,ctemp,indcell,indcelltemp,
-c$$$     &     npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
+c$$$     &     npopmax,nlocmax,nallmax,nindiv,nloc,nlocmax2,
 c$$$     &     nppmax)
 c$$$      implicit none
-c$$$      integer npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
-c$$$     &     nppmax,z(nindivmax,nlocmax2),c(nppmax),ctemp(nppmax),
-c$$$     &     indcell(nindivmax),indcelltemp(nindivmax)
+c$$$      integer npopmax,nlocmax,nallmax,nindiv,nloc,nlocmax2,
+c$$$     &     nppmax,z(nindiv,nlocmax2),c(nppmax),ctemp(nppmax),
+c$$$     &     indcell(nindiv),indcelltemp(nindiv)
 c$$$      real f(npopmax,nlocmax,nallmax),ftemp(npopmax,nlocmax,nallmax)
 c$$$      integer iindiv,iloc,iall1,iall2,ipop,ipoptemp
 c$$$
@@ -1695,12 +1698,12 @@ c      write(*,*) 'bico =',bico
 *     log du ratio des vraisemblances dans bdpop6
 *
       real function llr6(z,f,ftemp,c,ctemp,indcell,indcelltemp,
-     &     npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
+     &     npopmax,nlocmax,nallmax,nindiv,nloc,nlocmax2,
      &     nppmax,ploidy)
       implicit none
-      integer npopmax,nlocmax,nallmax,nindiv,nindivmax,nloc,nlocmax2,
-     &     nppmax,z(nindivmax,nlocmax2),c(nppmax),ctemp(nppmax),
-     &     indcell(nindivmax),indcelltemp(nindivmax),ploidy
+      integer npopmax,nlocmax,nallmax,nindiv,nloc,nlocmax2,
+     &     nppmax,z(nindiv,nlocmax2),c(nppmax),ctemp(nppmax),
+     &     indcell(nindiv),indcelltemp(nindiv),ploidy
       real f(npopmax,nlocmax,nallmax),ftemp(npopmax,nlocmax,nallmax)
       integer iindiv,iloc,iall1,iall2,ipop,ipoptemp
 
@@ -1839,13 +1842,13 @@ c         write(*,*) 'nn=',nn
 *
       subroutine bdpop7(npop,npopmin,npopmax,f,fa,drift,
      &     nloc,nlocmax,nlocmax2,
-     &     nall,nallmax,indcell,nindiv,nindivmax,npp,nppmax,c,ctemp,
+     &     nall,nallmax,indcell,nindiv,npp,nppmax,c,ctemp,
      &     a,ptemp,ftemp,drifttemp,z,cellpop,listcell,
      &     cellpophost,n,ntemp,ploidy)
       implicit none
       integer npop,npopmin,npopmax,nloc,nlocmax,nall(nlocmax),
-     &     nallmax,nindiv,nindivmax,npp,nppmax,indcell(nindivmax),
-     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindivmax,nlocmax2),
+     &     nallmax,nindiv,npp,nppmax,indcell(nindiv),
+     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindiv,nlocmax2),
      &     n(npopmax,nloc,nallmax),ntemp(npopmax,nloc,nallmax),
      &     ploidy
       real f(npopmax,nlocmax,nallmax),drift(npopmax),
@@ -1904,7 +1907,7 @@ c     &     nall,nallmax,f,ftemp,fa,drift,drifttemp,a,ptemp)
 *     terme des vraisemblances
                    lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
      &                  indcell,npopmax,nlocmax,nallmax,
-     &                  nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &                  nindiv,nloc,nlocmax2,nppmax,ploidy)
 *     terme des freq.
                    lratio = lratio + termfsplit(isplit,npop,npopmax,
      &                  nlocmax,nall,nallmax,
@@ -1970,7 +1973,7 @@ c$$$                   enddo
 c$$$                   write(*,*) 'terme vrais. =',
 c$$$     &                 llr6(z,f,ftemp,c,ctemp,indcell,
 c$$$     &                  indcell,npopmax,nlocmax,nallmax,
-c$$$     &                  nindiv,nindivmax,nloc,nlocmax2,nppmax) 
+c$$$     &                  nindiv,nloc,nlocmax2,nppmax) 
 c$$$                   write(*,*) 'terme freq =',
 c$$$     &                  termfsplit(isplit,npop,npopmax,
 c$$$     &                  nlocmax,nall,nallmax,
@@ -2043,7 +2046,7 @@ c     &              a,fa)
 *     terme des vraisemblances
                lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
      &              indcell,npopmax,nlocmax,nallmax,
-     &              nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &              nindiv,nloc,nlocmax2,nppmax,ploidy)
                
 *     terme des freq.
                lratio = lratio + 
@@ -2112,7 +2115,7 @@ c$$$               enddo
 c$$$               write(*,*) 'terme vrais. =',
 c$$$     &              llr6(z,f,ftemp,c,ctemp,indcell,
 c$$$     &              indcell,npopmax,nlocmax,nallmax,
-c$$$     &              nindiv,nindivmax,nloc,nlocmax2,nppmax)
+c$$$     &              nindiv,nloc,nlocmax2,nppmax)
 c$$$               write(*,*) 'terme freq =',
 c$$$     &              termfmerge(ipophost,ipoprem,
 c$$$     &              npop,npopmax,nlocmax,
@@ -2148,13 +2151,13 @@ c$$$               write(*,*) 'alpha=',alpha
 * 
       subroutine bdpop7bis(npop,npopmin,npopmax,f,fa,drift,
      &     nloc,nlocmax,nlocmax2,
-     &     nall,nallmax,indcell,nindiv,nindivmax,npp,nppmax,c,ctemp,
+     &     nall,nallmax,indcell,nindiv,npp,nppmax,c,ctemp,
      &     a,ptemp,ftemp,drifttemp,z,cellpop,listcell,
      &     cellpophost,n,ntemp,ploidy)
       implicit none
       integer npop,npopmin,npopmax,nloc,nlocmax,nall(nlocmax),
-     &     nallmax,nindiv,nindivmax,npp,nppmax,indcell(nindivmax),
-     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindivmax,nlocmax2),
+     &     nallmax,nindiv,npp,nppmax,indcell(nindiv),
+     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindiv,nlocmax2),
      &     n(npopmax,nloc,nallmax),ntemp(npopmax,nloc,nallmax),
      &     ploidy
       real f(npopmax,nlocmax,nallmax),drift(npopmax),
@@ -2176,7 +2179,7 @@ c$$$               write(*,*) 'alpha=',alpha
        
        if(b .eq. 1) then
           if(npop .lt. npopmax) then 
-c             write(*,*) 'naissance'
+             write(*,*) 'naissance'
 *     split
 
 *     choix de la pope qui split
@@ -2214,9 +2217,13 @@ c     &     nall,nallmax,f,ftemp,fa,drift,drifttemp,a,ptemp)
 *     terme des vraisemblances
                    lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
      &                  indcell,npopmax,nlocmax,nallmax,
-     &                  nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &                  nindiv,nloc,nlocmax2,nppmax,ploidy)
 *     terme des freq.
                    lratio = lratio + termfsplitbis(isplit,npop,
+     &                  npopmax,nlocmax,nall,nallmax,
+     &                  f,ftemp,n,ntemp,fa,drift,drifttemp)
+
+                   write(*,*) 't=',termfsplitbis(isplit,npop,
      &                  npopmax,nlocmax,nall,nallmax,
      &                  f,ftemp,n,ntemp,fa,drift,drifttemp)
 
@@ -2280,7 +2287,7 @@ c$$$                   enddo
 c$$$                   write(*,*) 'terme vrais. =',
 c$$$     &                 llr6(z,f,ftemp,c,ctemp,indcell,
 c$$$     &                  indcell,npopmax,nlocmax,nallmax,
-c$$$     &                  nindiv,nindivmax,nloc,nlocmax2,nppmax) 
+c$$$     &                  nindiv,nloc,nlocmax2,nppmax) 
 c$$$                   write(*,*) 'terme freq =',
 c$$$     &                  termfsplit(isplit,npop,npopmax,
 c$$$     &                  nlocmax,nall,nallmax,
@@ -2306,7 +2313,7 @@ c$$$                   write(*,*) 'alpha=',alpha
 *     merge
       else
          if(npop .gt. npopmin) then 
-c             write(*,*) 'mort'
+             write(*,*) 'mort'
 *     tirage de la pope qui meurt
             ipoprem = 1 + int(aint(float(npop)*ranf()))
             
@@ -2353,7 +2360,7 @@ c     &              a,fa)
 *     terme des vraisemblances
                lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
      &              indcell,npopmax,nlocmax,nallmax,
-     &              nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &              nindiv,nloc,nlocmax2,nppmax,ploidy)
                
 *     terme des freq.
                lratio = lratio + 
@@ -2422,7 +2429,7 @@ c$$$               enddo
 c$$$               write(*,*) 'terme vrais. =',
 c$$$     &              llr6(z,f,ftemp,c,ctemp,indcell,
 c$$$     &              indcell,npopmax,nlocmax,nallmax,
-c$$$     &              nindiv,nindivmax,nloc,nlocmax2,nppmax)
+c$$$     &              nindiv,nloc,nlocmax2,nppmax)
 c$$$               write(*,*) 'terme freq =',
 c$$$     &              termfmerge(ipophost,ipoprem,
 c$$$     &              npopmax,nlocmax,nlocmax2,
@@ -2464,13 +2471,13 @@ c$$$               write(*,*) 'alpha=',alpha
 *
       subroutine bdpop8(npop,npopmin,npopmax,f,fa,drift,
      &     nloc,nlocmax,nlocmax2,
-     &     nall,nallmax,indcell,nindiv,nindivmax,npp,nppmax,c,ctemp,
+     &     nall,nallmax,indcell,nindiv,npp,nppmax,c,ctemp,
      &     a,ptemp,ftemp,drifttemp,z,cellpop,listcell,
      &     cellpophost,n,ntemp,ploidy)
       implicit none
       integer npop,npopmin,npopmax,nloc,nlocmax,nall(nlocmax),
-     &     nallmax,nindiv,nindivmax,npp,nppmax,indcell(nindivmax),
-     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindivmax,nlocmax2),
+     &     nallmax,nindiv,npp,nppmax,indcell(nindiv),
+     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindiv,nlocmax2),
      &     n(npopmax,nloc,nallmax),ntemp(npopmax,nloc,nallmax),
      &     ploidy
       real f(npopmax,nlocmax,nallmax),drift(npopmax),
@@ -2542,7 +2549,7 @@ c     &     nall,nallmax,f,ftemp,fa,drift,drifttemp,a,ptemp)
 *     terme des vraisemblances
              lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
      &            indcell,npopmax,nlocmax,nallmax,
-     &            nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &            nindiv,nloc,nlocmax2,nppmax,ploidy)
 *     terme des freq.
              lratio = lratio + termfsplit(isplit,npop,npopmax,
      &            nlocmax,nall,nallmax,
@@ -2608,7 +2615,7 @@ c$$$                   enddo
 c$$$                   write(*,*) 'terme vrais. =',
 c$$$     &                 llr6(z,f,ftemp,c,ctemp,indcell,
 c$$$     &                  indcell,npopmax,nlocmax,nallmax,
-c$$$     &                  nindiv,nindivmax,nloc,nlocmax2,nppmax) 
+c$$$     &                  nindiv,nloc,nlocmax2,nppmax) 
 c$$$                   write(*,*) 'terme freq =',
 c$$$     &                  termfsplit(isplit,npop,npopmax,
 c$$$     &                  nlocmax,nall,nallmax,
@@ -2680,7 +2687,7 @@ c     &              a,fa)
 *     terme des vraisemblances
                lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
      &              indcell,npopmax,nlocmax,nallmax,
-     &              nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &              nindiv,nloc,nlocmax2,nppmax,ploidy)
                
 *     terme des freq.
                lratio = lratio + 
@@ -2749,7 +2756,7 @@ c$$$               enddo
 c$$$               write(*,*) 'terme vrais. =',
 c$$$     &              llr6(z,f,ftemp,c,ctemp,indcell,
 c$$$     &              indcell,npopmax,nlocmax,nallmax,
-c$$$     &              nindiv,nindivmax,nloc,nlocmax2,nppmax)
+c$$$     &              nindiv,nloc,nlocmax2,nppmax)
 c$$$               write(*,*) 'terme freq =',
 c$$$     &              termfmerge(ipophost,ipoprem,
 c$$$     &              npopmax,nlocmax,
@@ -2785,13 +2792,13 @@ c$$$               write(*,*) 'alpha=',alpha
 *       they have
       subroutine bdpop8bis(npop,npopmin,npopmax,f,fa,drift,
      &     nloc,nlocmax,nlocmax2,
-     &     nall,nallmax,indcell,nindiv,nindivmax,npp,nppmax,c,ctemp,
+     &     nall,nallmax,indcell,nindiv,npp,nppmax,c,ctemp,
      &     a,ptemp,ftemp,drifttemp,z,cellpop,listcell,
      &     cellpophost,n,ntemp,ploidy)
       implicit none
       integer npop,npopmin,npopmax,nloc,nlocmax,nall(nlocmax),
-     &     nallmax,nindiv,nindivmax,npp,nppmax,indcell(nindivmax),
-     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindivmax,nlocmax2),
+     &     nallmax,nindiv,npp,nppmax,indcell(nindiv),
+     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindiv,nlocmax2),
      &     n(npopmax,nloc,nallmax),ntemp(npopmax,nloc,nallmax),
      &     ploidy
       real f(npopmax,nlocmax,nallmax),drift(npopmax),
@@ -2877,7 +2884,7 @@ c            write(*,*) 'z(67,10)=',z(67,10)
 c            write(*,*) 'calcul du log du ratio'
             lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
      &           indcell,npopmax,nlocmax,nallmax,
-     &           nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &           nindiv,nloc,nlocmax2,nppmax,ploidy)
 c            write(*,*) 'lratio =',lratio
 
 *     terme des freq.
@@ -2948,7 +2955,7 @@ c$$$                   enddo
 c$$$                   write(*,*) 'terme vrais. =',
 c$$$     &                 llr6(z,f,ftemp,c,ctemp,indcell,
 c$$$     &                  indcell,npopmax,nlocmax,nallmax,
-c$$$     &                  nindiv,nindivmax,nloc,nlocmax2,nppmax) 
+c$$$     &                  nindiv,nloc,nlocmax2,nppmax) 
 c$$$                   write(*,*) 'terme freq =',
 c$$$     &                  termfsplitbis(isplit,npop,npopmax,
 c$$$     &                  nlocmax,nall,nallmax,
@@ -3021,7 +3028,7 @@ c      write(*,*) 'mort'
 *     terme des vraisemblances
             lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
      &           indcell,npopmax,nlocmax,nallmax,
-     &           nindiv,nindivmax,nloc,nlocmax2,nppmax,ploidy)
+     &           nindiv,nloc,nlocmax2,nppmax,ploidy)
 c            write(*,*) 'lratio =',lratio
 *     terme des freq.
             lratio = lratio + 
@@ -3093,7 +3100,7 @@ c$$$               enddo
 c$$$               write(*,*) 'terme vrais. =',
 c$$$     &              llr6(z,f,ftemp,c,ctemp,indcell,
 c$$$     &              indcell,npopmax,nlocmax,nallmax,
-c$$$     &              nindiv,nindivmax,nloc,nlocmax2,nppmax)
+c$$$     &              nindiv,nloc,nlocmax2,nppmax)
 c$$$               write(*,*) 'terme freq =',
 c$$$     &              termfmergebis(ipophost,ipoprem,
 c$$$     &              npopmax,nlocmax,
@@ -3128,6 +3135,728 @@ c               write(*,*) 'z(67,10)=',z(67,10)
 
 
 
+
+***********************************************************************
+*
+*     Naissance et mort de popes avec réallocations 
+*     (split/merge)
+*     proposition de drift* selon prior
+*     proposition de f* selon conditionnelle complète 
+*     dans les deux sens
+*
+      subroutine bdpop9(npop,npopmin,npopmax,f,fa,drift,
+     &     nloc,nlocmax,nlocmax2,
+     &     nall,nallmax,indcell,nindiv,npp,nppmax,c,ctemp,
+     &     a,ptemp,ftemp,drifttemp,z,cellpop,listcell,
+     &     cellpophost,n,ntemp,ploidy)
+      implicit none
+      integer npop,npopmin,npopmax,nloc,nlocmax,nall(nlocmax),
+     &     nallmax,nindiv,npp,nppmax,indcell(nindiv),
+     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindiv,nlocmax2),
+     &     n(npopmax,nloc,nallmax),ntemp(npopmax,nloc,nallmax),
+     &     ploidy
+      real f(npopmax,nlocmax,nallmax),drift(npopmax),
+     &      ftemp(npopmax,nlocmax,nallmax),drifttemp(npopmax),
+     &     a(nallmax),ptemp(nallmax),fa(nlocmax,nallmax)
+      integer ipoprem,ipp,isplit,
+     &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
+     &     ipophost,ncellpophost,cellpophost(nppmax),ii
+      real alpha,ranf,lbico,lratio,llr6,termf9
+      integer b,ignbin,bern
+      
+       do ipp=1,nppmax
+          cellpop(ipp) = -999
+          listcell(ipp) = -999
+       enddo
+*     naissance ou mort ?
+       b = ignbin(1,0.5e0)
+       
+       if(b .eq. 1) then
+          if(npop .lt. npopmax) then 
+             write(*,*) 'naissance'
+*     split
+
+*     choix de la pope qui split
+             isplit = 1 + int(aint(float(npop)*ranf()))
+             
+*     recherche des cellules affectees a cette pope
+             call who(c,isplit,npp,nppmax,cellpop,ncellpop)
+             
+             if(ncellpop .gt. 0) then
+*     tirage du nombre de cellules reallouees
+                nu = int(aint(float(ncellpop)*ranf()))
+                if(nu .gt. 0) then
+                   
+*     tirage des cellules reallouees
+                   call sample2(cellpop,nppmax,nu,ncellpop,
+     &                  listcell)
+                   
+*     proposition de reallocation dans la pope npop+1
+                   call split(npop+1,c,ctemp,nppmax,nu,
+     &                  listcell)
+                else 
+                   do ipp = 1,nppmax
+                      ctemp(ipp) = c(ipp)
+                   enddo
+                endif
+             else
+                nu = 0
+                do ipp = 1,nppmax
+                   ctemp(ipp) = c(ipp)
+                enddo
+             endif
+
+*     comptage des alleles sur chaque locus pour c puis ctemp
+             call countn(nindiv,nlocmax,nlocmax2,npopmax,
+     &            nppmax,nall,nallmax,z,n,indcell,c,ploidy)
+             call countn(nindiv,nlocmax,nlocmax2,npopmax,
+     &            nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
+             
+*     proposition nouvelle freq et derive 
+c     call addfreq5(isplit,npop,npopmax,nloc,nlocmax,
+c     &     nall,nallmax,f,ftemp,fa,drift,drifttemp,a,ptemp)
+             call addfreq7(npop,npopmax,nloc,nlocmax,
+     &            nall,nallmax,isplit,
+     &            f,ftemp,fa,drift,drifttemp,a,ptemp,ntemp)
+             
+*     calcul du log du ratio
+*     terme des vraisemblances
+             lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
+     &            indcell,npopmax,nlocmax,nallmax,
+     &            nindiv,nloc,nlocmax2,nppmax,ploidy)
+*     terme des freq.
+c$$$             lratio = lratio + termfsplit(isplit,npop,npopmax,
+c$$$     &            nlocmax,nall,nallmax,
+c$$$     &            f,ftemp,n,ntemp,fa,drift,drifttemp) 
+             lratio = lratio 
+     &           + termf9(npopmax,nloc,nall,nallmax,n,f,fa,drift,isplit) 
+     &-termf9(npopmax,nloc,nall,nallmax,ntemp,ftemp,fa,drifttemp,isplit) 
+     &-termf9(npopmax,nloc,nall,nallmax,ntemp,ftemp,fa,drifttemp,npop+1) 
+
+             
+*     terme des proposal sur c
+             lratio = lratio + alog(2*float(ncellpop+1)) + 
+     &            lbico(ncellpop,nu) - alog(float(npop+1)) 
+             
+*     terme des priors sur c
+             lratio = lratio + 
+     &            float(npp)*(alog(float(npop)) - 
+     &            alog(float(npop+1)))
+             
+             lratio = amin1(0.e0,lratio)
+             alpha = exp(lratio)
+             bern = ignbin(1,alpha)
+
+c$$$                   write(*,*) 'npop=',npop
+c$$$                   write(*,*) 'npp=',npp
+c$$$                   write(*,*) 'isplit=',isplit
+c$$$                   write(*,*) 'c=',c
+c$$$                   write(*,*) 'ncellpop=',ncellpop  
+c$$$                   write(*,*) 'nu=',nu
+c$$$                   write(*,*) 'listcell=',listcell
+c$$$                   write(*,*) 'ctemp=',ctemp 
+c$$$                   do ipop=1,npopmax
+c$$$                      do iloc=1,nlocmax
+c$$$                         do iall=1,nall(iloc)
+c$$$                            write(*,*) 
+c$$$     &                           'n(',ipop,',',iloc,',',iall,')=',
+c$$$     &                           n(ipop,iloc,iall)
+c$$$                         enddo
+c$$$                      enddo
+c$$$                   enddo
+*c$$$                   do ipop=1,npopmax
+c$$$                      do iloc=1,nlocmax
+c$$$                         do iall=1,nall(iloc)
+c$$$                            write(*,*) 
+c$$$     &                           'ntemp(',ipop,',',iloc,',',iall,')=',
+c$$$     &                           ntemp(ipop,iloc,iall)
+c$$$                         enddo
+c$$$                      enddo
+c$$$                   enddo
+c$$$                   do ipop=1,npopmax
+c$$$                      do iloc=1,nlocmax
+c$$$                         do iall=1,nall(iloc)
+c$$$                            write(*,*) 
+c$$$     &                           'f(',ipop,',',iloc,',',iall,')=',
+c$$$     &                       f(ipop,iloc,iall)
+c$$$                         enddo
+c$$$                      enddo
+c$$$                   enddo
+c$$$                   do ipop=1,npopmax
+c$$$                      do iloc=1,nlocmax
+c$$$                         do iall=1,nall(iloc)
+c$$$                            write(*,*) 
+c$$$     &                           'ftemp(',ipop,',',iloc,',',iall,')=',
+c$$$     &                           ftemp(ipop,iloc,iall)
+c$$$                         enddo
+c$$$                      enddo
+c$$$                   enddo
+c$$$                   write(*,*) 'terme vrais. =',
+c$$$     &                 llr6(z,f,ftemp,c,ctemp,indcell,
+c$$$     &                  indcell,npopmax,nlocmax,nallmax,
+c$$$     &                  nindiv,nloc,nlocmax2,nppmax) 
+c$$$                   write(*,*) 'terme freq =',
+c$$$     &                  termfsplit(isplit,npop,npopmax,
+c$$$     &                  nlocmax,nall,nallmax,
+c$$$     &                  f,ftemp,n,ntemp,fa,drift,drifttemp)
+c$$$                   write(*,*) ' term prop c=',
+c$$$     &                  alog(2*float(ncellpop+1)) + 
+c$$$     &                  lbico(ncellpop,nu) - alog(float(npop+1)) 
+c$$$                   write(*,*) ' term prior c=',
+c$$$     &                   float(npp)*(alog(float(npop)) - 
+c$$$     &                  alog(float(npop+1)))
+                    write(*,*) 'alpha=',alpha 
+
+             
+             if(bern .eq. 1) then
+                call accept5(nppmax,npopmax,nlocmax,
+     &               nallmax,nall,c,ctemp,f,ftemp,drift,drifttemp)
+                npop = npop + 1
+             endif
+          endif
+
+*     merge
+      else
+         if(npop .gt. npopmin) then 
+             write(*,*) 'mort'
+*     tirage de la pope qui meurt
+            ipoprem = 1 + int(aint(float(npop)*ranf()))
+            
+*     tirage de la pope hote
+            ipophost = 1 + int(aint(float(npop)*ranf()))
+            do while(ipophost .eq. ipoprem)
+               ipophost = 1 + 
+     &              int(aint(float(npop)*ranf()))
+            enddo
+
+*     on range dans la pope d'indice le plus petit
+            if(ipophost .gt. ipoprem) then
+               ii = ipophost
+               ipophost = ipoprem
+               ipoprem = ii
+            endif
+            
+*     recherche des cellules qui vont etre reallouees
+            call who(c,ipoprem,npp,nppmax,cellpop,ncellpop)
+            
+*     recherche des cellules de la pope hote
+            call who(c,ipophost,npp,nppmax,cellpophost,
+     &           ncellpophost)
+               
+            if(ncellpop .gt. 0) then
+*     proposition de reallocation dans la pope ipophost
+               call merging(ipoprem,ipophost,c,ctemp,nppmax,
+     &              ncellpop,cellpop)
+
+*     comptage des alleles sur chaque locus pour c puis ctemp
+               call countn(nindiv,nlocmax,nlocmax2,npopmax,
+     &              nppmax,nall,nallmax,z,n,indcell,c,ploidy)
+               call countn(nindiv,nlocmax,nlocmax2,npopmax,
+     &              nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
+
+*     propostion du nouveau tableau de freq et de derives
+c               call remfreq5(ipoprem,ipophost,npop,npopmax,
+c     &              nloc,nlocmax,nall,nallmax,f,ftemp,drift,drifttemp,
+c     &              a,fa)
+               call remfreq7(ipoprem,ipophost,
+     &     npop,npopmax,nloc,nlocmax,nall,
+     &     nallmax,f,ftemp,drift,drifttemp,fa,a,ptemp,ntemp)
+               
+*     calcul du log du ratio  
+*     terme des vraisemblances
+               lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
+     &              indcell,npopmax,nlocmax,nallmax,
+     &              nindiv,nloc,nlocmax2,nppmax,ploidy)
+               
+*     terme des freq.
+c$$$               lratio = lratio + 
+c$$$     &              termfmerge(ipophost,ipoprem,
+c$$$     &              npopmax,nlocmax,
+c$$$     &              nall,nallmax,
+c$$$     &              f,ftemp,n,ntemp,fa,drift,drifttemp)
+            lratio = lratio  
+     &     + termf9(npopmax,nloc,nall,nallmax,n,f,fa,drift,ipophost) 
+     &      + termf9(npopmax,nloc,nall,nallmax,n,f,fa,drift,ipoprem) 
+     & -termf9(npopmax,nloc,nall,nallmax,ntemp,ftemp,fa,
+     &              drifttemp,ipophost)
+
+
+*     terme des proposal sur c
+               lratio = lratio + alog(float(npop)) - 
+     &              alog(2*float(ncellpop+ncellpophost+1)) -
+     &              lbico(ncellpop+ncellpophost,ncellpop) 
+
+*     terme des priors sur c
+               lratio = lratio + 
+     &              float(npp)*(alog(float(npop)) - 
+     &              alog(float(npop-1)))
+               lratio = amin1(0.e0,lratio)
+               alpha  = exp(lratio)
+               bern = ignbin(1,alpha)      
+      
+         
+c$$$               write(*,*) 'npop=',npop
+c$$$               write(*,*) 'npp=',npp
+c$$$               write(*,*) 'ipoprem=',ipoprem
+c$$$               write(*,*) 'cellpop=',cellpop
+c$$$               write(*,*) 'ipophost=',ipophost
+c$$$               write(*,*) 'c=',c
+c$$$               write(*,*) 'ctemp=',ctemp 
+c$$$               do ipop=1,npopmax
+c$$$                  do iloc=1,nlocmax
+c$$$                     do iall=1,nall(iloc)
+c$$$                        write(*,*) 
+c$$$     &                           'n(',ipop,',',iloc,',',iall,')=',
+c$$$     &                       n(ipop,iloc,iall)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               enddo
+c$$$               do ipop=1,npopmax
+c$$$                  do iloc=1,nlocmax
+c$$$                     do iall=1,nall(iloc)
+c$$$                        write(*,*) 
+c$$$     &                       'ntemp(',ipop,',',iloc,',',iall,')=',
+c$$$     &                           ntemp(ipop,iloc,iall)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               enddo
+c$$$               do ipop=1,npopmax
+c$$$                  do iloc=1,nlocmax
+c$$$                     do iall=1,nall(iloc)
+c$$$                        write(*,*) 
+c$$$     &                           'f(',ipop,',',iloc,',',iall,')=',
+c$$$     &                       f(ipop,iloc,iall)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               enddo
+c$$$               do ipop=1,npopmax
+c$$$                  do iloc=1,nlocmax
+c$$$                     do iall=1,nall(iloc)
+c$$$                        write(*,*) 
+c$$$     &                       'ftemp(',ipop,',',iloc,',',iall,')=',
+c$$$     &                           ftemp(ipop,iloc,iall)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               enddo
+c$$$               write(*,*) 'terme vrais. =',
+c$$$     &              llr6(z,f,ftemp,c,ctemp,indcell,
+c$$$     &              indcell,npopmax,nlocmax,nallmax,
+c$$$     &              nindiv,nloc,nlocmax2,nppmax)
+c$$$               write(*,*) 'terme freq =',
+c$$$     &              termfmerge(ipophost,ipoprem,
+c$$$     &              npopmax,nlocmax,
+c$$$     &              nall,nallmax,
+c$$$     &              f,ftemp,n,ntemp,fa,drift,drifttemp)
+c$$$               write(*,*) ' term prop c=',
+c$$$     &              alog(float(npop)) - 
+c$$$     &              alog(2*float(ncellpop+ncellpophost+1)) -
+c$$$     &              lbico(ncellpop+ncellpophost,ncellpop) 
+c$$$               write(*,*) ' term prior c=',
+c$$$     &              float(npp)*(alog(float(npop)) - 
+c$$$     &              alog(float(npop-1)))
+               write(*,*) 'alpha=',alpha 
+
+
+               if(bern .eq. 1) then
+                  call accept5(nppmax,npopmax,nlocmax,
+     &                 nallmax,nall,c,ctemp,f,ftemp,drift,drifttemp)
+                  npop = npop - 1
+               endif
+            endif
+         endif
+      endif
+      end subroutine bdpop9
+
+
+
+
+***********************************************************************
+*     split/merge populations in the spatial D-model
+*     changes from bdpop7bis:
+*     - process populations whatever the number of tiles or individuals
+*       they have
+      subroutine bdpop9bis(npop,npopmin,npopmax,f,fa,drift,
+     &     nloc,nlocmax,nlocmax2,
+     &     nall,nallmax,indcell,nindiv,npp,nppmax,c,ctemp,
+     &     a,ptemp,ftemp,drifttemp,z,cellpop,listcell,
+     &     cellpophost,n,ntemp,ploidy)
+      implicit none
+      integer npop,npopmin,npopmax,nloc,nlocmax,nall(nlocmax),
+     &     nallmax,nindiv,npp,nppmax,indcell(nindiv),
+     &     nlocmax2,c(nppmax),ctemp(nppmax),z(nindiv,nlocmax2),
+     &     n(npopmax,nloc,nallmax),ntemp(npopmax,nloc,nallmax),
+     &     ploidy
+      real f(npopmax,nlocmax,nallmax),drift(npopmax),
+     &      ftemp(npopmax,nlocmax,nallmax),drifttemp(npopmax),
+     &     a(nallmax),ptemp(nallmax),fa(nlocmax,nallmax)
+      integer ipoprem,ipp,isplit,
+     &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
+     &     ipophost,ncellpophost,cellpophost(nppmax),ii
+      real alpha,ranf,lbico,lratio,llr6,termf9bis,algama
+      integer b,ignbin,bern,iloc
+
+c      write(*,*) ''
+
+      do ipp=1,nppmax
+         cellpop(ipp) = -999
+         listcell(ipp) = -999
+      enddo
+*     naissance ou mort ?
+      b = ignbin(1,0.5)
+      
+      if(b .eq. 1) then
+         if(npop .lt. npopmax) then 
+c            write(*,*) 'naissance'
+*     split
+            
+*     choix de la pope qui split
+            isplit = 1 + int(aint(float(npop)*ranf()))
+c            write(*,*) 'isplit=',isplit
+
+*     recherche des cellules affectees a cette pope
+            call who(c,isplit,npp,nppmax,cellpop,ncellpop)
+
+            if(ncellpop .gt. 0) then
+*     tirage du nombre de cellules reallouees 
+               nu = int(aint(float(ncellpop+1)*ranf()))
+               if(nu .gt. 0) then                 
+
+*     tirage des cellules reallouees
+                  call sample2(cellpop,nppmax,nu,ncellpop,
+     &                 listcell)
+ 
+*     proposition de reallocation dans la pope npop+1
+                  call split(npop+1,c,ctemp,nppmax,nu,
+     &                 listcell)
+c                  write(*,*) 'apres split'
+c                  write(*,*) 'z(67,9)=',z(67,9)
+c                  write(*,*) 'z(67,10)=',z(67,10)
+               else 
+c                  write(*,*) 'nu=0'
+c                  write(*,*) 'npp=',npp
+c                  write(*,*) 'npop=',npop
+                  do ipp = 1,nppmax
+                     ctemp(ipp) = c(ipp)
+                  enddo
+               endif
+            else
+               nu = 0
+               do ipp = 1,nppmax
+                  ctemp(ipp) = c(ipp)
+               enddo
+            endif
+            
+*     comptage des alleles sur chaque locus pour c puis ctemp
+c            write(*,*) 'comptage des alleles'
+            call countn(nindiv,nlocmax,nlocmax2,npopmax,
+     &           nppmax,nall,nallmax,z,n,indcell,c,ploidy)
+            call countn(nindiv,nlocmax,nlocmax2,npopmax,
+     &           nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
+c            write(*,*) 'apres count'
+c            write(*,*) 'z(67,9)=',z(67,9)
+c            write(*,*) 'z(67,10)=',z(67,10)
+            
+*     proposition nouvelle freq et derive 
+c            write(*,*) 'ajoutage des freq'
+c            write(*,*) 'z(67,9)=',z(67,9)
+c            write(*,*) 'z(67,10)=',z(67,10)
+            call addfreq7bis(npop,npopmax,nloc,
+     &           nlocmax,nall,nallmax,isplit,
+     &           f,ftemp,fa,drift,drifttemp,a,ptemp,ntemp)
+c            write(*,*) 'z(67,9)=',z(67,9)
+c            write(*,*) 'z(67,10)=',z(67,10)
+
+*     calcul du log du ratio
+*     terme des vraisemblances
+c            write(*,*) 'calcul du log du ratio'
+            lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
+     &           indcell,npopmax,nlocmax,nallmax,
+     &           nindiv,nloc,nlocmax2,nppmax,ploidy)
+c            if(nu .eq. 0) then
+c               write(*,*) 'lratio =',lratio
+c            endif
+
+*     term proposal freq.
+c$$$            lratio = lratio + termfsplitbis(isplit,npop,
+c$$$     &           npopmax,nlocmax,nall,nallmax,
+c$$$     &           f,ftemp,n,ntemp,fa,drift,drifttemp)
+            lratio = lratio 
+     &           + termf9bis(npopmax,nloc,nall,nallmax,n,f,isplit) 
+     &         - termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,isplit) 
+     &         - termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,npop+1)  
+
+* term prior freq
+            do iloc = 1,nloc
+               lratio = lratio + algama(float(nall(iloc)))
+            enddo
+            
+
+c            if(nu .eq. 0) then
+c            write(*,*) 't=',termf9bis(npopmax,nloc,nall,nallmax,n,f,isplit)
+c     &           -termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,isplit) 
+c     &           -termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,npop+1)
+c            endif
+
+c            write(*,*) 'lratio =',lratio
+*     terme des proposal sur c
+            lratio = lratio + alog(2*float(ncellpop+1)) + 
+     &           lbico(ncellpop,nu) - alog(float(npop+1)) 
+c            write(*,*) 'lratio =',lratio
+*     terme des priors sur c
+            lratio = lratio + 
+     &           float(npp)*(alog(float(npop)) - 
+     &           alog(float(npop+1)))
+c*     Poisson prior on npop
+c     &           -alog(float(npop+1)
+c            write(*,*) 'lratio =',lratio
+
+            lratio = amin1(0.e0,lratio)
+            alpha = exp(lratio)
+            bern = ignbin(1,alpha)
+c            if(nu .eq. 0) then
+c               write(*,*) 'alpha=',alpha
+c            endif
+c$$$
+c$$$                   write(*,*) 'npop=',npop
+c$$$                   write(*,*) 'npp=',npp
+c$$$                   write(*,*) 'isplit=',isplit
+c$$$                   write(*,*) 'c=',c
+c$$$                   write(*,*) 'ncellpop=',ncellpop  
+c$$$                   write(*,*) 'nu=',nu
+c$$$                   write(*,*) 'listcell=',listcell
+c$$$                   write(*,*) 'ctemp=',ctemp 
+c$$$                   do ipop=1,npopmax
+c$$$                      do iloc=1,nlocmax
+c$$$                         do iall=1,nall(iloc)
+c$$$                            write(*,*) 
+c$$$     &                           'n(',ipop,',',iloc,',',iall,')=',
+c$$$     &                           n(ipop,iloc,iall)
+c$$$                         enddo
+c$$$                      enddo
+c$$$                   enddo
+c$$$                   do ipop=1,npopmax
+c$$$                      do iloc=1,nlocmax
+c$$$                         do iall=1,nall(iloc)
+c$$$                            write(*,*) 
+c$$$     &                           'ntemp(',ipop,',',iloc,',',iall,')=',
+c$$$     &                           ntemp(ipop,iloc,iall)
+c$$$                         enddo
+c$$$                      enddo
+c$$$                   enddo
+c$$$                   do ipop=1,npopmax
+c$$$                      do iloc=1,nlocmax
+c$$$                         do iall=1,nall(iloc)
+c$$$                            write(*,*) 
+c$$$     &                           'f(',ipop,',',iloc,',',iall,')=',
+c$$$     &                       f(ipop,iloc,iall)
+c$$$                         enddo
+c$$$                      enddo
+c$$$                   enddo
+c$$$                   do ipop=1,npopmax
+c$$$                      do iloc=1,nlocmax
+c$$$                         do iall=1,nall(iloc)
+c$$$                            write(*,*) 
+c$$$     &                           'ftemp(',ipop,',',iloc,',',iall,')=',
+c$$$     &                           ftemp(ipop,iloc,iall)
+c$$$                         enddo
+c$$$                      enddo
+c$$$                   enddo
+c$$$                   write(*,*) 'terme vrais. =',
+c$$$     &                 llr6(z,f,ftemp,c,ctemp,indcell,
+c$$$     &                  indcell,npopmax,nlocmax,nallmax,
+c$$$     &                  nindiv,nloc,nlocmax2,nppmax) 
+c$$$                   write(*,*) 'terme freq =',
+c$$$     &                  termfsplitbis(isplit,npop,npopmax,
+c$$$     &                  nlocmax,nall,nallmax,
+c$$$     &                  f,ftemp,n,ntemp,fa,drift,drifttemp)
+c$$$                   write(*,*) ' term prop c=',
+c$$$     &                  alog(2*float(ncellpop+1)) + 
+c$$$     &                  lbico(ncellpop,nu) - alog(float(npop+1)) 
+c$$$                   write(*,*) ' term prior c=',
+c$$$     &                   float(npp)*(alog(float(npop)) - 
+c$$$     &                  alog(float(npop+1)))
+c$$$                   write(*,*) 'alpha=',alpha 
+            
+            if(bern .eq. 1) then
+c               write(*,*) 'accept split'
+c               write(*,*) 'z(67,9)=',z(67,9)
+c               write(*,*) 'z(67,10)=',z(67,10)
+
+               call accept5(nppmax,npopmax,nlocmax,
+     &              nallmax,nall,c,ctemp,f,ftemp,drift,drifttemp)
+               npop = npop + 1
+c               write(*,*) 'z(67,9)=',z(67,9)
+c               write(*,*) 'z(67,10)=',z(67,10)
+            endif
+         endif
+
+      else
+         if(npop .gt. npopmin) then 
+c      write(*,*) 'mort'
+*     tirage de la pope qui meurt
+            ipoprem = 1 + int(aint(float(npop)*ranf()))
+            
+*     tirage de la pope hote
+            ipophost = 1 + int(aint(float(npop)*ranf()))
+            do while(ipophost .eq. ipoprem)
+               ipophost = 1 
+     &              + int(aint(float(npop)*ranf()))
+            enddo
+            
+*     on range dans la pope d'indice le plus petit
+            if(ipophost .gt. ipoprem) then
+               ii = ipophost
+               ipophost = ipoprem
+               ipoprem = ii
+            endif
+            
+*     recherche des cellules qui vont etre reallouees
+            call who(c,ipoprem,npp,nppmax,cellpop,ncellpop)
+            
+*     recherche des cellules de la pope hote
+            call who(c,ipophost,npp,nppmax,cellpophost,
+     &           ncellpophost)
+
+*     proposition de reallocation dans la pope ipophost
+            call merging(ipoprem,ipophost,c,ctemp,nppmax,
+     &           ncellpop,cellpop)
+            
+*     comptage des alleles sur chaque locus pour c puis ctemp
+            call countn(nindiv,nlocmax,nlocmax2,npopmax,
+     &           nppmax,nall,nallmax,z,n,indcell,c,ploidy)
+            call countn(nindiv,nlocmax,nlocmax2,npopmax,
+     &           nppmax,nall,nallmax,z,ntemp,indcell,ctemp,ploidy)
+
+*     propostion du nouveau tableau de freq et de derives
+            call remfreq7bis(ipoprem,ipophost,
+     &           npop,npopmax,nloc,nlocmax,nall,
+     &           nallmax,f,ftemp,drift,drifttemp,fa,a,ptemp,
+     &           ntemp)
+            
+*     calcul du log du ratio  
+*     terme des vraisemblances
+            lratio =  llr6(z,f,ftemp,c,ctemp,indcell,
+     &           indcell,npopmax,nlocmax,nallmax,
+     &           nindiv,nloc,nlocmax2,nppmax,ploidy)
+c            write(*,*) 'lratio =',lratio
+*     terme des freq.
+c$$$            lratio = lratio + 
+c$$$     &           termfmergebis(ipophost,ipoprem,
+c$$$     &           npopmax,nlocmax,
+c$$$     &           nall,nallmax,
+c$$$     &           f,ftemp,n,ntemp,fa,drift,drifttemp) 
+            lratio = lratio  
+     &           + termf9bis(npopmax,nloc,nall,nallmax,n,f,ipophost) 
+     &           + termf9bis(npopmax,nloc,nall,nallmax,n,f,ipoprem) 
+     &       -termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,ipophost)
+
+c$$$            write(*,*) 't=',
+c$$$     &           termf9bis(npopmax,nloc,nall,nallmax,n,f,ipophost) + 
+c$$$     &           termf9bis(npopmax,nloc,nall,nallmax,n,f,ipoprem) - 
+c$$$     &           termf9bis(npopmax,nloc,nall,nallmax,ntemp,ftemp,ipophost)
+
+* term prior freq
+            do iloc = 1,nloc
+               lratio = lratio - algama(float(nall(iloc)))
+            enddo
+     
+c            write(*,*) 'lratio =',lratio
+*     terme des proposal sur c
+            lratio = lratio + alog(float(npop)) - 
+     &           alog(2*float(ncellpop+ncellpophost+1)) -
+     &           lbico(ncellpop+ncellpophost,ncellpop) 
+c            write(*,*) 'lratio =',lratio
+*     terme des priors sur c
+            lratio = lratio + 
+     &           float(npp)*(alog(float(npop)) - 
+     &           alog(float(npop-1)))
+c*     Poisson prior on npop
+c     &           + alog(float(npop))
+c            write(*,*) 'lratio =',lratio
+
+            lratio = amin1(0.e0,lratio)
+            alpha  = exp(lratio)
+            bern = ignbin(1,alpha) 
+
+c$$$               write(*,*) 'npop=',npop
+c$$$               write(*,*) 'npp=',npp
+c$$$               write(*,*) 'ipoprem=',ipoprem
+c$$$               write(*,*) 'cellpop=',cellpop
+c$$$               write(*,*) 'ipophost=',ipophost
+c$$$               write(*,*) 'c=',c
+c$$$               write(*,*) 'ctemp=',ctemp 
+c$$$               do ipop=1,npopmax
+c$$$                  do iloc=1,nlocmax
+c$$$                     do iall=1,nall(iloc)
+c$$$                        write(*,*) 
+c$$$     &                           'n(',ipop,',',iloc,',',iall,')=',
+c$$$     &                       n(ipop,iloc,iall)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               enddo
+c$$$               do ipop=1,npopmax
+c$$$                  do iloc=1,nlocmax
+c$$$                     do iall=1,nall(iloc)
+c$$$                        write(*,*) 
+c$$$     &                       'ntemp(',ipop,',',iloc,',',iall,')=',
+c$$$     &                           ntemp(ipop,iloc,iall)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               enddo
+c$$$               do ipop=1,npopmax
+c$$$                  do iloc=1,nlocmax
+c$$$                     do iall=1,nall(iloc)
+c$$$                        write(*,*) 
+c$$$     &                           'f(',ipop,',',iloc,',',iall,')=',
+c$$$     &                       f(ipop,iloc,iall)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               enddo
+c$$$               do ipop=1,npopmax
+c$$$                  do iloc=1,nlocmax
+c$$$                     do iall=1,nall(iloc)
+c$$$                        write(*,*) 
+c$$$     &                       'ftemp(',ipop,',',iloc,',',iall,')=',
+c$$$     &                           ftemp(ipop,iloc,iall)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               enddo
+c$$$               write(*,*) 'terme vrais. =',
+c$$$     &              llr6(z,f,ftemp,c,ctemp,indcell,
+c$$$     &              indcell,npopmax,nlocmax,nallmax,
+c$$$     &              nindiv,nloc,nlocmax2,nppmax)
+c$$$               write(*,*) 'terme freq =',
+c$$$     &              termfmergebis(ipophost,ipoprem,
+c$$$     &              npopmax,nlocmax,
+c$$$     &              nall,nallmax,
+c$$$     &              f,ftemp,n,ntemp,fa,drift,drifttemp)
+c$$$               write(*,*) ' term prop c=',
+c$$$     &              alog(float(npop)) - 
+c$$$     &              alog(2*float(ncellpop+ncellpophost+1)) -
+c$$$     &              lbico(ncellpop+ncellpophost,ncellpop) 
+c$$$               write(*,*) ' term prior c=',
+c$$$     &              float(npp)*(alog(float(npop)) - 
+c$$$     &              alog(float(npop-1)))
+c$$$               write(*,*) 'alpha=',alpha 
+  
+            if(bern .eq. 1) then
+c               write(*,*) 'accept merge'
+c               write(*,*) 'z(67,9)=',z(67,9)
+c               write(*,*) 'z(67,10)=',z(67,10)
+               call accept5(nppmax,npopmax,nlocmax,
+     &              nallmax,nall,c,ctemp,f,ftemp,drift,drifttemp)
+               npop = npop - 1
+c               write(*,*) 'z(67,9)=',z(67,9)
+c               write(*,*) 'z(67,10)=',z(67,10)
+            endif
+         endif
+      endif 
+      
+      end subroutine bdpop9bis
+
+ 
+
+
 *
 *     ajoute une pope 
 *     dans  le tableau des dérives selon le prior
@@ -3146,7 +3875,10 @@ c               write(*,*) 'z(67,10)=',z(67,10)
      &     fa(nlocmax,nallmax),a(nallmax)
       integer iloc,iall,ipop
       real ptemp(nallmax),ranf
-
+c      write(*,*) 'debut addfreq7'
+c      write(*,*) 'fa=',fa
+c      write(*,*) 'drift=',drift
+c      write(*,*) 'ntemp=',ntemp
 
 *     remplissage de f et drift pour le popes pre-existantes
       do ipop = 1,npop
@@ -3544,6 +4276,7 @@ c$$$      write(*,*) 'ftemp(',ipophost,2,2,')=',ftemp(ipophost,2,2)
 
 
 
+*******************************************************
 *
 *     terme des freq dans le log ratio pour un split 
 *     quand f_Alj =1 pour tout j et drift(ipop) =0.5
@@ -3776,20 +4509,82 @@ c$$$      write(*,*) 'ftemp(',ipophost,2,2,')=',ftemp(ipophost,2,2)
       termfmergebis = termfmergebis - tt
       end function termfmergebis
 
+
+
+*******************************************************
+*
+*     term from proposal of frequencies in a split in bdpop9bis
+*
+      real function termf9(npopmax,nloc,nall,nallmax,n,
+     &     f,fa,drift,ipop)
+      implicit none 
+      integer npopmax,nloc,nall,nallmax,n,ipop,ipop2
+      real f,fa,drift
+      dimension nall(nloc),n(npopmax,nloc,nallmax),
+     &     f(npopmax,nloc,nallmax),fa(nloc,nallmax),drift(npopmax)
+      integer iloc,iall,nn
+      real algama,q
+      q = drift(ipop) / (1- drift(ipop))
+      termf9 = 0.e0
+      do iloc=1,nloc
+         nn = 0
+         do iall=1,nall(iloc)
+            termf9 = termf9 + 
+     &           float(n(ipop,iloc,iall))*alog(f(ipop,iloc,iall)) - 
+     &           algama(q*fa(iloc,iall)+float(n(ipop,iloc,iall))) + 
+     &           algama(q*fa(iloc,iall))
+            nn = nn + n(ipop,iloc,iall)
+         enddo
+         termf9 = termf9 + 
+     &        algama(q+float(nn)) -  algama(float(nn))
+      enddo
+      end function termf9
+
+ 
+*******************************************************
+*
+*     term from proposal of frequencies in a split in bdpop9bis
+*
+      real function termf9bis(npopmax,nloc,nall,nallmax,n,
+     &     f,ipop)
+      implicit none 
+      integer npopmax,nloc,nall,nallmax,n,ipop,ipop2
+      real f
+      dimension nall(nloc),n(npopmax,nloc,nallmax),
+     &     f(npopmax,nloc,nallmax)
+      integer iloc,iall,nn
+      real algama
+      termf9bis = 0.e0
+      do iloc=1,nloc
+         nn = 0
+         do iall=1,nall(iloc)
+            termf9bis = termf9bis + 
+     &           float(n(ipop,iloc,iall))*alog(f(ipop,iloc,iall)) - 
+     &           algama(1+float(n(ipop,iloc,iall))) 
+            nn = nn + n(ipop,iloc,iall)
+         enddo
+         termf9bis = termf9bis + 
+     &        algama(float(nall(iloc)+nn))
+      enddo
+      end function termf9bis
+
+ 
+
+********************************************************
 *
 *     log vraisemblance
 *
-      real function ll(z,nindivmax,nlocmax,nlocmax2,npopmax,
+      real function ll(z,nindiv,nlocmax,nlocmax2,npopmax,
      &     nallmax,nppmax,c,f,indcell)
       implicit none
-      integer nindivmax,nlocmax,nlocmax2,npopmax,
-     &     z(nindivmax,nlocmax2),nppmax,c(nppmax),nallmax,
-     &     indcell(nindivmax)
+      integer nindiv,nlocmax,nlocmax2,npopmax,
+     &     z(nindiv,nlocmax2),nppmax,c(nppmax),nallmax,
+     &     indcell(nindiv)
       real f(npopmax,nlocmax,nallmax)
       integer iindiv,iloc,iall1,iall2,ipop
 
       ll = 0
-      do iindiv = 1,nindivmax
+      do iindiv = 1,nindiv
          ipop = c(indcell(iindiv))
          do iloc = 1,nlocmax
             iall1 = z(iindiv,2*iloc-1)
@@ -3812,11 +4607,11 @@ c$$$      write(*,*) 'ftemp(',ipophost,2,2,')=',ftemp(ipophost,2,2)
 *     log de la proba a posteriori du vecteur de parametres
 *
       real function lpp(lambda,z,npop,npp,drift,f,fa,c,nppmax,
-     &     nindivmax,nlocmax2,npopmax,nlocmax,nallmax,indcell,nall,
+     &     nindiv,nlocmax2,npopmax,nlocmax,nallmax,indcell,nall,
      &     fmodel)
       implicit none
-      integer nindivmax,nlocmax2,npop,npopmax,nlocmax,nallmax,
-     &     npp,nppmax,z(nindivmax,nlocmax2),indcell(nindivmax),
+      integer nindiv,nlocmax2,npop,npopmax,nlocmax,nallmax,
+     &     npp,nppmax,z(nindiv,nlocmax2),indcell(nindiv),
      &     c(nppmax),nall(nlocmax),fmodel
       real drift(npopmax),f(npopmax,nlocmax,nallmax),
      &     fa(nlocmax,nallmax),lambda
@@ -3850,7 +4645,7 @@ c$$$      write(*,*) 'ftemp(',ipophost,2,2,')=',ftemp(ipophost,2,2)
          enddo
       endif
       
-      lpp = lpp + ll(z,nindivmax,nlocmax,nlocmax2,npopmax,
+      lpp = lpp + ll(z,nindiv,nlocmax,nlocmax2,npopmax,
      &     nallmax,nppmax,c,f,indcell)
 
       end function lpp
@@ -3914,7 +4709,7 @@ c$$$      write(*,*) 'ftemp(',ipophost,2,2,')=',ftemp(ipophost,2,2)
             ftemp(ipop2,iloc,iall)  = ptemp(iall)
          enddo
       enddo
-      end subroutine  samplef 
+      end subroutine samplef 
 
 
 
@@ -3933,31 +4728,57 @@ c$$$      write(*,*) 'ftemp(',ipophost,2,2,')=',ftemp(ipophost,2,2)
       integer iloc,iall,n1,n2,ntemp1,ntemp2
       real algama
       lrpf = 0.e0
-      do iloc=1,nloc
-         n1 = 0
-         n2 = 0
-         ntemp1 = 0
-         ntemp2 = 0
-         do iall=1,nall(iloc)
-            lrpf = lrpf + 
-     &         n(ipop1,iloc,iall)*alog(f(ipop1,iloc,iall)) 
-     &       + n(ipop2,iloc,iall)*alog(f(ipop2,iloc,iall) )
-     &       - ntemp(ipop1,iloc,iall)*alog(ftemp(ipop1,iloc,iall)) 
-     &       - ntemp(ipop2,iloc,iall)*alog(ftemp(ipop2,iloc,iall)) 
-     &       - algama(1+float(n(ipop1,iloc,iall)))
-     &       - algama(1+float(n(ipop2,iloc,iall)))
-     &       + algama(1+float(ntemp(ipop1,iloc,iall)))
-     &       + algama(1+float(ntemp(ipop2,iloc,iall)))
-            n1 = n1 + n(ipop1,iloc,iall)
-            n2 = n2 + n(ipop2,iloc,iall)
-            ntemp1 = ntemp1 + ntemp(ipop1,iloc,iall)
-            ntemp2 = ntemp2 + ntemp(ipop2,iloc,iall)
-         enddo
-         lrpf = lrpf + algama(float(nall(iloc)+n1)) 
+      if(ipop1 .ne. ipop2) then
+         do iloc=1,nloc
+c         write(*,*) 'iloc=',iloc
+            n1 = 0
+            n2 = 0
+            ntemp1 = 0
+            ntemp2 = 0
+            do iall=1,nall(iloc)
+c     write(*,*) 'iall=',iall
+               lrpf = lrpf + 
+     &              n(ipop1,iloc,iall)*alog(f(ipop1,iloc,iall)) 
+     &              + n(ipop2,iloc,iall)*alog(f(ipop2,iloc,iall) )
+     &             - ntemp(ipop1,iloc,iall)*alog(ftemp(ipop1,iloc,iall)) 
+     &             - ntemp(ipop2,iloc,iall)*alog(ftemp(ipop2,iloc,iall)) 
+     &              - algama(1+float(n(ipop1,iloc,iall)))
+     &              - algama(1+float(n(ipop2,iloc,iall)))
+     &              + algama(1+float(ntemp(ipop1,iloc,iall)))
+     &              + algama(1+float(ntemp(ipop2,iloc,iall)))
+               n1 = n1 + n(ipop1,iloc,iall)
+               n2 = n2 + n(ipop2,iloc,iall)
+               ntemp1 = ntemp1 + ntemp(ipop1,iloc,iall)
+               ntemp2 = ntemp2 + ntemp(ipop2,iloc,iall)
+c         write(*,*) 'lrpf=',lrpf
+            enddo
+            lrpf = lrpf + algama(float(nall(iloc)+n1)) 
      &           + algama(float(nall(iloc)+n2)) 
      &           - algama(float(nall(iloc)+ntemp1)) 
      &           - algama(float(nall(iloc)+ntemp2))
-      enddo
+c         write(*,*) 'lrpf=',lrpf
+         enddo
+      else
+         do iloc=1,nloc
+c         write(*,*) 'iloc=',iloc
+            n1 = 0
+            ntemp1 = 0
+            do iall=1,nall(iloc)
+c     write(*,*) 'iall=',iall
+               lrpf = lrpf + 
+     &              n(ipop1,iloc,iall)*alog(f(ipop1,iloc,iall)) 
+     &             - ntemp(ipop1,iloc,iall)*alog(ftemp(ipop1,iloc,iall)) 
+     &             - algama(1+float(n(ipop1,iloc,iall)))
+     &             + algama(1+float(ntemp(ipop1,iloc,iall)))
+               n1 = n1 + n(ipop1,iloc,iall)
+               ntemp1 = ntemp1 + ntemp(ipop1,iloc,iall)
+c         write(*,*) 'lrpf=',lrpf
+            enddo
+            lrpf = lrpf + algama(float(nall(iloc)+n1)) 
+     &           - algama(float(nall(iloc)+ntemp1)) 
+c         write(*,*) 'lrpf=',lrpf
+         enddo
+      endif
       end 
 
 

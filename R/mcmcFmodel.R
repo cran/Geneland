@@ -43,7 +43,6 @@ function(
     if(is.null(allele.numbers)) {allele.numbers <- data.tmp$allele.numbers}
 
 
-
     ##
     ## Initializing variables
     
@@ -59,14 +58,16 @@ function(
     filet <-  paste(path.mcmc,"hidden.coord.txt",sep="")
     filelpp <- paste(path.mcmc,"log.posterior.density.txt",sep="")
     filell <- paste(path.mcmc,"log.likelihood.txt",sep="")
+    filesize <- paste(path.mcmc,"size.pop.txt",sep="")
  
 
     nindiv <- nrow(genotypes)
     nloc <- length(allele.numbers)
     
-    npp <- ifelse(spatial==1,
-                  1+floor(runif(1)*nb.nuclei.max/2), #avoid large init for npp w.r.t lambda
-                  nindiv)
+##     npp <- ifelse(spatial==1,
+##                   1+floor(runif(1)*nb.nuclei.max/2), #avoid large init for npp w.r.t lambda
+##                   nindiv)
+    npp <- -999
     nallmax <- max(allele.numbers)
     u <- matrix(nr=2,nc=nb.nuclei.max,data=-999)
     utemp <- matrix(nr=2,nc=nb.nuclei.max,data=-999)
@@ -119,6 +120,7 @@ function(
                        as.character(filet),
                        as.character(filelpp),
                        as.character(filell),
+                       as.character(filesize),
                        as.single(rate.max),
                        as.single(delta.coord),
                        as.integer(nit),

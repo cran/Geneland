@@ -1,13 +1,12 @@
-\name{Fstat}
-\alias{Fstat}
+\name{Fstat.output}
+\alias{Fstat.output}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{Computes F statistics on a population genetics dataset given as R
-  object}
+\title{Computes F statistics on the output of an inference by MCMC simulation}
 \description{Computes F statistics according to Weir and Cockerham's 
   estimators.}
 
 \usage{
-Fstat(genotypes,allele.numbers,npop,pop.mbrship)
+Fstat.output(genotypes,allele.numbers, path.mcmc)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -15,9 +14,7 @@ Fstat(genotypes,allele.numbers,npop,pop.mbrship)
     individual and 2 columns per locus}
   \item{allele.numbers}{A vector of integer containing the number of possible
     allele for each locus}
-  \item{npop}{total number of popluation present in the dataset}
-  \item{pop.mbrship}{Vector of integers giving the population membership
-     for each individual  }
+  \item{path.mcmc}{ Path to output files directory }
 }
 }
 \value{A list with components 
