@@ -1,5 +1,5 @@
-"PlotFreqA" <-
-function(allele.numbers,path.mcmc,iloc,iall,printit=FALSE,path=NULL)
+`PlotFreqA` <-
+function(allele.numbers,path.mcmc,iloc,iall,printit=FALSE,path)
   {
     coordinates <- as.matrix(coordinates)
     genotypes <- as.matrix(genotypes)

@@ -5,7 +5,7 @@
 \description{Gives a plot of the trace of the drift factors along the
   MCMC run}
 \usage{
-PlotDrift(path.mcmc,printit=FALSE,file=NULL)
+PlotDrift(path.mcmc,printit=FALSE,file)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

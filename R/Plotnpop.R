@@ -1,5 +1,5 @@
-"Plotnpop" <-
-function(path.mcmc,printit=FALSE,file=NULL)
+`Plotnpop` <-
+function(path.mcmc,printit=FALSE,file)
   {
     fileparam <- paste(path.mcmc,"parameters.txt",sep="/")
     param <- as.matrix(read.table(fileparam))

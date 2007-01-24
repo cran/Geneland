@@ -3,7 +3,8 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Computes F statistics on the output of an inference by MCMC simulation}
 \description{Computes F statistics according to Weir and Cockerham's 
-  estimators.}
+  estimators.    Missing values are allowed but as of today, the NA code is only treated as an extra
+  allele which might bias the result.}
 
 \usage{
 Fstat.output(genotypes,allele.numbers, path.mcmc)

@@ -1,4 +1,4 @@
-"PostProcessChain" <-
+`PostProcessChain` <-
 function(coordinates,genotypes,#data
                              path.mcmc, # path to MCMC output directory
                              nxdom,nydom,# resolution

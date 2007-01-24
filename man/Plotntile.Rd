@@ -6,7 +6,7 @@
   along the MCMC run}
 
 \usage{
-Plotntile(path.mcmc,printit=FALSE,file=NULL)
+Plotntile(path.mcmc,printit=FALSE,file)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

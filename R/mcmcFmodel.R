@@ -1,7 +1,7 @@
-"mcmcFmodel" <-
+`mcmcFmodel` <-
 function(
                                         # input data
-                       coordinates,genotypes,allele.numbers=NULL,ploidy=2,
+                       coordinates,genotypes,allele.numbers,ploidy=2,
                                         # path to output directory
                        path.mcmc,
                                         # hyper-prior parameters
@@ -23,7 +23,7 @@ function(
     if(ploidy == 1)
       {
         ## diploidize the data
-##         if(!is.null(allele.numbers))
+##         if(!missing(allele.numbers))
 ##           {
 ##             allele.numbers.tmp <- rep(NA,ncol(genotypes)*2)
 ##             allele.numbers.tmp[seq(1,ncol(genotypes)*2-1,2)] <- allele.numbers
@@ -40,7 +40,7 @@ function(
     data.tmp <- FormatGenotypes(as.matrix(genotypes))
     coordinates <- as.matrix(coordinates)
     genotypes <- data.tmp$genotypes
-    if(is.null(allele.numbers)) {allele.numbers <- data.tmp$allele.numbers}
+    if(missing(allele.numbers)) {allele.numbers <- data.tmp$allele.numbers}
 
 
     ##

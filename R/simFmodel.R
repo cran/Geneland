@@ -1,29 +1,29 @@
-"simFmodel" <-
+`simFmodel` <-
 function(nindiv,
-                      coordinates=NULL,
+                      coordinates,
                       coord.lim,
                       number.nuclei,
-                      coord.nuclei=NULL,
-                      color.nuclei=NULL,
+                      coord.nuclei,
+                      color.nuclei,
                       nall,
                       npop,
                       freq.model="Dirichlet",
-                      drift=NULL,
-                      seed=NULL,
+                      drift,
+                      seed,
                       plots=FALSE,
                       ploth=FALSE)
   {
-    if(!is.null(seed)) { set.seed(seed)}
+    if(!missing(seed)) { set.seed(seed)}
     
                                         # spatial coord of indviduals
-    if(is.null(coordinates))
+    if(missing(coordinates))
       {
         coordinates <- rbind(runif(min=coord.lim[1],max=coord.lim[2],nindiv),
                    runif(min=coord.lim[3],max=coord.lim[4],nindiv))
       }
     
                                         # centers and colors of tiles
-    if(is.null(coord.nuclei))
+    if(missing(coord.nuclei))
       {
         coord.nuclei <-  rbind(runif(min=0,max=1,number.nuclei),
                                runif(min=0,max=1,number.nuclei))
@@ -55,7 +55,7 @@ function(nindiv,
     if(freq.model == "Falush")
       {
         # drift parameters
-        if(is.null(drift))
+        if(missing(drift))
           {
             drift <- rbeta(shape1=2,shape2=20,npop)
           }

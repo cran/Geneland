@@ -1,19 +1,25 @@
 *     Calcul du Fst d'apres programme en Turbo Pascal d'Arnaud Estoup
 *     le vecteur c contient la variable de classe
 *     les effectifs des pop doivent etre donnees en entree
-
-      subroutine fstae(nindiv,nppmax,nloc,nloc2,nall,npop,effcl,z,c,
+ 
+      subroutine ggfst(nindiv,nloc,nloc2,nall,npop,effcl,z,c,
      &     tabindiv,kk,Fistot,Fsttot,Fittot)
       implicit none
-      integer nindiv,nppmax,nloc,nloc2,nall(nloc),npop,
-     &     z(nindiv,nloc2),c(nppmax),effcl(npop)
+      integer nindiv,nloc,nloc2,nall,npop,effcl,z,c,tabindiv,kk
+
       real Fsttot,Fittot,Fistot
+      
+      dimension nall(nloc),z(nindiv,nloc2),c(nindiv),effcl(npop),
+     &     tabindiv(nindiv,npop),kk(npop)
+
       integer iloc,ipop,iall,iindiv
-      integer g1,g2,k,tabindiv(nindiv,npop),kk(npop)
+      integer g1,g2,k
+
       real s1,s2,s3,s1l,s2l,s3l,ni,sni,sni2,sniA,sniAA,s2A,nA,AA,
      &     nc,MSG,MSI,MSP,s2G,s2I,s2P,Fst,Fit,Fis
+  
 
-*     Recherche des indices des indiv de chaque pop
+*     Recherche des indices des indiv de chaque pope 
       do ipop=1,npop
          kk(ipop) = 1
       enddo
@@ -62,7 +68,7 @@ c                  write(*,*) 'iindiv=',iindiv
                      nA = nA + 1. 
                   endif
 c                  write(*,*) 'variables=',AA,nA
-               enddo
+               enddo 
 c               k = k+ni
                sniA = sniA + nA
                sniAA = sniAA + AA
@@ -94,12 +100,25 @@ c         write(*,*) 'variables=',Fst,Fit,Fis,s1,s2,s3
       Fsttot = s1/s3
       Fittot = S2/s3
       Fistot = (Fittot-Fsttot)/(1-Fsttot)
-      end
+      
+      end subroutine ggfst
       
 
 
 
 
+ 
+
+
+
+
+
+
+
+
+
+
+ 
 
 
 
@@ -115,18 +134,7 @@ c         write(*,*) 'variables=',Fst,Fit,Fis,s1,s2,s3
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+ 
 
 
 

@@ -1,4 +1,4 @@
-"Fstat" <-
+`Fstat` <-
 function(genotypes,allele.numbers,npop,pop.mbrship)
   {
     #dyn.load("~/mathlib/Fst/myfst.so")
@@ -8,6 +8,7 @@ function(genotypes,allele.numbers,npop,pop.mbrship)
     #print(allele.numbers)
     #print(npop)
     #print(pop.mbrship)
+    if(sum(is.na(genotypes)) != 0) warning("Genotypes contain missing values which might bias computations")
      
     nindiv <- nrow(genotypes)
     
@@ -38,7 +39,7 @@ function(genotypes,allele.numbers,npop,pop.mbrship)
                 nloc2 <- 2*nloc
                 Fistmp <- Fsttmp <- Fittmp <- -999
                 ## print("Calling Fortran function fstae")
-                res<- .Fortran(name="fstae",
+                res<- .Fortran(name="ggfst",
                                PACKAGE="Geneland",
                                as.integer(nindivtmp),
                                as.integer(nloc),
@@ -76,7 +77,7 @@ function(genotypes,allele.numbers,npop,pop.mbrship)
          nloc2 <- 2*nloc
          Fistmp <- Fsttmp <- Fittmp <- -999
 ##         print("Calling Fortran function fstae")
-         res<- .Fortran(name="fstae",
+         res<- .Fortran(name="ggfst",
                         PACKAGE="Geneland",
                         as.integer(nindivtmp),
                         as.integer(nloc),

@@ -5,7 +5,7 @@
 \description{Gives a plot of the number of populations along the MCMC run
 }
 \usage{
-Plotnpop(path.mcmc,printit=FALSE,file=NULL)
+Plotnpop(path.mcmc,printit=FALSE,file)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

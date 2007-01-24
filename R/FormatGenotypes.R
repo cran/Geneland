@@ -1,4 +1,4 @@
-"FormatGenotypes" <-
+`FormatGenotypes` <-
 function(genotypes)
   {
     formatted <- genotypes

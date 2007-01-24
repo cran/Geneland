@@ -14,12 +14,12 @@
   takes geo-referenced individual multilocus genetic data and tries to detect
   population structure, i.e sub-populations making use of both spatial and genetic information.
 }
-}
+
 \details{
   \tabular{ll}{
     Package: \tab Geneland\cr
     Type: \tab Package\cr
-    Version: \tab 1.0.7\cr
+    Version: \tab 1.0.8\cr
     Date: \tab 2006-12-01\cr
     License: \tab GPL\cr
   }
@@ -154,7 +154,6 @@ model for landscape genetics. Genetics, 170, 1261-1280, 2005.
 - G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
 genetics. Molecular Ecology Notes, 5, 712-715, 2005.
 
-}
 }
 \keyword{ }
 

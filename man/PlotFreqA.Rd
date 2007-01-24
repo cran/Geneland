@@ -8,7 +8,7 @@
   in ancestral population}
 
 \usage{
-PlotFreqA(allele.numbers, path.mcmc,iloc,iall,printit=FALSE,path=NULL)
+PlotFreqA(allele.numbers, path.mcmc,iloc,iall,printit=FALSE,path)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

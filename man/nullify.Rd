@@ -14,10 +14,8 @@ nullify(genotypes, nall.null = 1, nloc.null)
 }
 \details{For diploid data only}
 
-\value{A list with components: 
+\value{A list with component: 
   \item{genotypes }{The new genotypes after alteration.}
-  \item{freq }{The frequency of null allele on each locus}
-  ...
 }
 \references{}
 \author{Gilles Guillot}

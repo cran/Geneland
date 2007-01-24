@@ -9,7 +9,7 @@
   for allele \code{iall}  of locus \code{iloc}}
 
 \usage{
-PlotFreq(allele.numbers, path.mcmc,ipop,iloc,iall,printit=FALSE,path=NULL)
+PlotFreq(allele.numbers, path.mcmc,ipop,iloc,iall,printit=FALSE,path)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

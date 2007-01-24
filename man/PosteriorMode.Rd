@@ -7,7 +7,7 @@
 
 \usage{
 PosteriorMode(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
-                          printit=FALSE,file=NULL,main.title=NULL)
+                          printit=FALSE,file,main.title)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{

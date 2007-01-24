@@ -1,6 +1,6 @@
-"PlotFreq" <-
+`PlotFreq` <-
 function(allele.numbers,
-                     path.mcmc,ipop,iloc,iall,printit=FALSE,path=NULL)
+                     path.mcmc,ipop,iloc,iall,printit=FALSE,path)
   {
     allele.numbers <- as.matrix(allele.numbers)
                                         # get informations about the MCMC run 

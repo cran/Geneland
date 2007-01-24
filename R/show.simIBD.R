@@ -1,4 +1,4 @@
-"show.simIBD" <-
+`show.simIBD` <-
 function(dataset,
                      plot.coord=FALSE,
                        plot.tess=FALSE,

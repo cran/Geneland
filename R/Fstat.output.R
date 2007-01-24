@@ -1,4 +1,4 @@
-"Fstat.output" <-
+`Fstat.output` <-
 function(genotypes,allele.numbers,path.mcmc)
   {
     fileparam <- paste(path.mcmc,"parameters.txt",sep="")
@@ -9,6 +9,7 @@ function(genotypes,allele.numbers,path.mcmc)
     npop <- as.numeric(param[param[,1]=="npopmax",3])
     map <- scan(filepm)
 
+     if(sum(is.na(genotypes)) != 0)  warning("Genotypes contain missing values which might bias computations")
 
 
                                          # Pairwise computations

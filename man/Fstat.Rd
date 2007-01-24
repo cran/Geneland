@@ -4,7 +4,9 @@
 \title{Computes F statistics on a population genetics dataset given as R
   object}
 \description{Computes F statistics according to Weir and Cockerham's 
-  estimators.}
+  estimators.
+  Missing values are allowed but as of today, the NA code is only treated as an extra
+  allele which might bias the result.}
 
 \usage{
 Fstat(genotypes,allele.numbers,npop,pop.mbrship)

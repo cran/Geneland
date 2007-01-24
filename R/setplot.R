@@ -1,4 +1,4 @@
-"setplot" <-
+`setplot` <-
 function(xdata, ydata, pretty.call = TRUE, maxdim, axes = FALSE)
 {
         if(missing(xdata))
@@ -11,10 +11,10 @@ function(xdata, ydata, pretty.call = TRUE, maxdim, axes = FALSE)
         }
         else if(is.list(xdata)) {
                 ydata <- xdata$y
-                if(is.null(ydata))
+                if(missing(ydata))
                         stop(paste(substitute(xdata), "has no y component"))
                 xdata <- xdata$x
-                if(is.null(xdata))
+                if(missing(xdata))
                         stop(paste(substitute(xdata), "has no x component"))
         }
         else if(missing(ydata))

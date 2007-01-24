@@ -7,8 +7,8 @@
   individuals belonging to some spatially organised populations.
 }
 \usage{
-simFmodel(nindiv, coordinates = NULL, coord.lim, number.nuclei,
-coord.nuclei = NULL, color.nuclei = NULL,nall, npop, freq.model="Dirichlet",drift=NULL, seed=NULL, plots = FALSE, ploth = FALSE)
+simFmodel(nindiv, coordinates, coord.lim, number.nuclei,
+coord.nuclei, color.nuclei,nall, npop, freq.model="Dirichlet",drift, seed, plots = FALSE, ploth = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -66,6 +66,6 @@ frequencies,  ancestral.frequencies, drifts, index.nearest.nucleus}
 
 
 
-\seealso{ Function \code{\link{mcmcFmodel}} for inference}
+%\seealso{ Function \code{\link{mcmcFmodel}} for inference}
 
 \keyword{}

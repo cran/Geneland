@@ -1,21 +1,21 @@
-"simIBD" <-
+`simIBD` <-
 function(nindiv,
-                   coord.indiv=NULL,
+                   coord.indiv,
                    coord.lim=c(0,1,0,1),
-                   rate=NULL,                        
-                   number.nuclei=NULL,
-                   coord.nuclei=NULL,
-                   color.nuclei=NULL,
+                   rate,                        
+                   number.nuclei,
+                   coord.nuclei,
+                   color.nuclei,
                    allele.numbers,
                    model,
                    param,# c(0,1,0,scale,smooth,OPT. variance)
                    npop,
-                   seed.coord=NULL,
-                   seed.tess=NULL,
-                   seed.freq=NULL,
+                   seed.coord,
+                   seed.tess,
+                   seed.freq,
                    give.tess.grid=FALSE,
                    give.freq.grid=FALSE,
-                   npix=NULL,
+                   npix,
                    comp.Fst=FALSE,
                    comp.Dsigma2=FALSE,
                    comp.diff=FALSE,
@@ -25,16 +25,16 @@ function(nindiv,
   {
     #dyn.load("~/projets/flux/cline/version3/source/alarousset.so")
     
-    if(is.null(rate)) rate <- nindiv/2
-    if(is.null(number.nuclei)) number.nuclei <- rpois(1,rate)
+    if(missing(rate)) rate <- nindiv/2
+    if(missing(number.nuclei)) number.nuclei <- rpois(1,rate)
 
     nloc <- length(allele.numbers)
 
     
                                         # spatial coord of indviduals
-    if(is.null(coord.indiv))
+    if(missing(coord.indiv))
       {
-        if(!is.null(seed.coord)) set.seed(seed.coord)
+        if(!missing(seed.coord)) set.seed(seed.coord)
         coord.indiv <- rbind(runif(min=coord.lim[1],max=coord.lim[2],nindiv),
                              runif(min=coord.lim[3],max=coord.lim[4],nindiv))
       }
@@ -54,13 +54,13 @@ function(nindiv,
       
     
                                         # centers and colors of tiles
-    if(!is.null(seed.tess)) set.seed(seed.tess)
-    if(is.null(coord.nuclei))
+    if(!missing(seed.tess)) set.seed(seed.tess)
+    if(missing(coord.nuclei))
       {
         coord.nuclei <-  rbind(runif(min=coord.lim[1],max=coord.lim[2],number.nuclei),
                                runif(min=coord.lim[3],max=coord.lim[4],number.nuclei))
       }
-    if(is.null(color.nuclei))
+    if(missing(color.nuclei))
       {
         color.nuclei <- sample(1:npop,number.nuclei,replace=TRUE)
       }
@@ -97,7 +97,7 @@ function(nindiv,
     
                                         # Gaussian random fields
                                         # param=c(NA,variance,nugget,scale,...)
-    if(!is.null(seed.freq)) set.seed(seed.freq)
+    if(!missing(seed.freq)) set.seed(seed.freq)
     e <- array(NA,dim=c(npop,ncol(coord.all),nloc,max(allele.numbers)))
                                         # Gaussian field stored in an
                                         # intermediate array to comply with
