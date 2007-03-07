@@ -1,5 +1,5 @@
-\name{simIBD}
-\alias{simIBD}
+\name{simdata}
+\alias{simdata}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Simulation of georeferenced genotypes under an IBD + barrier
   model}
@@ -10,7 +10,7 @@
   and different populations are supposed to be separated by impermeable
   barriers. The barriers are given by a Poisson-Voronoi tessellation.}
 \usage{
-simIBD(nindiv,
+simdata(nindiv,
 coord.indiv ,
 coord.lim,
 rate ,
@@ -18,8 +18,11 @@ number.nuclei ,
 coord.nuclei ,
 color.nuclei ,
 allele.numbers,
+IBD,
 model,
-param,
+alpha,
+beta,
+gamma,
 npop,
 seed.coord ,
 seed.tess ,
@@ -49,14 +52,22 @@ plot.pairs.borders=FALSE)
   \item{color.nuclei}{Population membeship of the nuclei: a vector of
     integer of length \code{number of nuclei} whose values are between 1
   and \code{npop}}
-  \item{allele.numbers}{A vecor giving the number of alleles observed at
+  \item{allele.numbers}{A vector giving the number of alleles observed at
     each locus}
+  \item{IBD}{Logical. If TRUE, then the allele frequencies are simulated
+  according to an IBD model. If FALSE, panmixia is assumed.}
   \item{model}{Model of spatial covariance function used for the
-    underlying Gaussian fields (see documentation of the package
+    underlying Gaussian fields (see documentation of package
     \code{RandomFields}
-  for details)}
-  \item{param}{Parametersof spatial covariance function used for the
-    underlying Gaussian fields (see documentation of the package
+    for details)}
+  \item{alpha}{Parameter of the spatial Dirichlet vector field
+    underlying the frequencies (a positive real) }
+  \item{beta}{Scale parameter of the spatial covariance function used for the
+    underlying Gaussian fields. A positive real number (see documentation of the package
+    \code{RandomFields}
+    for details)}
+  \item{gamma}{Smoothing parameter of spatial covariance function used for the
+    underlying Gaussian fields. (see documentation of the package
     \code{RandomFields}
   for details)}
   \item{npop}{Number of Populations}
@@ -89,11 +100,32 @@ plot.pairs.borders=FALSE)
 
 \value{A list whose components can be seen using \code{summary}}
 
-\references{}
-\author{Gilles Guillot}
+\references{G. Guillot, F. Santos, A. Estoup.  Inference in population genetics with Geneland: a sensitivity analysis to spatial sampling scheme, 
+  null alleles and isolation by distance. Submitted.}
+
+\author{Arnaud Estoup, Gilles Guillot, Filipe Santos}
 \note{ }
-\seealso{}
-\examples{}
+\seealso{Function \code{show.simdata} to make graphical display of
+  simulated data.}
+\examples{
+dataset <- simdata(nindiv=100,
+             number.nuclei=10,
+             allele.numbers=rep(5,3),
+             model="stable",
+             IBD=TRUE,
+             alpha=1,
+             beta=1,
+             gamma=1,
+             npop=3,
+             give.tess.grid=TRUE,
+             give.freq.grid=TRUE,
+             npix=c(10,10),
+             comp.Fst=TRUE,
+             comp.Dsigma2=TRUE,
+             comp.diff=TRUE,
+             width=0.1,
+             plot.pairs.borders=TRUE)
+}
 
 \keyword{}
 

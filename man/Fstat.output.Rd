@@ -7,22 +7,18 @@
   allele which might bias the result.}
 
 \usage{
-Fstat.output(genotypes,allele.numbers, path.mcmc)
+Fstat.output(genotypes,path.mcmc)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
    \item{genotypes}{Genotypes of individuals. A matrix with one line per
     individual and 2 columns per locus}
-  \item{allele.numbers}{A vector of integer containing the number of possible
-    allele for each locus}
   \item{path.mcmc}{ Path to output files directory }
 }
 }
 \value{A list with components 
-  \item{Total.Fit }{A real number estimating the total Fit}
   \item{Pairwise.Fis }{A matrix of real numbers estimating the pairwise Fis}
   \item{Pairwise.Fst }{A matrix of real numbers estimating the pairwise Fst}
-  \item{Pairwise.Fit }{A matrix of real numbers estimating the pairwise Fit}
 }
 
 \author{Arnaud Estoup for original code in Turbo Pascal.

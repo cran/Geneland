@@ -10,7 +10,7 @@ function(path.mcmc,printit=FALSE,file)
     npopmax <- ncol(drift)
     if(printit == TRUE){
       postscript(file=file)
-      par(mfrow=c(npopmax,1))
+      par(mfrow=c(ceiling(sqrt(npopmax)),ceiling(sqrt(npopmax))))
       for(iclass in 1:npopmax)
         {
           plot(drift[,iclass],
@@ -20,7 +20,7 @@ function(path.mcmc,printit=FALSE,file)
       dev.off()
     }
     get(getOption("device"))()
-    par(mfrow=c(npopmax,1))
+    par(mfrow=c(ceiling(sqrt(npopmax)),ceiling(sqrt(npopmax))))
     for(iclass in 1:npopmax)
       {
         plot(drift[,iclass],

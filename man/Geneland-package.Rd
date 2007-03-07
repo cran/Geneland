@@ -52,10 +52,10 @@
   \code{\link{simFmodel}}: simulation from the prior of the spatial
   F-model
 
-  \code{\link{simIBD}}: Simulation of georeferenced genotypes under an IBD + barrier
+  \code{\link{simdata}}: Simulation of georeferenced genotypes under an IBD + barrier
   model
 
-   \code{\link{show.simIBD}}:  Graphical display of data simulated by simIBD
+   \code{\link{show.simdata}}:  Graphical display of data simulated by simdata
   
   \code{\link{mcmcFmodel}}: Full Bayesian Markov Chain Monte Carlo
   inference of parameters in the spatial F-model
@@ -106,7 +106,7 @@
 
    
 }
-\author{Gilles Guillot
+\author{Arnaud Estoup, Gilles Guillot, Filipe Santos
 
   \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html}
 
@@ -117,43 +117,21 @@
 
 \references{
 
-  On the implementation of mixture models in population genetics:
-  
-- J.K. Pritchard, M. Stephens and P. Donnelly,
-Inference of population structure using multilocus genotype data,
-Genetics, pp 945-959 vol. 155, 2000
-
-- Falush D., M. Stephens and  J.K. Pritchard, 
-Inference of population structure using multilocus genotype data:
-Linked loci and correlated allele frequencies, Genetics, pp 1567-1587,
-vol 164, 2003
-
-On the implementation of variable dimension MCMC algorihtm in
-population genetics:
-
-- Corander, J.C., Waldmann, P. and Sillanpaa, M.J.,
-Bayesian analysis of genetic differentiation between populations,
-Genetics, 2003, 163, 367-374
-
-- Corander, J.C.,  P. Waldmann, P. Martinen and  M.J. Sillanpaa, ,
-BAPS2: Enhanced possibilities for the analysis of genetic population structure,
-Bioinformatics, vol. 20,number 15, 2004
-
-On the use of Voronoi tessellations in population genetics :
-
-- Dupanloup, I., Schneider, S. and Excoffier, L.,
-A simulated annealing approach to define genetic structure of populations,
-Molecular Ecology, 2002, 11, 2571-2581
-
-On the model (and sub-models) implemented in \code{Geneland}
-
-- G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+[1] G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
 model for landscape genetics. Genetics, 170, 1261-1280, 2005.
 
 
-- G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
+[2] G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
 genetics. Molecular Ecology Notes, 5, 712-715, 2005.
 
+
+[3] A. Coulon, Guillot G., Cosson J.-F., Angibault J.M.A., Aulagnier
+S. , Cargnelutti B., Galan M., Hewison A.J.M. Genetics structure is
+influenced by lansdcape features. Empirical evidence from a roe deer
+population. Molecular Ecology, 15 1669-1679, 2006.
+
+[4] G. Guillot, F. Santos, A. Estoup.  Inference in population genetics with Geneland: a sensitivity analysis to spatial sampling scheme, 
+null alleles and isolation by distance. Submitted.
 }
 \keyword{ }
 

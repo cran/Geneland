@@ -1,0 +1,24 @@
+Changes from version 1.0.8 to version 2.0.0:
+--------------------------------------------
+
+1) New function Geneland.GUI for graphical interface
+
+2) Small bug in simIBD: now give freq.grid  when requested 
+
+3) Parameters of the random fields now given as alpha,beta,gamma instead of the argument param
+	
+4) Now function simIBD also simulate panmictic data. 
+It has been renamed into simdata. 
+Function show.simIBD has been renamed accrodingly into show.simdata
+
+5) In mcmcFmodel, if rate.max and nb.nulcei.max are not passed by the user they 
+are now set automatically as nrow(genotypes) and 3*nrow(genotypes)
+
+6) Fstat and Fsta.output do not comput Fit ny longer, 
+ give only pairwise Fst and within Fis
+
+
+--   SYNTAXIC CHANGE(S) --
+------------------------------- 
+
+See points 3, 4 above.

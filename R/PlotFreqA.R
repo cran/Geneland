@@ -1,9 +1,7 @@
 `PlotFreqA` <-
-function(allele.numbers,path.mcmc,iloc,iall,printit=FALSE,path)
+function(genotypes,path.mcmc,iloc,iall,printit=FALSE,path)
   {
-    coordinates <- as.matrix(coordinates)
-    genotypes <- as.matrix(genotypes)
-    allele.numbers <- as.matrix(allele.numbers)
+    allele.numbers <- FormatGenotypes(genotypes)$allele.numbers
     
     fileparam <- paste(path.mcmc,"parameters.txt",sep="/")
     param <- as.matrix(read.table(fileparam))

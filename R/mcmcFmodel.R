@@ -42,6 +42,15 @@ function(
     genotypes <- data.tmp$genotypes
     if(missing(allele.numbers)) {allele.numbers <- data.tmp$allele.numbers}
 
+    ## default values for rate.max and nb.nuclei.max
+    if(missing(rate.max))
+      {
+        rate.max <- nrow(genotypes)
+      }
+      if(missing(nb.nuclei.max))
+      {
+        nb.nuclei.max <- 3*nrow(genotypes)
+      }
 
     ##
     ## Initializing variables

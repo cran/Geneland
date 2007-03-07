@@ -1,26 +1,29 @@
-`simIBD` <-
+`simdata` <-
 function(nindiv,
-                   coord.indiv,
-                   coord.lim=c(0,1,0,1),
-                   rate,                        
-                   number.nuclei,
-                   coord.nuclei,
-                   color.nuclei,
-                   allele.numbers,
-                   model,
-                   param,# c(0,1,0,scale,smooth,OPT. variance)
-                   npop,
-                   seed.coord,
-                   seed.tess,
-                   seed.freq,
-                   give.tess.grid=FALSE,
-                   give.freq.grid=FALSE,
-                   npix,
-                   comp.Fst=FALSE,
-                   comp.Dsigma2=FALSE,
-                   comp.diff=FALSE,
-                   width,
-                   plot.pairs.borders=FALSE)
+                    coord.indiv,
+                    coord.lim=c(0,1,0,1),
+                    rate,                        
+                    number.nuclei,
+                    coord.nuclei,
+                    color.nuclei,
+                    allele.numbers,
+                    IBD=TRUE,
+                    model="stable",
+                    alpha=1,
+                    beta=1,
+                    gamma=1.8,
+                    npop,
+                    seed.coord,
+                    seed.tess,
+                    seed.freq,
+                    give.tess.grid=FALSE,
+                    give.freq.grid=FALSE,
+                    npix,
+                    comp.Fst=FALSE,
+                    comp.Dsigma2=FALSE,
+                    comp.diff=FALSE,
+                    width,
+                    plot.pairs.borders=FALSE)
 
   {
     #dyn.load("~/projets/flux/cline/version3/source/alarousset.so")
@@ -44,7 +47,7 @@ function(nindiv,
         coord.grid[1,] <- rep(seq(from=coord.lim[1],to=coord.lim[2],
                                   length=npix[1]),
                               npix[2])
-        coord.grid[2,] <- as.vector(matrix(nr=npix[1],nc=npix[2],byr=T,
+        coord.grid[2,] <- as.vector(matrix(nr=npix[1],nc=npix[2],byr=TRUE,
                                            rep(seq(from=coord.lim[3],to=coord.lim[4],
                                                    length=npix[2]),
                                                    npix[1])))
@@ -102,14 +105,23 @@ function(nindiv,
                                         # Gaussian field stored in an
                                         # intermediate array to comply with
                                         # RandomFileds package format
-    print("Calling GaussRF")
-    ff <- GaussRF(x=coord.all[1,],
-                  y=coord.all[2,],
-                  grid=F,
-                  model=model,
-                  param=param[1:5],
-                  n=sum(allele.numbers)*npop)
-    print("End of GaussRF")
+    if(IBD)
+      {
+        print("Calling GaussRF")
+        ff <- GaussRF(x=coord.all[1,],
+                      y=coord.all[2,],
+                      grid=FALSE,
+                      model=model,
+                      param=c(0,1,0,beta,gamma),#param[1:5],
+                      n=sum(allele.numbers)*npop)
+        print("End of GaussRF")
+      }else
+    {
+      ff <- matrix(nr=ncol(coord.all),
+                   nc=sum(allele.numbers)*npop,
+                   data=rnorm(sum(allele.numbers)*npop),
+                   byrow=TRUE)
+    }
       
                                         # arrange in a better format 
     count <- 1
@@ -139,13 +151,13 @@ function(nindiv,
                                         # tranformation into exponential-like
                                         # values
     #y <- -log(1-pnorm(e))
-    if(length(param)==5)
+    if(length(alpha)==1)
       {
         y <- qexp(pnorm(e),rate=1)
       }
     else
       {
-        y <- qgamma(pnorm(e),shape=param[6])
+        y <- qgamma(pnorm(e),shape=alpha)
       }
 
     
@@ -193,7 +205,7 @@ function(nindiv,
     
     if(give.freq.grid)
       {
-        give.freq.grid <- array(data=freq[,-(1:nindiv),,],
+        freq.grid <- array(data=freq[,-(1:nindiv),,],
                            dim=c(npop,prod(npix),
                              nloc,max(allele.numbers)))
         gf.grid <- array(data=e[,-(1:nindiv),,],
@@ -207,34 +219,15 @@ function(nindiv,
 
     
    ## Fstat
-    print("Computing Fstat")
-    Fst <- NA
-    Fis <- NA
-    Fit <- NA
+    Fst <- Fis <- NA
     if(comp.Fst)
       {
-        if(npop == 2)
-          {
-            
-            Fstat.res <- Fstat(allele.numbers=allele.numbers,
-                               npop=npop,
-                               genotypes=z,
-                               pop.mbrship=color.nuclei[nearest.nucleus.indiv])
-            Fst <- Fstat.res$Fst[1,2]
-            Fis <- Fstat.res$Fis[1,2]
-            Fit <- Fstat.res$Fit[1,2]
-          }
-        
-        if(npop == 1)
-          {
-            Fstat.res <- Fstat(allele.numbers=allele.numbers,
-                               npop=npop,
-                               genotypes=z,
-                               pop.mbrship=color.nuclei[nearest.nucleus.indiv])
-            Fst <- Fstat.res$Fst[1,1]
-            Fis <- Fstat.res$Fis[1,1]
-            Fit <- Fstat.res$Fit[1,1]
-          } 
+        print("Computing Fstat")
+        Fstat.res <- Fstat(npop=npop,
+                           genotypes=z,
+                           pop.mbrship=color.nuclei[nearest.nucleus.indiv])
+        Fst <-    Fstat.res$Fst
+        Fis <- Fstat.res$Fis
         print("End of call to Fstat")
       }
     
@@ -262,7 +255,7 @@ function(nindiv,
                 a <- matrix(nrow=size.pop,ncol=size.pop,res[[7]])
                 sub.upt <- upper.tri(a)
                 aa <- a[sub.upt]
-                r <- as.matrix(dist(t(coord.indiv[,sub.pop]),upper=T))
+                r <- as.matrix(dist(t(coord.indiv[,sub.pop]),upper=TRUE))
                 rr <- r[sub.upt]
                 coeff <- lm(aa~log(rr))$coefficients
                 Dsigma2[ipop] <- 1/(4*pi*coeff[2])
@@ -279,6 +272,7 @@ function(nindiv,
         pop.mbrshp=color.nuclei[nearest.nucleus.indiv]
         if(plot.pairs.borders)
           {
+             get(getOption("device"))()
             plot(t(coord.indiv),type="n")
           }
         for(ipop1 in 1:(npop-1))
@@ -314,6 +308,7 @@ function(nindiv,
                                                         freq[ipop2,ind.pairs[,2],,]))
                         if(plot.pairs.borders)
                           {
+                           
                             points(t(coord.indiv[,ind.pairs[,1]]),col=ipop1)
                             points(t(coord.indiv[,ind.pairs[,2]]),col=ipop2)
                           }
@@ -352,10 +347,12 @@ function(nindiv,
                           }
                       }
                   }
+
                 diff.W[ipop] <- mean(abs(freq[ipop,ind.pairs[,1],,]-
                                          freq[ipop,ind.pairs[,2],,]))
               }
           }
+#        print(diff.W)
       }
 
 
@@ -374,7 +371,9 @@ function(nindiv,
                 npop=npop,
                 allele.numbers=allele.numbers,
                 model=model,
-                param=param,
+                alpha=alpha,
+                beta=beta,
+                gamma=gamma,
                 genotypes=z,
                 allele.numbers=allele.numbers,
                 number.nuclei=number.nuclei,
@@ -385,7 +384,6 @@ function(nindiv,
                 nearest.nucleus.indiv=nearest.nucleus.indiv,
                 Fst=Fst,
                 Fis=Fis,
-                Fit=Fit,
                 Dsigma2=Dsigma2,
                 heter=heter,
                 diff.B=diff.B,
