@@ -14,8 +14,6 @@
       real s,u,xlim(2),ylim(2),coorddom,dom,domperm,distvois,f,dt
 
 *     dimensionnement 
-*     PENSER AU FORMAT D ECRITURE DES FREQUENCES 
-*     QUI DEPEND DE NPOPMAX
       dimension s(2,nindiv),u(2,nppmax),c(nppmax),
      &     dom(nxdommax*nydommax,npopmax),
      &     domperm(nxdommax*nydommax,npopmax),
@@ -116,8 +114,10 @@ c         write(6,100)float(ichain)/float(nchain)*100.
  2000 format (1000(f8.3,1x))
 
       do idom=1,nxdommax*nydommax
-         write(15,2000) (dom(idom,ipop), ipop=1,npopmax)
-         write(16,2000) (domperm(idom,ipop), ipop=1,npopmax)
+         write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
+     &        (dom(idom,ipop), ipop=1,npopmax)
+         write(16,2000)  coorddom(1,idom),  coorddom(2,idom), 
+     &        (domperm(idom,ipop), ipop=1,npopmax)
       enddo
       
       close(9)

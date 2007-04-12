@@ -173,6 +173,7 @@ function(
 
                                         # write parameters of the present run in an ascii file
     param <- c(#paste("path.mcmc :",path.mcmc),
+               paste("ploidy :",ploidy),
                paste("rate.max :",rate.max),
                paste("delta.coord :",delta.coord),
                paste("npopmin :",npopmin),

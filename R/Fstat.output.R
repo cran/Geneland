@@ -28,7 +28,7 @@ function(genotypes,path.mcmc)
                 sub2 <- pop.mbrship==iclass2
                 if((sum(sub1)!=0)  & (sum(sub2)!=0))
                   {
-                                        print("coucou")
+                    print("coucou")
                     ztmp <- genotypes[sub1 | sub2,]
                     nindivtmp <- nrow(ztmp)
                     pop.mbrshiptmp <- pop.mbrship[sub1 | sub2]

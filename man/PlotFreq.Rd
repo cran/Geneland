@@ -9,10 +9,11 @@
   for allele \code{iall}  of locus \code{iloc}}
 
 \usage{
-PlotFreq(allele.numbers, path.mcmc,ipop,iloc,iall,printit=FALSE,path)
+PlotFreq(genotypes,allele.numbers, path.mcmc,ipop,iloc,iall,printit=FALSE,path)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+  \item{genotypes}{the matrix of genotypes}
     \item{allele.numbers}{A vector of integer containing the number of possible
     allele for each locus}
    \item{path.mcmc}{ Path to output files directory }

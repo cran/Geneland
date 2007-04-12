@@ -1,12 +1,22 @@
 `PlotFreqA` <-
 function(genotypes,path.mcmc,iloc,iall,printit=FALSE,path)
   {
-    allele.numbers <- FormatGenotypes(genotypes)$allele.numbers
+   
     
     fileparam <- paste(path.mcmc,"parameters.txt",sep="/")
     param <- as.matrix(read.table(fileparam))
     thinning <- as.numeric(param[param[,1]=="thinning",3])
-
+    ploidy <- as.numeric(param[param[,1]=="ploidy",3])
+    if(ploidy == 1)
+      {
+        ## diploidize the data
+        data.tmp <- matrix(nrow=nrow(genotypes),
+                           ncol=ncol(genotypes)*2)
+        data.tmp[,seq(1,ncol(genotypes)*2-1,2)] <- genotypes
+        data.tmp[,seq(2,ncol(genotypes)*2,2)] <- genotypes
+        genotypes <- data.tmp
+       }
+    allele.numbers <- FormatGenotypes(genotypes)$allele.numbers
     nloc <- length(allele.numbers)
     filefa <-  paste(path.mcmc,"ancestral.frequencies.txt",sep="")
     fa <- as.matrix(read.table(filefa))

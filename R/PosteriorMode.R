@@ -1,5 +1,5 @@
 `PosteriorMode` <-
-function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
+function(coordinates,path.mcmc,write=TRUE,plotit=TRUE,
                           printit=FALSE,file,main.title="")
   {
     coordinates <- as.matrix(coordinates)
@@ -17,7 +17,8 @@ function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
 
     s <- coordinates
     filedom <- paste(path.mcmc,"proba.pop.membership.txt",sep="/")
-    dom.post <- as.matrix(read.table(filedom))
+    dom.post <- as.matrix(read.table(filedom))[,-(1:2)]
+    coord.grid <- as.matrix(read.table(filedom))[,(1:2)]
     
     
     s[,1] <- s[,1] - min(s[,1])
@@ -40,41 +41,37 @@ function(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
     for(k in 1:length(ks))
       {map[k] <- order(dom.post[ks[k],],decreasing=TRUE)[1]}
     
-    filepm <- paste(path.mcmc,"posterior.mode.txt",sep="/")
-    if(write) write.table(map,file=filepm,quote=FALSE,row.name=FALSE,col.name=FALSE)
+    filepm <- paste(path.mcmc,"modal.pop.txt",sep="/")
+    if(write) write.table(cbind(coord.grid,map),file=filepm,quote=FALSE,row.name=FALSE,col.name=FALSE)
 
     map.dom <- t(apply(dom.post,1,order))[,npopmax]
-    #s <- coordinates
+
     
     if(plotit) {
       get(getOption("device"))()
-      setplot(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
-              seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom))
       frame <- max(max(coordinates[,1])-min(coordinates[,1]),max(coordinates[,2])-min(coordinates[,2]))/40
       image(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
             seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom),
             matrix(map.dom,nr=nxdom,nc=nydom,byrow=TRUE),
-            xlab="x coordinates ",ylab="y coordinates",
+            xlab="",ylab="",
             main="",cex=1.5,cex.lab=1.5,col=terrain.colors(npopmax),
             xlim=c(min(coordinates[,1]-delta.coord/2-frame),max(coordinates[,1]+delta.coord/2+frame)),
-            ylim=c(min(coordinates[,2]-delta.coord/2-frame),max(coordinates[,2]+delta.coord/2+frame)))
-      title(sub="Map of posterior mode of population membership")
-      title(main=main.title,coordinates,pch=16)
+            ylim=c(min(coordinates[,2]-delta.coord/2-frame),max(coordinates[,2]+delta.coord/2+frame)),asp=1)
+      title(sub="Posterior mode of population membership")
+      title(main=main.title,pch=16)
     }
     if(printit){
       postscript(file)
-      setplot(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
-              seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom))
       frame <- max(max(coordinates[,1])-min(coordinates[,1]),max(coordinates[,2])-min(coordinates[,2]))/40
       image(seq(min(coordinates[,1]-delta.coord/2),max(coordinates[,1]+delta.coord/2),length=nxdom),
             seq(min(coordinates[,2]-delta.coord/2),max(coordinates[,2]+delta.coord/2),length=nydom),
             matrix(map.dom,nr=nxdom,nc=nydom,byrow=TRUE),
-            xlab="x coordinates ",ylab="y coordinates",
+            xlab="",ylab="",
             main="",cex=1.5,cex.lab=1.5,col=terrain.colors(npopmax),
             xlim=c(min(coordinates[,1]-delta.coord/2-frame),max(coordinates[,1]+delta.coord/2+frame)),
-            ylim=c(min(coordinates[,2]-delta.coord/2-frame),max(coordinates[,2]+delta.coord/2+frame)))
+            ylim=c(min(coordinates[,2]-delta.coord/2-frame),max(coordinates[,2]+delta.coord/2+frame)),asp=1)
       points(coordinates,pch=16)
-      title(main=main.title,sub="Map of posterior mode of population membership")
+      title(main=main.title,sub="Posterior mode of population membership")
       dev.off()
     }
   }

@@ -21,8 +21,9 @@ Fstat(genotypes,npop,pop.mbrship)
 }
 }
 \value{A list with components 
-  \item{Pairwise.Fis }{A matrix of real numbers estimating the within Fis}
-  \item{Pairwise.Fst }{A matrix of real numbers estimating the pairwise Fst}
+  \item{Pairwise.Fis }{A vector of estimations of within-population Fis}
+  \item{Pairwise.Fst }{A matrix of estimations the pairwise population
+    Fst. (Only the upper triangular part is returned).}
 }
 
 \author{Arnaud Estoup for original code in Turbo Pascal.

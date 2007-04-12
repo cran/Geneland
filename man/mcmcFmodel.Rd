@@ -13,7 +13,8 @@ npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial,jcf)
   \item{coordinates}{Spatial coordinates of individuals. A matrix with 2
     columns and one line per individual.}
   \item{genotypes}{Genotypes of individuals. A matrix with one line per
-    individual and 2 columns per locus}
+    individual and 2  columns (resp. one column) per locus for diploid
+    data (resp. haploid data).}
   \item{allele.numbers}{Number of observed alleles at each loci. Default
   value is NULL and then the numbers used are the observed number
   computed by FormatGenotypes.}
@@ -249,10 +250,10 @@ path.mcmc=path.mcmc,ipop=1,iloc=1,iall=1)
 
 
  # read the estimated population for indivuals
- pppm.indiv <- scan(paste(path.mcmc,"modal.pop.indiv.txt",sep=""))
+ pppm.indiv <- read.table(paste(path.mcmc,"modal.pop.indiv.txt",sep=""))
 
  # add a plot of the individual colored as their estimated population of origin
-points(sim$coordinates,col=pppm.indiv,pch=16)
+points(sim$coordinates,col=pppm.indiv[,3],pch=16)
 
 }
 

@@ -5,6 +5,24 @@ function(coordinates,genotypes,#data
                              burnin # number of iterations of the chain to throw away
                              )
   {
+    param <- as.matrix(read.table(paste(path.mcmc,"parameters.txt",sep="")))
+    delta.coord <- as.numeric(param[param[,1]=="delta.coord",3])
+    npopmax <- as.numeric(param[param[,1]=="npopmax",3])
+    nb.nuclei.max <- as.numeric(param[param[,1]=="nb.nuclei.max",3])
+    nit <- as.numeric(param[param[,1]=="nit",3])
+    thinning <- as.numeric(param[param[,1]=="thinning",3])
+    ploidy <- as.numeric(param[param[,1]=="ploidy",3])
+
+     if(ploidy == 1)
+      {
+        ## diploidize the data
+        data.tmp <- matrix(nrow=nrow(genotypes),
+                            ncol=ncol(genotypes)*2)
+        data.tmp[,seq(1,ncol(genotypes)*2-1,2)] <- genotypes
+        data.tmp[,seq(2,ncol(genotypes)*2,2)] <- genotypes
+        genotypes <- data.tmp
+ 
+      }
     coordinates <- as.matrix(coordinates)
     data.tmp <- FormatGenotypes(as.matrix(genotypes))
     genotypes <- data.tmp$genotypes
@@ -23,12 +41,7 @@ function(coordinates,genotypes,#data
     nindiv <- nrow(genotypes)
     nloc <- length(allele.numbers)
 
-    param <- as.matrix(read.table(paste(path.mcmc,"parameters.txt",sep="")))
-    delta.coord <- as.numeric(param[param[,1]=="delta.coord",3])
-    npopmax <- as.numeric(param[param[,1]=="npopmax",3])
-    nb.nuclei.max <- as.numeric(param[param[,1]=="nb.nuclei.max",3])
-    nit <- as.numeric(param[param[,1]=="nit",3])
-    thinning <- as.numeric(param[param[,1]=="thinning",3])
+   
     
     dom <- matrix(nr=nxdom*nydom,nc=npopmax,data=0)
     domperm <- matrix(nr=nxdom*nydom,nc=npopmax,data=0)
@@ -112,11 +125,24 @@ function(coordinates,genotypes,#data
       {
         mod.pop.indiv[iindiv] <-  order(pmp[iindiv,],decreasing=TRUE)[1]
       }
-      
-    write.table(pmp,
+
+    ## write result for pixels with coordinates
+ 
+ ##    coord.grid <- cbind(as.vector(t(matrix(nr=nxdom,nc=nydom,byrow=FALSE,
+##                                rep(seq(min(coordinates[,1]),
+##                                        max(coordinates[,2]),
+##                                        length=nxdom),nydom)))),
+##                         rep(seq(min(coordinates[,2]),
+##                                 max(coordinates[,2]),
+##                                 length=nydom),nxdom))
+
+    write.table(cbind(coordinates,pmp),
                 file=paste(path.mcmc,"proba.pop.membership.indiv.txt",sep=""),
                 quote=FALSE,row.name=FALSE,col.name=FALSE)
-    write.table(mod.pop.indiv,
+    
+
+    ## result for indiv with coordinates
+    write.table(cbind(coordinates,mod.pop.indiv),
                 file=paste(path.mcmc,"modal.pop.indiv.txt",sep=""),
                 quote=FALSE,row.name=FALSE,col.name=FALSE)
 

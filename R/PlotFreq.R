@@ -1,5 +1,5 @@
 `PlotFreq` <-
-function(allele.numbers,
+function(genotypes,allele.numbers=NA,
                      path.mcmc,ipop,iloc,iall,printit=FALSE,path)
   {
     allele.numbers <- as.matrix(allele.numbers)
@@ -8,7 +8,21 @@ function(allele.numbers,
     param <- as.matrix(read.table(fileparam))
     nit <- as.numeric(param[param[,1]=="nit",3])
     thinning <-  as.numeric(param[param[,1]=="thinning",3])
-
+    ploidy <- as.numeric(param[param[,1]=="ploidy",3])
+    if(ploidy == 1)
+      {
+        ## diploidize the data
+        data.tmp <- matrix(nrow=nrow(genotypes),
+                           ncol=ncol(genotypes)*2)
+        data.tmp[,seq(1,ncol(genotypes)*2-1,2)] <- genotypes
+        data.tmp[,seq(2,ncol(genotypes)*2,2)] <- genotypes
+        genotypes <- data.tmp
+       }
+    if(is.na(allele.numbers))
+       {
+         allele.numbers <- FormatGenotypes(genotypes)$allele.numbers
+       }
+       
     filef <-  paste(path.mcmc,"frequencies.txt",sep="")
     f <- as.matrix(read.table(filef))
     npopmax <- ncol(f)

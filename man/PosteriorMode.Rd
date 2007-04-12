@@ -6,7 +6,7 @@
   color code for each pixel.}
 
 \usage{
-PosteriorMode(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
+PosteriorMode(coordinates,path.mcmc,write=TRUE,plotit=TRUE,
                           printit=FALSE,file,main.title)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -15,7 +15,7 @@ PosteriorMode(coordinates,path.mcmc,write=FALSE,plotit=TRUE,
     columns and one line per individual.}
   \item{path.mcmc}{ Path to output files directory }
   \item{write}{Logical: if TRUE the modal class of each individual is
-    written in a plain ascci file named posterior.mode.txt}
+    written in a plain ascci file named modal.pop.txt}
   \item{plotit}{Logical: if TRUE the map is plotted}
   \item{printit}{Logical : if TRUE, figures are also printed}
   \item{file}{Character : Path to file where figures

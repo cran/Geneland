@@ -22,7 +22,7 @@ function(lib.loc=NULL) {
 
   globalcoordinates <- 0
   globalgenotypes <- 0
-  globalallele.numbers <- 0
+  #globalallele.numbers <- 0
 
   falush <- 0
   
@@ -188,7 +188,7 @@ function(lib.loc=NULL) {
       if(tclvalue(coordinatesfile)!=""){
         if(tclvalue(sep1)=="White space")
           tclvalue(sep1) <- ""
-        globalcoordinates <<- read.table(tclvalue(coordinatesfile),sep= tclvalue(sep1))
+        globalcoordinates <<- as.matrix(read.table(tclvalue(coordinatesfile),sep= tclvalue(sep1)))
         if(tclvalue(sep1)=="")
           tclvalue(sep1) <- "White space"
         tclvalue(labelcoordtext)="Coordinates: File loaded"
@@ -215,10 +215,10 @@ function(lib.loc=NULL) {
       if(tclvalue(genotypefile)!=""){
         if(tclvalue(sep2)=="White space")
           tclvalue(sep2) <- ""
-        globalgenotypes <<- read.table(tclvalue(genotypefile),sep= tclvalue(sep2))
-        auxallele <- FormatGenotypes(globalgenotypes)
-        globalgenotypes <<- auxallele$genotypes
-        globalallele.numbers <<- auxallele$allele.numbers
+        globalgenotypes <<- as.matrix(read.table(tclvalue(genotypefile),sep= tclvalue(sep2)))
+        #auxallele <- FormatGenotypes(globalgenotypes)
+        #globalgenotypes <<- auxallele$genotypes
+        #globalallele.numbers <<- auxallele$allele.numbers
         if(tclvalue(sep2)=="")
           tclvalue(sep2) <- "White space"
         tclvalue(labelgenotext)="Genotype:    File loaded"
@@ -226,7 +226,7 @@ function(lib.loc=NULL) {
         
       } else {
         globalgenotypes <<- 0
-        globalallele.numbers <<- 0
+        #globalallele.numbers <<- 0
         tclvalue(labelgenotext)="Genotype:    Data unloaded"
         #tkconfigure(genodownlabel.widget,text="Genotype:    File unloaded")
       }
@@ -271,6 +271,12 @@ function(lib.loc=NULL) {
         dploidy <- 1
       else
         dploidy <- 2
+
+      varnpop<-TRUE
+      
+      if(as.integer(tclvalue(npopmin))==as.integer(tclvalue(npopmax)))
+        varnpop<-FALSE
+      
       
 #      vect<- c()
       
@@ -298,7 +304,7 @@ function(lib.loc=NULL) {
         #mcmcFmodel(coordinates=globalcoordinates,genotypes=globalgenotypes,ploidy=dploidy,path.mcmc=tclvalue(outputdir),rate.max=as.numeric(tclvalue(rate)),delta.coord=as.numeric(tclvalue(delta)),npopmin=as.numeric(tclvalue(npopmin)),npopinit=as.numeric(tclvalue(npopinit)),npopmax=as.numeric(tclvalue(npopmax)),nb.nuclei.max=as.numeric(tclvalue(nuclei)),nit=as.numeric(tclvalue(nit)),thinning=as.numeric(tclvalue(thinning)),freq.model=tclvalue(freq),varnpop=as.logical(tclvalue(varnpop)),spatial=as.logical(tclvalue(spatial)),jcf=as.logical(tclvalue(jcf)))
       #}
       #else{
-      err <- try(mcmcFmodel(coordinates=globalcoordinates,genotypes=globalgenotypes,ploidy=dploidy,path.mcmc=tclvalue(outputdir),rate.max=as.numeric(tclvalue(rate)),delta.coord=as.numeric(tclvalue(delta)),npopmin=as.numeric(tclvalue(npopmin)),npopinit=as.numeric(tclvalue(npopinit)),npopmax=as.numeric(tclvalue(npopmax)),nb.nuclei.max=as.numeric(tclvalue(nuclei)),nit=as.numeric(tclvalue(nit)),thinning=as.numeric(tclvalue(thinning)),freq.model=tclvalue(freq),varnpop=as.logical(tclvalue(varnpop)),spatial=as.logical(tclvalue(spatial)),jcf=as.logical(tclvalue(jcf))),silent=TRUE)
+      err <- try(mcmcFmodel(coordinates=globalcoordinates,genotypes=globalgenotypes,ploidy=dploidy,path.mcmc=tclvalue(outputdir),rate.max=as.numeric(tclvalue(rate)),delta.coord=as.numeric(tclvalue(delta)),npopmin=as.numeric(tclvalue(npopmin)),npopinit=as.numeric(tclvalue(npopinit)),npopmax=as.numeric(tclvalue(npopmax)),nb.nuclei.max=as.numeric(tclvalue(nuclei)),nit=as.numeric(tclvalue(nit)),thinning=as.numeric(tclvalue(thinning)),freq.model=tclvalue(freq),varnpop=varnpop,spatial=as.logical(tclvalue(spatial)),jcf=as.logical(tclvalue(jcf))),silent=TRUE)
       #}
       tkdestroy(tttry)
       print("Done.")
@@ -357,7 +363,7 @@ function(lib.loc=NULL) {
     #ploidycombo.widget <-
     #tk("tk_optionMenu","menubuttonoptions","haploid","diploid")
     tkgrid(ploidylabel.widget,row=2,column=1,sticky="w")
-    tkgrid(wdiplody,row=2,column=3,sticky="w")
+    tkgrid(wdiplody,row=2,column=3,columnspan=3,sticky="w")
 
     #rate max
     rate <- tclVar(100)
@@ -373,12 +379,15 @@ function(lib.loc=NULL) {
     deltalabel.widget <- tklabel(ttrun,text="Uncertainty on coordinates:")
     
     tkgrid(deltalabel.widget,row=4,column=1,sticky="w")
-    tkgrid(delta.widget,row=4,column=3,sticky="w")
+    tkgrid(delta.widget,row=4,column=3,columnspan=3,sticky="w")
 
     #populations
-    npopmin <- tclVar("1")
-    npopinit <- tclVar("1") 
-    npopmax <- tclVar("1")
+
+    poplabel.widget <- tklabel(ttrun,text="Number of populations:")
+    
+    npopmin <- tclVar(1)
+    npopinit <- tclVar(1) 
+    npopmax <- tclVar(1)
     
     wmin  <- .Tk.subwin(ttrun)
     winit <- .Tk.subwin(ttrun)
@@ -408,13 +417,13 @@ function(lib.loc=NULL) {
     npopinitlabel.widget <- tklabel(ttrun,text="pop init")
     npopmaxlabel.widget <- tklabel(ttrun,text="pop max")
     
-    tkgrid(npopminlabel.widget,row=5,column=1,sticky="e")
-    tkgrid(npopinitlabel.widget,row=5,column=2,sticky="w")
-    tkgrid(npopmaxlabel.widget,row=5,column=3,sticky="w")
-    
-    tkgrid(wmin,row=6,column=1,sticky="e")
-    tkgrid(winit,row=6,column=2,sticky="w")
-    tkgrid(wmax,row=6,column=3,sticky="w")
+    tkgrid(npopminlabel.widget,row=5,column=3,sticky="w")
+    tkgrid(npopinitlabel.widget,row=5,column=4,sticky="w")
+    tkgrid(npopmaxlabel.widget,row=5,column=5,sticky="w")
+    tkgrid(poplabel.widget,column=1,sticky="w")
+    tkgrid(wmin,row=6,column=3,sticky="w")
+    tkgrid(winit,row=6,column=4,sticky="w")
+    tkgrid(wmax,row=6,column=5,sticky="w")
 
     # nb.nuclei.max
 
@@ -431,7 +440,7 @@ function(lib.loc=NULL) {
     nitlabel.widget <- tklabel(ttrun,text="Number of iterations:")
     
     tkgrid(nitlabel.widget,row=8,column=1,sticky="w")
-    tkgrid(nit.widget,row=8,column=3,sticky="w")
+    tkgrid(nit.widget,row=8,column=3,columnspan=3,sticky="w")
     
     # thinning
 
@@ -440,7 +449,7 @@ function(lib.loc=NULL) {
     thinninglabel.widget <- tklabel(ttrun,text="Thinning:")
     
     tkgrid(thinninglabel.widget,row=9,column=1,sticky="w")
-    tkgrid(thinning.widget,row=9,column=3,sticky="w")
+    tkgrid(thinning.widget,row=9,column=3,columnspan=3,sticky="w")
 
     #freq.model
 
@@ -454,14 +463,14 @@ function(lib.loc=NULL) {
 
     #varnpop
 
-    varnpoplabel.widget <- tklabel(ttrun,text="Unknown number of populations:")
-    varnpop <- tclVar("TRUE")
-    wvarnpop <- .Tk.subwin(ttrun)
-    varnpopoptionmenu.widget <-  tcl("tk_optionMenu", wvarnpop,varnpop,"FALSE","TRUE")
+   # varnpoplabel.widget <- tklabel(ttrun,text="Unknown number of populations:")
+    #varnpop <- tclVar("TRUE")
+    #wvarnpop <- .Tk.subwin(ttrun)
+    #varnpopoptionmenu.widget <-  tcl("tk_optionMenu", wvarnpop,varnpop,"FALSE","TRUE")
     #ploidycombo.widget <-
     #tk("tk_optionMenu","menubuttonoptions","haploid","diploid")
-    tkgrid(varnpoplabel.widget,row=11,column=1,sticky="w")
-    tkgrid(wvarnpop,row=11,column=3,sticky="w")
+    #tkgrid(varnpoplabel.widget,row=11,column=1,sticky="w")
+    #tkgrid(wvarnpop,row=11,column=3,sticky="w")
     
     #spatial
 
@@ -472,7 +481,7 @@ function(lib.loc=NULL) {
     #ploidycombo.widget <-
     #tk("tk_optionMenu","menubuttonoptions","haploid","diploid")
     tkgrid(spatiallabel.widget,row=12,column=1,sticky="w")
-    tkgrid(wspatial,row=12,column=3,sticky="w")
+    tkgrid(wspatial,row=12,column=3,columnspan=3,sticky="w")
     
     #jcf
 
@@ -489,7 +498,7 @@ function(lib.loc=NULL) {
     #next
 
     nextbutton <- tkbutton(ttrun,image=imagerun2,text="RUN >>",command=RunmcmcFmodel)
-    tkgrid(nextbutton,row=14,column=3,sticky="e")
+    tkgrid(nextbutton,row=14,column=3,columnspan=3,sticky="e")
 
     tkfocus(ttrun)
 
@@ -497,13 +506,13 @@ function(lib.loc=NULL) {
 #    tkgrid(cb1.widget,row=1,column=2,sticky="w")
 #    tkgrid(entry1.widget,row=1,column=3,sticky="w")
     tkgrid(ratelabel.widget,row=3,column=1,sticky="w")
-    tkgrid(rate.widget,row=3,column=3,sticky="w")
+    tkgrid(rate.widget,row=3,column=3,columnspan=3,sticky="w")
     tkgrid(nucleilabel.widget,row=7,column=1,sticky="w")
-    tkgrid(nuclei.widget,row=7,column=3,sticky="w")
+    tkgrid(nuclei.widget,row=7,column=3,columnspan=3,sticky="w")
  #  tkgrid(jcflabel.widget,row=13,column=1,sticky="w")
  #   tkgrid(wjcf,row=13,column=3,sticky="w")
     tkgrid(freqlabel.widget,row=10,column=1,sticky="w")
-    tkgrid(wfreq,row=10,column=3,sticky="w")
+    tkgrid(wfreq,row=10,column=3,columnspan=3,sticky="w")
     
       
     if(tclvalue(advanced)==1){
@@ -934,10 +943,10 @@ function(lib.loc=NULL) {
       iloc <- tclVar(1)
       iall <- tclVar(1)
 
-      strallele <- paste(globalallele.numbers, sep = ",", collapse =",")#globalallele.numbers[0]
+      #strallele <- paste(globalallele.numbers, sep = ",", collapse =",")#globalallele.numbers[0]
       
       
-      allelenumbers<-tclVar(strallele)
+      #allelenumbers<-tclVar(strallele)
       
       Drawfreq <- function(){
         tttry <- tktoplevel(parent=.TkRoot)
@@ -948,10 +957,13 @@ function(lib.loc=NULL) {
         tkpack(warn)
         tkfocus(tttry)
         
-        vect1<- c()
-        vec1<-unlist(strsplit(tclvalue(allelenumbers),","))
-        for (i in 1:length(vec1)) vect1[i]<-as.numeric(vec1[i])
+        #vect1<- c()
+        #vec1<-unlist(strsplit(tclvalue(allelenumbers),","))
+        #for (i in 1:length(vec1)) vect1[i]<-as.numeric(vec1[i])
         
+        #auxallele <- FormatGenotypes(globalgenotypes)
+        #vect1 <- auxallele$allele.numbers
+ 
           
         print("Starting...")
         
@@ -960,9 +972,9 @@ function(lib.loc=NULL) {
         
         if(tclvalue(printit)==1){
           
-            err <- try(PlotFreq(allele.numbers=vect1,path.mcmc=tclvalue(outputdir),ipop=as.numeric(tclvalue(ipop)),iloc=as.numeric(tclvalue(iloc)),iall=as.numeric(tclvalue(iall)),printit=TRUE,path=tclvalue(printfile)),silent=TRUE)
+            err <- try(PlotFreq(genotypes=globalgenotypes,allele.numbers=NA,path.mcmc=tclvalue(outputdir),ipop=as.numeric(tclvalue(ipop)),iloc=as.numeric(tclvalue(iloc)),iall=as.numeric(tclvalue(iall)),printit=TRUE,path=tclvalue(printfile)),silent=TRUE)
           }else{
-            err <- try(PlotFreq(allele.numbers=vect1,path.mcmc=tclvalue(outputdir),ipop=as.numeric(tclvalue(ipop)),iloc=as.numeric(tclvalue(iloc)),iall=as.numeric(tclvalue(iall)),printit=FALSE),silent=TRUE)
+            err <- try(PlotFreq(genotypes=globalgenotypes,allele.numbers=NA,path.mcmc=tclvalue(outputdir),ipop=as.numeric(tclvalue(ipop)),iloc=as.numeric(tclvalue(iloc)),iall=as.numeric(tclvalue(iall)),printit=FALSE),silent=TRUE)
           }
         tkdestroy(tttry)
         print("Done.")
@@ -1090,7 +1102,7 @@ function(lib.loc=NULL) {
           if(tclvalue(printit)==1){
             err <- try(PlotFreqA(genotypes=globalgenotypes,path.mcmc=tclvalue(outputdir),iloc=as.numeric(tclvalue(iloc)),iall=as.numeric(tclvalue(iall)),printit=TRUE,path=tclvalue(printfile)),silent=TRUE)
           }else{
-            err <- try(PlotFreqA(allele.numbers=vect1,path.mcmc=tclvalue(outputdir),iloc=as.numeric(tclvalue(iloc)),iall=as.numeric(tclvalue(iall)),printit=FALSE),silent=TRUE)
+            err <- try(PlotFreqA(genotypes=globalgenotypes,path.mcmc=tclvalue(outputdir),iloc=as.numeric(tclvalue(iloc)),iall=as.numeric(tclvalue(iall)),printit=FALSE),silent=TRUE)
           }
           tkdestroy(tttry)
           print("Done.")
@@ -1911,103 +1923,6 @@ function(lib.loc=NULL) {
             
           }
         }
-        #}
-        
-        #if(tclvalue(cb2)==1){
-        #  tttry <- tktoplevel(parent=.TkRoot)
-        #  tkgrab(tttry)
-        #  tkwm.geometry(tttry, "+200+200")
-        #  tkwm.title(tttry,"wait")
-        #  warn<-tklabel(tttry,image=imagepleasewait)
-        #  tkpack(warn)
-        #  tkfocus(tttry)
-        #  
-        #  print("Starting...")
-        #  Sys.sleep(0.1)
-        #  
-        #  
-        #  err2 <- try(Fstat(genotypes=globalgenotypes,npop=as.integer(tclvalue(npop)),pop.mbrship=as.integer(tclvalue(pop.mbr))))
-        #  tkdestroy(tttry)
-        #  print("Done.")
-        #  if (class(err2) == "try-error") 
-        #    tkmessageBox(message=err2,icon="error",type="ok",parent=tt)              
-        #  else{
-        #    if(tclvalue(sep1)=="White space")
-        #      tclvalue(sep1) <- " "
-        #    if(tclvalue(sep2)=="White space")
-        #      tclvalue(sep2) <- " " 
-        #    tkmessageBox(message="Terminated with success",type="ok",parent=tt) 
-        #    
-        #    print(err2)
-        #    
-        #    if(tclvalue(sep1)==" ")
-        #      tclvalue(sep1) <- "White space"
-        #    if(tclvalue(sep2)==" ")
-        #      tclvalue(sep2) <- "White space"
-        #    
-        #  }
-        #}
-      #}
-      
-      #viewothers <- function(){
-      #  
-      #  if(tclvalue(cb2)==0){
-      #    tkconfigure(npoplabel.widget,state="disabled")
-      #    tkconfigure(npop.widget,state="disabled")
-      #    tkconfigure(pop.mbrlabel.widget,state="disabled")
-      #    tkconfigure(pop.mbr.widget,state="disabled")
-      #  }
-      #  else{
-      #    tkconfigure(npoplabel.widget,state="normal")
-      #    tkconfigure(npop.widget,state="normal")
-      #    tkconfigure(pop.mbrlabel.widget,state="normal")
-      #    tkconfigure(pop.mbr.widget,state="normal")
-      #  }
-      #}
-      
-      
-      #cb<-tclVar(0)
-      #cb2<-tclVar(0)
-      
-      #cblabel.widget <- tklabel(ttfstat,text="old")
-      #cb.widget <- tkcheckbutton(ttfstat,variable=cb,onvalue=1,offvalue=0)
-
-      #cb2label.widget <- tklabel(ttfstat,text="new")
-      #cb2.widget <- tkcheckbutton(ttfstat,variable=cb2,onvalue=1,offvalue=0,command=viewothers)
-
-      
-      #npop
-      #  npop<-tclVar(0)
-      #  npoplabel.widget <- tklabel(ttfstat,text="Number of populations",state="disabled")
-      #  npop.widget <-tkentry(ttfstat,width="20",textvariable=npop,state="disabled")
-
-      #pop.mbrship
-      #  pop.mbr <-tclVar(0)
-      #pop.mbrlabel.widget <- tklabel(ttfstat,text="Population membership",state="disabled")
-      #pop.mbr.widget <-tkentry(ttfstat,width="20",textvariable=pop.mbr,state="disabled")
-
-      #tkgrid(cblabel.widget,row=1,column=1,sticky="w")
-      #tkgrid(cb.widget,row=1,column=2,sticky="w")
-      #tkgrid(cb2label.widget,row=2,column=1,sticky="w")
-      #tkgrid(cb2.widget,row=2,column=2,sticky="w")
-      #tkgrid(npoplabel.widget,row=3,column=1,sticky="w")
-      #tkgrid(npop.widget,row=3,column=2,sticky="w")
-      #tkgrid(pop.mbrlabel.widget,row=4,column=1,sticky="w")
-      #tkgrid(pop.mbr.widget,row=4,column=2,sticky="w")
-       #strallele <- paste(globalallele.numbers, sep = ",", collapse =",")#globalallele.numbers[0]
-       #allelenumbers
-       #allelenumbers <- tclVar(strallele)
-       #allelenumbers.widget <-tkentry(ttfstat,width="20",textvariable=allelenumbers)
-       #allelenumberslabel.widget <- tklabel(ttfstat,text="Number of alleles per locus (E.g: n,m,..):")
-
-       #tkgrid(allelenumberslabel.widget,row=1,column=1,sticky="w")
-       #tkgrid(allelenumbers.widget,row=1,column=2,sticky="w")
-      
-      #nextbutton <- tkbutton(ttfstat,image=imagerun2,text="RUN >>",command=Runfstat)
-      #tkgrid(nextbutton,row=5,column=2,sticky="e")
-      
-       
-       
        
        Runfstat()
        
@@ -2078,11 +1993,11 @@ function(lib.loc=NULL) {
            #print(idb.dataset$Fit)
            globalcoordinates <<- t(idb.dataset$coord.indiv)
            #tkconfigure(coordownlabel.widget,text="Coordinates:    Simulated panmitic data loaded")
-           tclvalue(labelcoordtext) <- "Coordinates:    Simulated panmitic data loaded"
+           tclvalue(labelcoordtext) <- "Coordinates:    Simulated panmictic data loaded"
            globalgenotypes <<- idb.dataset$genotypes
            #tkconfigure(genodownlabel.widget,text="Genotype:       Simulated panmitic data loaded")
-           tclvalue(labelgenotext) <- "Genotype:      Simulated panmitic data loaded"
-           globalallele.numbers <<- idb.dataset$allele.numbers
+           tclvalue(labelgenotext) <- "Genotype:      Simulated panmictic data loaded"
+           #globalallele.numbers <<- idb.dataset$allele.numbers
 
            #print(idb.dataset$coord.indiv)
            
@@ -2363,7 +2278,7 @@ function(lib.loc=NULL) {
         tclvalue(labelgenotext) <- "Genotype:    Simulated non-IBD data loaded"
 
         #allele.numbers <<- sim$allele
-        globalallele.numbers <<- sim$allele
+        #globalallele.numbers <<- sim$allele
       
         if(tclvalue(save)==1){
           
@@ -2662,7 +2577,7 @@ function(lib.loc=NULL) {
            globalgenotypes <<- idb.dataset$genotypes
            #tkconfigure(genodownlabel.widget,text="Genotype:       Simulated IBD data loaded")
            tclvalue(labelgenotext)  <- "Genotype:       Simulated IBD data loaded"
-           globalallele.numbers <<- idb.dataset$allele.numbers
+           #globalallele.numbers <<- idb.dataset$allele.numbers
            
            if(tclvalue(save)==1){
              
@@ -2977,25 +2892,27 @@ function(lib.loc=NULL) {
     idb.dataset <<- 0
     globalcoordinates <<- 0
     globalgenotypes <<- 0
-    allele.numbers <<- 0
+    #allele.numbers <<- 0
     
     tclvalue(coordinatesfile) <<- ""
     tclvalue(genotypefile) <<- "" 
     tclvalue(outputdir) <<- ""
     tclvalue(advanced) <<- 0
-    
-    tkconfigure(coordownlabel.widget,text="")
-    tkconfigure(genodownlabel.widget,text="")
 
+    tclvalue(labelcoordtext)=""
+    tclvalue(labelgenotext)=""
+    
 
     configure()
     run()
     postproc()
     plot()
-    Gfstat()
-    simFModel()
+    #print ("gfstat")
+    #Gfstat()
+    SimnonIBD()
+                                        #simFModel()
     SimIBD()
-    
+    plot2()
     
   }
 
@@ -3080,7 +2997,7 @@ function(lib.loc=NULL) {
   labelsimulation <-tklabel(ttpan,text="-Simulation-",state="disabled",font="*-Times-bold-i-normal--20-*",foreground="blue")
   labelspace <-tklabel(ttpan,text=" ")
   buttonconf <- tkbutton(ttpan,image=imageconfigure,text="Configure",command=function() {configure();tkgrid.remove(ttinit);tkgrid.remove(ttsimf);tkgrid.remove(ttibd);tkgrid.remove(ttfstat);tkgrid.remove(ttplot2);tkgrid.remove(ttrun);tkgrid.remove(ttpost);tkgrid.remove(ttplot);tkgrid(ttconf,row=1,column=2,sticky="we")})
-  buttonfstat <- tkbutton(ttpan,image=imagefstat,text="Fstat",command=function(){ Gfstat();tkgrid.remove(ttinit);tkgrid.remove(ttsimf);tkgrid.remove(ttconf);tkgrid.remove(ttrun);tkgrid.remove(ttibd);tkgrid.remove(ttplot2);tkgrid.remove(ttpost);tkgrid.remove(ttplot);tkgrid(ttfstat,row=1,column=2,sticky="we")})
+  #buttonfstat <- tkbutton(ttpan,image=imagefstat,text="Fstat",command=function(){ Gfstat();tkgrid.remove(ttinit);tkgrid.remove(ttsimf);tkgrid.remove(ttconf);tkgrid.remove(ttrun);tkgrid.remove(ttibd);tkgrid.remove(ttplot2);tkgrid.remove(ttpost);tkgrid.remove(ttplot);tkgrid(ttfstat,row=1,column=2,sticky="we")})
   buttonrun <- tkbutton(ttpan,image=imagerun,text="Run",command=function(){ run();tkgrid.remove(ttinit);tkgrid.remove(ttsimf);tkgrid.remove(ttconf);tkgrid.remove(ttfstat);tkgrid.remove(ttibd);tkgrid.remove(ttplot2);tkgrid.remove(ttpost);tkgrid.remove(ttplot);tkgrid(ttrun,row=1,column=2,sticky="we")})
   buttonpostprocess <- tkbutton(ttpan,image=imagepostprocess,text="Postprocess",command=function(){ postproc();tkgrid.remove(ttinit);tkgrid.remove(ttsimf);tkgrid.remove(ttibd);tkgrid.remove(ttfstat);tkgrid.remove(ttplot2);tkgrid.remove(ttconf);tkgrid.remove(ttrun);tkgrid.remove(ttplot);tkgrid(ttpost,row=1,column=2,sticky="we")})
   buttonsimfmodel <- tkbutton(ttpan,image=imagefmodel,text="F-model",state="disabled",command=function(){ SimnonIBD();tkgrid.remove(ttinit);tkgrid.remove(ttconf);tkgrid.remove(ttibd);tkgrid.remove(ttfstat);tkgrid.remove(ttplot2);tkgrid.remove(ttrun);tkgrid.remove(ttplot);tkgrid(ttsimf,row=1,column=2,sticky="we")})
@@ -3106,14 +3023,20 @@ function(lib.loc=NULL) {
   genodownlabel.widget <- tklabel(tt,textvariable=labelgenotext,foreground="blue")
   
   auxblink <- 1
-  extralabel.widget <- tklabel(tt,text="Please configure output dir",foreground="blue")
+  extralabel.widget <- tklabel(tt,text="Please configure output directory",foreground="blue")
+  tkbind(extralabel.widget, "<Button-1>",function() {configure();tkgrid.remove(ttinit);tkgrid.remove(ttsimf);tkgrid.remove(ttibd);tkgrid.remove(ttfstat);tkgrid.remove(ttplot2);tkgrid.remove(ttrun);tkgrid.remove(ttpost);tkgrid.remove(ttplot);tkgrid(ttconf,row=1,column=2,sticky="we")})
   blink <- function(){
     if (auxblink==1){
-      try(tkconfigure(extralabel.widget,text=""),silent = TRUE)
+      error<-try(tkconfigure(extralabel.widget,text=""),silent = TRUE)
+      if (class(error) == "try-error") 
+        tkdestroy(tt)
+      
       auxblink<<-0
     }
     else if (auxblink==0){
-      try(tkconfigure(extralabel.widget,text="Please configure output dir"),silent = TRUE)
+      error<-try(tkconfigure(extralabel.widget,text="Please configure output directory"),silent = TRUE)
+      if (class(error) == "try-error") 
+        tkdestroy(tt)
       auxblink<<-1
     }
     try(tcl("after",1000,blink),silent = TRUE)
