@@ -102,7 +102,6 @@
    Transform a file of genotypes into
    a format suitable for function \code{\link{mcmcFmodel}}
 
-   \code{\link{setplot}}: Internal function
 
    
 }

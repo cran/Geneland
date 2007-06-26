@@ -9,7 +9,8 @@ function(genotypes,path.mcmc)
 
     nindiv <- nrow(genotypes)
     npop <- as.numeric(param[param[,1]=="npopmax",3])
-    pop.mbrship <- scan(filepm)
+    ## pop.mbrship <- scan(filepm)
+    pop.mbrship <- read.table(filepm)[,3]
 
      if(sum(is.na(genotypes)) != 0)  warning("Genotypes contain missing values which might bias computations")
 

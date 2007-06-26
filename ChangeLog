@@ -1,13 +1,11 @@
-	Changes from version 2.0.0 to version 2.0.1:
+	Changes from version 2.0.1 to version 2.0.2:
 	--------------------------------------------
 
 
-	- Cosmetic changes in the GUI
+	- corrected bug in Fstat.output.R 
+	introduced in version 2.0.1 Cosmetic changes in the GUI
 
-	- Coordinates stored in files proba.pop.membership.indiv.txt and modal.pop.indiv.txt
-	in PostProcessChain.R
 
-	- no use of setplot(), scaling obtained by asp=1
 
 
 	
