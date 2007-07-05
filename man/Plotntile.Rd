@@ -6,7 +6,7 @@
   along the MCMC run}
 
 \usage{
-Plotntile(path.mcmc,printit=FALSE,file)
+Plotntile(path.mcmc,burnin,printit=FALSE,file)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -14,6 +14,8 @@ Plotntile(path.mcmc,printit=FALSE,file)
    \item{printit}{Logical : if TRUE, figures are also printed}
   \item{file}{Character : Path to file where figures
     should be printed}
+  \item{burnin}{An integer: number of saved iterations to discard for
+    the representation of the histogram of the chain}
 }
 
 \author{Gilles Guillot  }

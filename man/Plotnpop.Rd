@@ -5,7 +5,7 @@
 \description{Gives a plot of the number of populations along the MCMC run
 }
 \usage{
-Plotnpop(path.mcmc,printit=FALSE,file)
+Plotnpop(path.mcmc,burnin,printit=FALSE,file)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -13,6 +13,8 @@ Plotnpop(path.mcmc,printit=FALSE,file)
   \item{printit}{Logical : if TRUE, figures are also printed}
   \item{file}{Character : Path to file where figures
     should be printed}
+  \item{burnin}{An integer: number of saved iterations to discard for
+    the representation of the histogram of the chain}
 }
 
 \references{A spatial statistical model for landscape genetics, Guillot,

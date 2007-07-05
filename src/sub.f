@@ -4606,26 +4606,70 @@ c$$$      write(*,*) 'ftemp(',ipophost,2,2,')=',ftemp(ipophost,2,2)
 *
 *     log de la proba a posteriori du vecteur de parametres
 *
-      real function lpp(lambda,z,npop,npp,drift,f,fa,c,nppmax,
+      real function lpp(lambdamax,lambda,z,npop,npp,drift,f,fa,c,nppmax,
      &     nindiv,nlocmax2,npopmax,nlocmax,nallmax,indcell,nall,
-     &     fmodel)
+     &     fmodel,xlim,ylim)
       implicit none
       integer nindiv,nlocmax2,npop,npopmax,nlocmax,nallmax,
      &     npp,nppmax,z(nindiv,nlocmax2),indcell(nindiv),
      &     c(nppmax),nall(nlocmax),fmodel
       real drift(npopmax),f(npopmax,nlocmax,nallmax),
-     &     fa(nlocmax,nallmax),lambda
+     &     fa(nlocmax,nallmax),lambdamax,lambda,xlim(2),ylim(2)
       integer ipp,ipop,iloc,iall
-      real algama,shape1,shape2,ll
+      real algama,shape1,shape2,ll,lg
 
       parameter(shape1=2.,shape2=20.)
 
-      lpp = -lambda + npp*alog(lambda) 
+c$$$      lpp = -lambda + npp*alog(lambda) 
+c$$$      do ipp=1,npp
+c$$$         lpp = lpp - alog(float(ipp))
+c$$$      enddo
+c$$$      lpp = lpp -npp*alog(float(npop))
+c$$$      
+c$$$      if(fmodel .eq. 1) then
+c$$$         do ipop = 1,npop
+c$$$            lpp = lpp + 
+c$$$     &           algama(shape1+shape2) - algama(shape1) - algama(shape2)
+c$$$     &           + (shape1-1)*alog(drift(ipop)) + 
+c$$$     &           (shape2-1)*alog(1-drift(ipop))
+c$$$            do iloc = 1,nlocmax
+c$$$               lpp = lpp + algama((1-drift(ipop))/drift(ipop))
+c$$$               do iall=1,nall(iloc)
+c$$$                  lpp = lpp -algama(fa(iloc,iall)*
+c$$$     &                 (1-drift(ipop))/drift(ipop)) + 
+c$$$     &                 (fa(iloc,iall)* 
+c$$$     &                 (1-drift(ipop))/drift(ipop)-1)*
+c$$$     &              f(ipop,iloc,iall)
+c$$$               enddo
+c$$$            enddo
+c$$$         enddo
+c$$$      endif
+c$$$      
+c$$$      lpp = lpp + ll(z,nindiv,nlocmax,nlocmax2,npopmax,
+c$$$     &     nallmax,nppmax,c,f,indcell) 
+
+*     contrib lambda
+      lpp = - alog(lambdamax)
+*     contrib npp
+      lpp = lpp -lambda + float(npp)*alog(lambda) 
       do ipp=1,npp
          lpp = lpp - alog(float(ipp))
       enddo
-      lpp = lpp -npp*alog(float(npop))
-      
+*     contrib npop
+      lpp = lpp - alog(float(npopmax))
+*     contrib c
+      lpp = lpp - float(npp)*alog(float(npop))
+*     contrib u
+      lpp = lpp - float(npp)*alog((xlim(2)-xlim(1))*(ylim(2)-ylim(1)))
+*     contrib freq
+      if(fmodel .eq. 0) then
+         lg = 0
+         do iloc = 1,nlocmax
+            lg = lg + algama(float(nall(iloc)))
+         enddo
+         lpp= lpp - float(npop) * lg
+      endif
+
       if(fmodel .eq. 1) then
          do ipop = 1,npop
             lpp = lpp + 
@@ -4645,6 +4689,7 @@ c$$$      write(*,*) 'ftemp(',ipophost,2,2,')=',ftemp(ipophost,2,2)
          enddo
       endif
       
+*     contrib likelihood
       lpp = lpp + ll(z,nindiv,nlocmax,nlocmax2,npopmax,
      &     nallmax,nppmax,c,f,indcell)
 

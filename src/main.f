@@ -111,10 +111,6 @@ c       write(*,*) 'fin de l ouverture'
          npp = nindiv
       endif
 
-CCCCCCCCCCCCCCCCCCCCCCCCCCCC
-c     for debugging only
-c      npp = 2
-CCCCCCCCCCCCCCCCCCCCCCCCCCCC
 
       do iindiv=1,nindiv
          t(1,iindiv) = s(1,iindiv) + dt*(ranf()-.5)
@@ -190,9 +186,9 @@ c$$$     &            iall=1,nallmax),iloc=1,nloc)
  3000        format (300(1x,e15.8,1x))    
              write(15,3000) ((fa(iloc,iall),iall=1,nallmax),iloc=1,nloc)
              write(16,2000) (drift(ipop),ipop=1,npopmax)
-             write(17,*) lpp(lambda,z,npop,npp,drift,f,fa,c,nppmax,
-     &            nindiv,nlocmax2,npopmax,nlocmax,nallmax,indcell,
-     &            nall,fmodel)           
+             write(17,*) lpp(lambdamax,lambda,z,npop,npp,drift,f,fa,c,
+     &            nppmax,nindiv,nlocmax2,npopmax,nlocmax,nallmax,
+     &            indcell,nall,fmodel,xlim,ylim)           
              write(18,*) ll(z,nindiv,nlocmax,nlocmax2,npopmax,
      &     nallmax,nppmax,c,f,indcell)
              if(dt .gt. 1.e-30) then 

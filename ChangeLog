@@ -1,9 +1,9 @@
-	Changes from version 2.0.1 to version 2.0.3:
+	Changes from version 2.0.4 to version 2.0.5:
 	--------------------------------------------
 
+	- Correct expression of Fortran function lpp()
+	- Legends in R functions Plotnpop() and Plotntile
 
-	- corrected bug in Fstat.output.R 
-	introduced in version 2.0.1 Cosmetic changes in the GUI
 
 
 
