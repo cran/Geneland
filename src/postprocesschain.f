@@ -111,7 +111,7 @@ c         write(6,100)float(ichain)/float(nchain)*100.
          enddo
       enddo
 
- 2000 format (1000(f8.3,1x))
+ 2000 format (1000(f15.3,1x))
 
       do idom=1,nxdommax*nydommax
          write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
@@ -120,6 +120,8 @@ c         write(6,100)float(ichain)/float(nchain)*100.
      &        (domperm(idom,ipop), ipop=1,npopmax)
       enddo
       
+c      write(*,*) coorddom
+
       close(9)
       close(10)
       close(11)
