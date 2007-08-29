@@ -43,20 +43,31 @@ function (coordinates, genotypes, path.mcmc, nxdom, nydom, burnin)
     nallmax <- max(allele.numbers)
     u <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
     c <- rep(times = nb.nuclei.max, -999)
+    xlim <- ylim <- rep(-999, 2)
     out.res <- .Fortran(name = "postprocesschain", PACKAGE = "Geneland", 
         as.integer(nxdom), as.integer(nydom), as.integer(burnin), 
         as.integer(npopmax), as.integer(nb.nuclei.max), as.integer(nloc), 
         as.integer(nindiv), as.integer(nloc), as.integer(nallmax), 
-        as.single(delta.coord), as.integer(nit/thinning), as.character(filenpp), 
-        as.character(filenpop), as.character(fileu), as.character(filec), 
-        as.character(filef), as.character(filefperm), as.character(filedom), 
-        as.character(filedomperm), as.single(t(coordinates)), 
-        as.single(u), as.integer(c), as.single(dom), as.single(domperm), 
-        as.single(coorddom), as.integer(indvois), as.single(distvois), 
-        as.single(f11), as.single(orderf11))
+        as.single(xlim), as.single(ylim), as.single(delta.coord), 
+        as.integer(nit/thinning), as.character(filenpp), as.character(filenpop), 
+        as.character(fileu), as.character(filec), as.character(filef), 
+        as.character(filefperm), as.character(filedom), as.character(filedomperm), 
+        as.single(t(coordinates)), as.single(u), as.integer(c), 
+        as.single(dom), as.single(domperm), as.single(coorddom), 
+        as.integer(indvois), as.single(distvois), as.single(f11), 
+        as.single(orderf11))
     param <- c(paste("nxdom :", nxdom), paste("nydom :", nydom))
     write.table(param, file = paste(path.mcmc, "postprocess.parameters.txt", 
         sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
+    coord.grid <- read.table(filedom)[, 1:2]
+    pmbr <- as.matrix(read.table(filedom)[, -(1:2)])
+    pmp <- rep(NA, dim(pmbr)[1])
+    for (ipix in 1:(dim(pmbr)[1])) {
+        pmp[ipix] <- order(pmbr[ipix, ], decreasing = TRUE)[1]
+    }
+    write.table(cbind(coord.grid, pmp), file = paste(path.mcmc, 
+        "modal.pop.txt", sep = ""), quote = FALSE, row.name = FALSE, 
+        col.name = FALSE)
     indvois <- numeric(nindiv)
     distvois <- numeric(nindiv)
     u <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)

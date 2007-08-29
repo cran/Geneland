@@ -1,6 +1,6 @@
 `PosteriorMode` <-
-function (coordinates, path.mcmc, write = TRUE, plotit = TRUE, 
-    printit = FALSE, file, main.title = "") 
+function (coordinates, path.mcmc, plotit = TRUE, printit = FALSE, 
+    file, main.title = "") 
 {
     coordinates <- as.matrix(coordinates)
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "")
@@ -32,10 +32,6 @@ function (coordinates, path.mcmc, write = TRUE, plotit = TRUE,
     for (k in 1:length(ks)) {
         map[k] <- order(dom.post[ks[k], ], decreasing = TRUE)[1]
     }
-    filepm <- paste(path.mcmc, "modal.pop.txt", sep = "/")
-    if (write) 
-        write.table(cbind(coord.grid, map), file = filepm, quote = FALSE, 
-            row.name = FALSE, col.name = FALSE)
     map.dom <- t(apply(dom.post, 1, order))[, npopmax]
     if (plotit) {
         get(getOption("device"))()

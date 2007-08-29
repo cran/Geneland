@@ -19,7 +19,7 @@ function (path.mcmc, burnin, printit = FALSE, file)
             xlab = paste("Index of MCMC iteration", " \n Whole chain", 
                 sep = ""))
         hist(npp[sub], plot = T, prob = T, xlab = paste("Number of tiles along the chain \n(after a burnin of ", 
-            burnin, "x", thinning, " it.)", sep = ""))
+            burnin, "x", thinning, " it.)", sep = ""), main = "Number of tiles along the chain  \n  after burnin")
         dev.off()
     }
     else {
@@ -28,6 +28,6 @@ function (path.mcmc, burnin, printit = FALSE, file)
             xlab = paste("Index of MCMC iteration", "\n Whole chain", 
                 sep = ""))
         hist(npp[sub], plot = T, prob = T, xlab = paste("Number of tiles along the chain \n(after a burnin of ", 
-            burnin, "x", thinning, " it.)", sep = ""))
+            burnin, "x", thinning, " it.)", sep = ""), main = "Number of tiles along the chain  \n  after burnin")
     }
 }

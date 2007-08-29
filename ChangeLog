@@ -1,13 +1,17 @@
-	Changes from version 2.0.5 to version 2.0.6:
+	Changes from version 2.0.6 to version 2.0.7:
 	--------------------------------------------
 
-	- Fortran subroutine postprocesschain:
-	Format for printing coordinates allowing 15 digits
+* R
+
+- file modal.pop.txt of estimated pop mbrshp for pixels written by R function PostProcessChain 
+	instead of R function PosteriorMode
+
+- Title in R functions Plotnpop and plotntile
 
 
+* Fortran 
 
-
-
+- Arrays xlim and ylim now passed as arguments in Fortran subroutine mcmcFmodel 	
+   
 
 	
-    

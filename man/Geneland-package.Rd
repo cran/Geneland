@@ -12,14 +12,14 @@
 \description{
   The main function \code{\link{mcmcFmodel}} 
   takes geo-referenced individual multilocus genetic data and tries to detect
-  population structure, i.e sub-populations making use of both spatial and genetic information.
+  population structure (i.e sub-populations), making use of both spatial and genetic information.
 }
 
 \details{
   \tabular{ll}{
     Package: \tab Geneland\cr
     Type: \tab Package\cr
-    Version: \tab 2.0.5\cr
+    Version: \tab 2.0.7\cr
     Date: \tab 2006-12-01\cr
     License: \tab GPL\cr
   }

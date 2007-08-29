@@ -59,6 +59,7 @@ function (coordinates, genotypes, allele.numbers, ploidy = 2,
     indcelltemp <- rep(times = nindiv, -999)
     distcell <- rep(times = nindiv, -999)
     distcelltemp <- rep(times = nindiv, -999)
+    xlim <- ylim <- rep(-999, times = 2)
     n <- array(dim = c(npopmax, nloc, nallmax), data = -999)
     ntemp <- array(dim = c(npopmax, nloc, nallmax), data = -999)
     a <- rep(times = nallmax, -999)
@@ -86,10 +87,11 @@ function (coordinates, genotypes, allele.numbers, ploidy = 2,
         as.integer(ctemp), as.single(f), as.single(ftemp), as.single(fa), 
         as.single(drift), as.single(drifttemp), as.integer(indcell), 
         as.integer(indcelltemp), as.single(distcell), as.single(distcelltemp), 
-        as.integer(n), as.integer(ntemp), as.single(a), as.single(ptemp), 
-        as.integer(cellclass), as.integer(listcell), as.integer(fmodel), 
-        as.integer(kfix), as.integer(spatial), as.integer(jcf), 
-        as.integer(seed1), as.integer(seed2))
+        as.single(xlim), as.single(ylim), as.integer(n), as.integer(ntemp), 
+        as.single(a), as.single(ptemp), as.integer(cellclass), 
+        as.integer(listcell), as.integer(fmodel), as.integer(kfix), 
+        as.integer(spatial), as.integer(jcf), as.integer(seed1), 
+        as.integer(seed2))
     param <- c(paste("ploidy :", ploidy), paste("rate.max :", 
         rate.max), paste("delta.coord :", delta.coord), paste("npopmin :", 
         npopmin), paste("npopinit :", npopinit), paste("npopmax :", 

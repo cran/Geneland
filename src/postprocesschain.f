@@ -1,21 +1,21 @@
       subroutine  postprocesschain(nxdommax,nydommax,burn,
      &     npopmax,nppmax,
-     &     nlocmax,nindiv,nloc,nallmax,dt,nchain,filenpp,
+     &     nlocmax,nindiv,nloc,nallmax,xlim,ylim,dt,nchain,filenpp,
      &     filenpop,fileu,filec,filef,filefperm,filedom,filedomperm,
      &     s,u,c,dom,domperm,coorddom,indvois,distvois,f,orderf)
       implicit none
 
-      character*256 fileu,filec,filenpp,
+      character*255 fileu,filec,filenpp,
      &     filenpop,filedom,filedomperm,filef,filefperm
       
       integer nchain,npp,npop,ichain,nindiv,nxdommax,
      &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indvois,
      &     ipop,nloc, nlocmax,nallmax,ijunk,orderf,ipopperm,burn
-      real s,u,xlim(2),ylim(2),coorddom,dom,domperm,distvois,f,dt
+      real s,u,xlim,ylim,coorddom,dom,domperm,distvois,f,dt
 
 *     dimensionnement 
       dimension s(2,nindiv),u(2,nppmax),c(nppmax),
-     &     dom(nxdommax*nydommax,npopmax),
+     &     dom(nxdommax*nydommax,npopmax),xlim(2),ylim(2),
      &     domperm(nxdommax*nydommax,npopmax),
      &     coorddom(2,nxdommax*nydommax),indvois(nxdommax*nydommax),
      &     distvois(nxdommax*nydommax),f(npopmax),
@@ -146,7 +146,7 @@ c      write(*,*) coorddom
       real pmp,distcell,u,s
 
       integer iit,ipp,iindiv,ipop
-      character*256 fileu,filec,filenpp,filenpop
+      character*255 fileu,filec,filenpp,filenpop
       
 
       dimension indcell(nindiv),distcell(nindiv),
@@ -155,19 +155,41 @@ c      write(*,*) coorddom
       write(6,*) '      *  Computing posterior probabilities          '
       write(6,*) '      *  of population membership for individuals   '
       write(6,*) '      **********************************************'
+c$$$      write(*,*) 'nindiv=',nindiv
+c$$$      write(*,*) 's=',s
+c$$$      write(*,*) 'npopmax=',npopmax
+c$$$      write(*,*) 'nppmax=',nppmax
+c$$$c$$$      write(*,*) 'indcell=',indcell
+c$$$c$$$      write(*,*) 'distcell=',distcell
+c$$$c$$$      write(*,*) 'u=',u
+c$$$c$$$      write(*,*) 'c=',c
+c$$$c$$$      write(*,*) 'pmp=',pmp
+c$$$      write(*,*) 'filenpp=',filenpp
+c$$$      write(*,*) 'fileu=',fileu
+c$$$      write(*,*) 'filec=',filec
+c$$$      write(*,*) 'nit=',nit
+c$$$      write(*,*) 'burn=',burn,'\n'
+c$$$      write(*,*) 'iit=',iit
+c$$$      write(*,*) 'ipp=',ipp
+c$$$      write(*,*) 'npp=',npp, '\n'
 
-      
       open(10,file=filenpp)
       open(11,file=fileu)
       open(12,file=filec)
 
 *     sequentially processes states of the chain
+     
       do iit=1,nit
 c10000    format(f7.3,' %')
 c         write(6,10000)float(iit)/float(nit)*100.
          
+c$$$         write(*,*) 'nit=',nit
+c$$$         write(*,*) 'iit=',iit
+c$$$         write(*,*) 'npp=',npp, '\n' 
+
          read(10,*) npp
          do ipp=1,nppmax
+c             write(*,*) 'ipp=',ipp
             read(11,*) u(1,ipp),u(2,ipp)
             read(12,*) c(ipp)
          enddo
@@ -179,8 +201,14 @@ c         write(6,10000)float(iit)/float(nit)*100.
                pmp(iindiv,ipop) =  pmp(iindiv,ipop) + 1.
             enddo
          endif 
+
+c$$$         write(*,*) 'nit=',nit
+c$$$         write(*,*) 'iit=',iit
+c$$$         write(*,*) 'npp=',npp, '\n'
+
       enddo
-      
+     
+c      write(*,*) 'sortie de la boucle'
 c      write(*,*) 'pmp=',pmp
       do iindiv=1,nindiv 
          do ipop=1,npopmax
@@ -191,6 +219,25 @@ c      write(*,*) 'pmp=',pmp
       close(10)
       close(11)
       close(12)
+
+c$$$      write(*,*) 'nindiv=',nindiv
+c$$$      write(*,*) 's=',s
+c$$$      write(*,*) 'npopmax=',npopmax
+c$$$      write(*,*) 'nppmax=',nppmax
+c$$$c$$$      write(*,*) 'indcell=',indcell
+c$$$c$$$      write(*,*) 'distcell=',distcell
+c$$$c$$$      write(*,*) 'u=',u
+c$$$c$$$      write(*,*) 'c=',c
+c$$$c$$$      write(*,*) 'pmp=',pmp
+c$$$      write(*,*) 'filenpp=',filenpp
+c$$$      write(*,*) 'fileu=',fileu
+c$$$      write(*,*) 'filec=',filec
+c$$$      write(*,*) 'nit=',nit
+c$$$      write(*,*) 'burn=',burn,'\n'
+c$$$      write(*,*) 'iit=',iit
+c$$$      write(*,*) 'ipp=',ipp
+c$$$      write(*,*) 'npp=',npp, '\n'
+
       end subroutine  pppmindiv
 
 

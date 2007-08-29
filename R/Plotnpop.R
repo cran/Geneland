@@ -20,7 +20,7 @@ function (path.mcmc, burnin, printit = FALSE, file)
                 sep = ""), ylim = c(1, max(npop) + 0.5))
         hist(npop[sub], plot = TRUE, prob = TRUE, breaks = seq(0.5, 
             max(npop) + 0.5, 1), xlab = paste("Nb. of pop. along the chain \n(after a burnin of ", 
-            burnin, "x", thinning, "i t.)", sep = ""))
+            burnin, "x", thinning, "i t.)", sep = ""), main = "Number of populations along the chain \n after burnin")
         dev.off()
     }
     else {
@@ -30,6 +30,6 @@ function (path.mcmc, burnin, printit = FALSE, file)
                 sep = ""), ylim = c(1, max(npop) + 0.5))
         hist(npop[sub], plot = TRUE, prob = TRUE, breaks = seq(0.5, 
             max(npop) + 0.5, 1), xlab = paste("Nb. of pop. along the chain \n(after a burnin of ", 
-            burnin, "x", thinning, " it.)", sep = ""))
+            burnin, "x", thinning, " it.)", sep = ""), main = "Number of populations along the chain  \n after burnin")
     }
 }

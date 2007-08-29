@@ -11,17 +11,17 @@
       subroutine mcmc(s,z,nall,ploidy,filelambda,
      &     filenpp,fileu,filec,filef,filefa,filedrift,
      &     filenpop,filet,filelpp,filell,filesize,lambdamax,
-     &     dt,nchain,stepw,
-     &     nindiv,nlocmax,nlocmax2,nallmax,npp,nppmax,
+     &     dt,nit,thinning,
+     &     nindiv,nloc,nloc2,nallmax,npp,nppmax,
      &     npop,npopmin,npopmax,
-     &     t,ttemp,u,utemp,c,ctemp,f,ftemp,fa,drift,drifttemp,
-     &     indcell,indcelltemp,
-     &     distcell,distcelltemp,n,ntemp,a,ptemp,
+     &     t,ttmp,u,utmp,c,ctmp,f,ftmp,fa,drift,drifttmp,
+     &     indcell,indcelltmp,
+     &     distcell,distcelltmp,xlim,ylim,n,ntmp,a,ptmp,
      &     cellpop,listcell,fmodel,kfix,spatial,jcf,seed1,seed2) 
       implicit none 
 
 *     les donnees
-      integer nindiv,nloc,nlocmax,nlocmax2,
+      integer nindiv,nloc,nloc2,
      &     nall,nallmax,z,ploidy,jcf,seed1,seed2
       real s
 
@@ -30,33 +30,33 @@
 
 *     les parametres a inferer (et valeurs maximales)
       integer npp,nppmax,npop,npopmin,npopmax,
-     &     c,ctemp
-      real lambda,u,utemp,f,t,fa,drift,ftemp,drifttemp
+     &     c,ctmp
+      real lambda,u,utmp,f,t,fa,drift,ftmp,drifttmp
 
 *     variables de travail
-      integer iloc,iindiv,ichain,nchain,
-     &     ipp,ipop,iall,stepw,indcell,indcelltemp,
+      integer iloc,iindiv,ichain,nit,
+     &     ipp,ipop,iall,thinning,indcell,indcelltmp,
      &     n,cellpop,listcell,
-     &     cellpophost,ntemp,fmodel,kfix,spatial
-      real ptemp,xlim(2),ylim(2),ranf,rpostlamb,
-     &     distcell,du,distcelltemp,a,ttemp,lpp,ll
-      character*256 filef,filenpp,
+     &     cellpophost,ntmp,fmodel,kfix,spatial
+      real ptmp,xlim,ylim,ranf,rpostlamb,
+     &     distcell,du,distcelltmp,a,ttmp,lpp,ll
+      character*255 filef,filenpp,
      &     filelambda,filenpop,fileu,filec,
      &     filefa,filedrift,filelpp,filell,filet,filesize
 
       integer nn
  
 *     dimensionnement 
-      dimension s(2,nindiv),t(2,nindiv),z(nindiv,nlocmax2),
-     &     u(2,nppmax),utemp(2,nppmax),c(nppmax),ctemp(nppmax),
-     &     f(npopmax,nlocmax,nallmax),
-     &     nall(nlocmax),indcell(nindiv),indcelltemp(nindiv),
-     &     distcell(nindiv),ttemp(2,nindiv),
-     &     distcelltemp(nindiv),n(npopmax,nlocmax,nallmax),
-     &     ntemp(npopmax,nlocmax,nallmax),
-     &     a(nallmax),ptemp(nallmax),
-     &     fa(nlocmax,nallmax),drift(npopmax),
-     &     ftemp(npopmax,nlocmax,nallmax),drifttemp(npopmax),
+      dimension s(2,nindiv),t(2,nindiv),z(nindiv,nloc2),
+     &     u(2,nppmax),utmp(2,nppmax),c(nppmax),ctmp(nppmax),
+     &     f(npopmax,nloc,nallmax),xlim(2),ylim(2),
+     &     nall(nloc),indcell(nindiv),indcelltmp(nindiv),
+     &     distcell(nindiv),ttmp(2,nindiv),
+     &     distcelltmp(nindiv),n(npopmax,nloc,nallmax),
+     &     ntmp(npopmax,nloc,nallmax),
+     &     a(nallmax),ptmp(nallmax),
+     &     fa(nloc,nallmax),drift(npopmax),
+     &     ftmp(npopmax,nloc,nallmax),drifttmp(npopmax),
      &     cellpop(nppmax),listcell(nppmax),cellpophost(nppmax)
 
 
@@ -70,7 +70,7 @@
 
       call setall(seed1,seed2) 
    
-      nloc = nlocmax
+      nloc = nloc
   
  
 *     look for smallest rectangle enclosing the spatial domain
@@ -127,84 +127,93 @@ c       write(*,*) 'fin de l ouverture'
       endif  
 
       call rpriorc(npp,nppmax,npop,c)
-
-CCCCCCCCCCCCCCCCCCCCCCCCCCCC
-c     for debugging only
-c$$$      c(1) = 1 
-c$$$      c(2) = 1
-c$$$      u(1,1) = 0.25
-c$$$      u(2,1) = 0.5  
-c$$$      u(1,2) = 0.75
-c$$$      u(2,2) = 0.5
-c      write(*,*) 'f=',f
-c      write(*,*) 'ftemp=',ftemp
-c      write(*,*) 'c=', c
-c      write(*,*) 'u=',(u(1,ipp),ipp=1,nppmax)
-c      write(*,*) 'u=',(u(2,ipp),ipp=1,nppmax)
-CCCCCCCCCCCCCCCCCCCCCCCCCCC
-
-
       call calccell(nindiv,t,npp,nppmax,u,indcell,distcell)
-c      write(*,*) 'indcell =',indcell
-      
       call rpriordrift(npop,npopmax,drift,fmodel)
-
-      call rpriorfa(nloc,nlocmax,nall,nallmax,fa,fmodel,ptemp)
-       
-      call rpriorf(npop,npopmax,nloc,nlocmax,nall,nallmax,f,ptemp)
+      call rpriorfa(nloc,nloc,nall,nallmax,fa,fmodel,ptmp)
+      call rpriorf(npop,npopmax,nloc,nloc,nall,nallmax,f,ptmp)
  
-C
-  
+
+c$$$      write(*,*) 'nindiv =', nindiv,"\n"
+c$$$      write(*,*) 'nloc =',nloc   ,"\n"
+c$$$      write(*,*) 'nall =',nall ,"\n"
+c$$$      write(*,*) 'nallmax =', nallmax,"\n"
+c$$$      write(*,*) 'z =', z,"\n"
+c$$$      write(*,*) 's =', s,"\n"
+c$$$      write(*,*) 'lambda=',lambda,"\n"
+c$$$      write(*,*) 'lambdamax=',lambdamax  ,"\n"
+c$$$      write(*,*) 'npp =', npp ,"\n"
+c$$$      write(*,*) 'nppmax =', nppmax   ,"\n"  
+c$$$      write(*,*) 'npopmin =',npopmin  ,"\n"
+c$$$      write(*,*) 'npopmax =', npopmax ,"\n" 
+c$$$      write(*,*) 'c =', c,"\n"
+c$$$      write(*,*) 'ctmp =',ctmp ,"\n"
+c$$$      write(*,*) 'u =',u  ,"\n"
+c$$$      write(*,*) 'utmp =',utmp ,"\n"
+c$$$      write(*,*) 'f =', f  ,"\n"
+c$$$      write(*,*) 'ftmp =', ftmp,"\n"
+c$$$      write(*,*) 'nit =', nit ,"\n" 
+c$$$      write(*,*) 'thinning =',thinning  ,"\n"
+c$$$      write(*,*) 'indcell =', indcell ,"\n"
+c$$$      write(*,*) 'distcell =', distcell,"\n"
+c$$$      write(*,*) 'indcelltmp =', indcelltmp ,"\n"
+c$$$      write(*,*) 'distcelltmp =',distcelltmp ,"\n"
+c$$$      write(*,*) 'xlim=', xlim 
+c$$$      write(*,*) 'ylim=', ylim 
+
+
+
 ************************  
 * mise a jour iterative  
 ************************
  
 c      write(*,*) 'Starting updates'
-      do ichain=1,nchain
-*     ecriture dans les fichiers (tous les stepw)
-          if(mod(ichain,stepw) .eq. 0) then
- 100         format(f7.3,' %')
-             write(6,100)float(ichain)/float(nchain)*100.
-             write(9,*) lambda
-             write(10,*) npp
-             write(11,*) npop
- 1000        format (2(1x,e15.8,1x))
-             write(12,1000) (u(1,ipp),u(2,ipp), ipp=1,nppmax)
-             do ipp=1,nppmax
-                write(13,*) c(ipp)
-             enddo
-c$$$ 2000        format (2(e10.5,1x))
-c$$$             write(14,2000) (((f(ipop,iloc,iall),ipop=1,npopmax),
-c$$$     &            iall=1,nallmax),iloc=1,nloc)
- 2000        format (300(1x,e15.8,1x))
-             do iloc=1,nlocmax
-                do iall=1,nallmax
-                   write(14,2000) (f(ipop,iloc,iall),
-     &                  ipop=1,npopmax)
-                enddo
-             enddo  
- 3000        format (300(1x,e15.8,1x))    
-             write(15,3000) ((fa(iloc,iall),iall=1,nallmax),iloc=1,nloc)
-             write(16,2000) (drift(ipop),ipop=1,npopmax)
-             write(17,*) lpp(lambdamax,lambda,z,npop,npp,drift,f,fa,c,
-     &            nppmax,nindiv,nlocmax2,npopmax,nlocmax,nallmax,
-     &            indcell,nall,fmodel,xlim,ylim)           
-             write(18,*) ll(z,nindiv,nlocmax,nlocmax2,npopmax,
-     &     nallmax,nppmax,c,f,indcell)
-             if(dt .gt. 1.e-30) then 
-                write(19,1000) (t(1,iindiv),t(2,iindiv),iindiv=1,nindiv)
-             endif
+      do ichain=1,nit
+*     ecriture dans les fichiers (tous les thinning)
+         if(mod(ichain,thinning) .eq. 0) then
+ 100        format(f7.3,' %')
+            write(6,100)float(ichain)/float(nit)*100.
+            write(9,*) lambda
+            write(10,*) npp
+            write(11,*) npop
+ 1000       format (2(1x,e15.8,1x))
+            
+            write(12,1000) (u(1,ipp),u(2,ipp), ipp=1,nppmax)
+            do ipp=1,nppmax
+               write(13,*) c(ipp)
+            enddo
+            
+ 2000       format (300(1x,e15.8,1x))
+            do iloc=1,nloc
+               do iall=1,nallmax
+                  write(14,2000) (f(ipop,iloc,iall),
+     &                 ipop=1,npopmax)
+               enddo
+            enddo  
+ 3000       format (300(1x,e15.8,1x))    
+            write(15,3000) ((fa(iloc,iall),iall=1,nallmax),iloc=1,nloc)
+            write(16,2000) (drift(ipop),ipop=1,npopmax)
+            write(17,*) lpp(lambdamax,lambda,z,npop,npp,drift,f,fa,c,
+     &           nppmax,nindiv,nloc2,npopmax,nloc,nallmax,
+     &           indcell,nall,fmodel,xlim,ylim)           
+            write(18,*) ll(z,nindiv,nloc,nloc2,npopmax,
+     &           nallmax,nppmax,c,f,indcell)
+            if(dt .gt. 1.e-30) then 
+               write(19,1000) (t(1,iindiv),t(2,iindiv),iindiv=1,nindiv)
+            endif
 
-             do ipop = 1,npopmax
-                nn = 0
-                do iindiv = 1,nindiv
-                   if(c(indcell(iindiv)) .eq. ipop) then
-                      nn = nn + 1
-                   endif
-                enddo
-                write(20,*) nn
-             enddo
-          endif
+*     counting nb of individuals in each pop
+            do ipop = 1,npopmax
+               nn = 0
+               do iindiv = 1,nindiv
+                  if(c(indcell(iindiv)) .eq. ipop) then
+                     nn = nn + 1
+                  endif
+               enddo
+               write(20,*) nn
+            enddo
+         endif
+
+
 
 
 *     update lambda
@@ -216,11 +225,11 @@ c$$$     &            iall=1,nallmax),iloc=1,nloc)
           if(fmodel .eq. 1) then 
 *     update drift
 *              write(*,*) 'update drift'
-             call  upddrift(npop,npopmax,nlocmax,nallmax,nall,
+             call  upddrift(npop,npopmax,nloc,nallmax,nall,
      &            f,fa,drift)
 *     update fa
 *             write(*,*) 'update fa'
-             call updfa(npop,npopmax,nlocmax,nallmax,nall,
+             call updfa(npop,npopmax,nloc,nallmax,nall,
      &            f,fa,drift) 
           endif
  
@@ -231,48 +240,51 @@ c     write(*,*) 'update c and f'
              if(fmodel .eq. 0) then 
 *     joint update of c anf f
                 call  udcf(npop,npopmax,f,fa,drift,
-     &               nloc,nlocmax,nlocmax2,
+     &               nloc,nloc,nloc2,
      &               nall,nallmax,indcell,nindiv,npp,nppmax,
-     &               c,ctemp,a,ptemp,ftemp,z,n,ntemp,ploidy)
+     &               c,ctmp,a,ptmp,ftmp,z,n,ntmp,ploidy)
              else
                 call udcf2(npop,npopmax,f,fa,drift,
-     &               nloc,nlocmax,nlocmax2,
+     &               nloc,nloc,nloc2,
      &               nall,nallmax,indcell,nindiv,npp,nppmax,
-     &               c,ctemp,a,ptemp,ftemp,z,n,ntemp,ploidy)
+     &               c,ctmp,a,ptmp,ftmp,z,n,ntmp,ploidy)
              endif
           else          
-             call rpostf2(npop,npopmax,nloc,nlocmax,nall,nallmax,
+             call rpostf2(npop,npopmax,nloc,nloc,nall,nallmax,
      &            f,fa,drift,
-     &            nindiv,nlocmax2,z,nppmax,c,indcell,
-     &            n,a,ptemp,ploidy)
-             call updc(npp,nppmax,c,ctemp,z,nindiv,nloc,
-     &         nlocmax,nlocmax2,nallmax,npop,npopmax,f,indcell,ploidy)
+     &            nindiv,nloc2,z,nppmax,c,indcell,
+     &            n,a,ptmp,ploidy)
+             call updc(npp,nppmax,c,ctmp,z,nindiv,nloc,
+     &         nloc,nloc2,nallmax,npop,npopmax,f,indcell,ploidy)
 
           endif
  
 
           if(spatial .eq. 1) then 
 *     update u et mise a jour de indcell et distcell
-*             write(*,*) 'update u'
-             call updurw(npp,nppmax,c,u,z,nindiv,nloc,nlocmax,
-     &            nlocmax2,nallmax,npopmax,f,indcell,distcell,
-     &            indcelltemp,distcelltemp,t,xlim,ylim,du,ploidy)
+c$$$             write(*,*) 'before update u'
+c$$$             write(*,*) 'xlim=', xlim 
+             call updurw(npp,nppmax,c,u,z,nindiv,nloc,nloc,
+     &            nloc2,nallmax,npopmax,f,indcell,distcell,
+     &            indcelltmp,distcelltmp,t,xlim,ylim,du,ploidy)
+c$$$             write(*,*) 'xlim=', xlim
+c$$$             write(*,*) 'after update u'
              
 *     update t et mise a jour de indcell et distcell
              if(dt .gt. 1.e-30) then 
 *                write(*,*) 'update t'
                 call updt(npp,nppmax,nindiv,
-     &               nloc,nlocmax,nlocmax2,nallmax,npopmax,
-     &               t,ttemp,dt,s,c,indcell,distcell,
-     &               indcelltemp,distcelltemp,u,z,f,ploidy)
+     &               nloc,nloc,nloc2,nallmax,npopmax,
+     &               t,ttmp,dt,s,c,indcell,distcell,
+     &               indcelltmp,distcelltmp,u,z,f,ploidy)
              endif
 
 *     birth/death des points du pp
 *             write(*,*) 'update npp'
-             call bdpp(nindiv,u,c,utemp,ctemp,
-     &            npop,npopmax,nloc,nlocmax,
-     &            nlocmax2,nallmax,npp,nppmax,z,f,t,xlim,ylim,indcell,
-     &            distcell,indcelltemp,distcelltemp,lambda,ploidy)
+             call bdpp(nindiv,u,c,utmp,ctmp,
+     &            npop,npopmax,nloc,nloc,
+     &            nloc2,nallmax,npp,nppmax,z,f,t,xlim,ylim,indcell,
+     &            distcell,indcelltmp,distcelltmp,lambda,ploidy)
           endif
 
 
@@ -283,16 +295,16 @@ c     write(*,*) 'update c and f'
             if(fmodel .eq. 0) then 
 *     avec drift=0.5 et fa=1 pour court-circuiter le F-model
                call bdpop9bis(npop,npopmin,npopmax,f,fa,drift,
-     &              nloc,nlocmax,nlocmax2,
+     &              nloc,nloc,nloc2,
      &              nall,nallmax,indcell,nindiv,npp,nppmax,c,
-     &              ctemp,a,ptemp,ftemp,drifttemp,z,cellpop,listcell,
-     &              cellpophost,n,ntemp,ploidy)
+     &              ctmp,a,ptmp,ftmp,drifttmp,z,cellpop,listcell,
+     &              cellpophost,n,ntmp,ploidy)
             else
                call bdpop9(npop,npopmin,npopmax,f,fa,drift,
-     &              nloc,nlocmax,nlocmax2,
+     &              nloc,nloc,nloc2,
      &              nall,nallmax,indcell,nindiv,npp,nppmax,c,
-     &              ctemp,a,ptemp,ftemp,drifttemp,z,cellpop,listcell,
-     &              cellpophost,n,ntemp,ploidy)
+     &              ctmp,a,ptmp,ftmp,drifttmp,z,cellpop,listcell,
+     &              cellpophost,n,ntmp,ploidy)
             endif
          endif
 
@@ -317,6 +329,37 @@ c     write(*,*) 'update c and f'
       write(6,*) '          ************************************'
       write(6,*) '          ***    End of MCMC inference     ***'
       write(6,*) '          ************************************'
+
+c$$$      write(*,*) 'nindiv =', nindiv,"\n"
+c$$$      write(*,*) 'nloc =',nloc   ,"\n"
+c$$$      write(*,*) 'nloc2 =', nloc2,"\n"
+c$$$      write(*,*) 'nall =',nall ,"\n"
+c$$$      write(*,*) 'nallmax =', nallmax,"\n"
+c$$$      write(*,*) 'z =', z,"\n"
+c$$$      write(*,*) 's =', s,"\n"
+c$$$      write(*,*) 'lambda=',lambda,"\n"
+c$$$      write(*,*) 'lambdamax=',lambdamax  ,"\n"
+c$$$      write(*,*) 'npp =', npp ,"\n"
+c$$$      write(*,*) 'nppmax =', nppmax   ,"\n"  
+c$$$      write(*,*) 'npopmin =',npopmin  ,"\n"
+c$$$      write(*,*) 'npopmax =', npopmax ,"\n" 
+c$$$      write(*,*) 'c =', c,"\n"
+c$$$      write(*,*) 'ctmp =',ctmp ,"\n"
+c$$$      write(*,*) 'u =',u  ,"\n"
+c$$$      write(*,*) 'utmp =',utmp ,"\n"
+c$$$      write(*,*) 'f =', f  ,"\n"
+c$$$      write(*,*) 'ftmp =', ftmp,"\n"
+c$$$      write(*,*) 'nit =', nit ,"\n" 
+c$$$      write(*,*) 'thinning =',thinning  ,"\n"
+c$$$      write(*,*) 'indcell =', indcell ,"\n"
+c$$$      write(*,*) 'distcell =', distcell,"\n"
+c$$$      write(*,*) 'indcelltmp =', indcelltmp ,"\n"
+c$$$      write(*,*) 'distcelltmp =',distcelltmp ,"\n"
+c$$$      write(*,*) 'xlim=', xlim 
+c$$$      write(*,*) 'ylim=', ylim 
+
+
+
       end
       
 c      include 'sub.f'

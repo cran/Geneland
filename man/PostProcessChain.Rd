@@ -55,8 +55,10 @@ path.mcmc,nxdom, nydom,burnin)
   }
   
   
-  \item{Label of modal population for individuals:}{
-    They are written in a file named \file{modal.pop.indiv.txt}. 
+  \item{Label of modal population for pixels and individuals:}{
+    They are written in files named \file{modal.pop.txt} and
+    \file{modal.pop.indiv.txt}
+    respectively. 
     See the example section  of function \code{\link{mcmcFmodel}} to see
     how they can be added in a plot.}
 }
