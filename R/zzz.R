@@ -4,7 +4,7 @@
 
   
   cat('---------------------------------------------------------------------------------',fill=T)
-  cat('-   Geneland-2.0.7 is loaded                                                    -',fill=T)
+  cat('-   Geneland-2.0.8 is loaded                                                    -',fill=T)
   cat('-                                                                               -',fill=T)
   cat('-                                                                               -',fill=T)
   cat('-       *** Please ***                                                          -',fill=T)

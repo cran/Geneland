@@ -1,17 +1,6 @@
-	Changes from version 2.0.6 to version 2.0.7:
+	Changes from version 2.0.7 to version 2.0.8:
 	--------------------------------------------
 
 * R
 
-- file modal.pop.txt of estimated pop mbrshp for pixels written by R function PostProcessChain 
-	instead of R function PosteriorMode
-
-- Title in R functions Plotnpop and plotntile
-
-
-* Fortran 
-
-- Arrays xlim and ylim now passed as arguments in Fortran subroutine mcmcFmodel 	
-   
-
-	
+- GUI complies with change from 2.06 to 2.0.7 

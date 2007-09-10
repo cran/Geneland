@@ -343,11 +343,11 @@ function (lib.loc = NULL)
             tkconfigure(init, "-from", as.numeric(tclvalue(npopmin)), 
                 "-to", as.numeric(tclvalue(npopmax)))
             if (as.numeric(tclvalue(npopinit)) > as.numeric(tclvalue(npopmax))) {
-                as.numeric(tclvalue(npopinit)) <- as.numeric(tclvalue(npopmax))
+                tclvalue(npopinit) <- tclvalue(npopmax)
                 tkconfigure(init, "-textvariable", npopinit)
             }
             else if (as.numeric(tclvalue(npopinit)) < as.numeric(tclvalue(npopmin))) {
-                as.numeric(tclvalue(npopinit)) <- as.numeric(tclvalue(npopmin))
+                tclvalue(npopinit) <- tclvalue(npopmin)
                 tkconfigure(init, "-textvariable", npopinit)
             }
         }
@@ -1226,15 +1226,15 @@ function (lib.loc = NULL)
                   mean.lpp = mean(file[-(1:as.numeric(tclvalue(burnin)))])
                   if (tclvalue(printit) == 1) {
                     postscript(tclvalue(printfile))
-                    plot.default(x = as.vector(file[-(1:as.numeric(tclvalue(burnin)))]), 
-                      type = "l", ylab = "Log posterior density")
+                    plot.default(x = as.vector(file), type = "l", 
+                      ylab = "Log posterior density")
                     title(main = paste("Posterior density of model (values in log)\nMean=", 
                       mean.lpp))
                     dev.off()
                   }
                   else {
-                    plot.default(x = as.vector(file[-(1:as.numeric(tclvalue(burnin)))]), 
-                      type = "l", ylab = "Log posterior density")
+                    plot.default(x = as.vector(file), type = "l", 
+                      ylab = "Log posterior density")
                     title(main = paste("Posterior density of model (values in log)\nMean=", 
                       mean.lpp))
                   }
@@ -1244,7 +1244,7 @@ function (lib.loc = NULL)
                     if (tclvalue(printit) == 1) {
                       Log(paste("postscript(\"", tclvalue(printfile), 
                         "\")", sep = ""))
-                      Log(paste("plot.default(x=", as.vector(file[-(1:as.numeric(tclvalue(burnin)))]), 
+                      Log(paste("plot.default(x=", as.vector(file), 
                         ",type=\"l\",ylab=\"Log posterior density\")", 
                         sep = ""), "[FAILED] ")
                       Log(paste("title(main=paste(\"Posterior density of model (values in log)\\nMean=\"", 
@@ -1252,7 +1252,7 @@ function (lib.loc = NULL)
                       Log("dev.off()")
                     }
                     else {
-                      Log(paste("plot.default(x=", as.vector(file[-(1:as.numeric(tclvalue(burnin)))]), 
+                      Log(paste("plot.default(x=", as.vector(file), 
                         ",type=\"l\",ylab=\"Log posterior density\")", 
                         sep = ""), "[FAILED] ")
                       Log(paste("title(main=paste(\"Posterior density of model (values in log)\\nMean=\"", 
@@ -1263,14 +1263,14 @@ function (lib.loc = NULL)
                   }
                   else {
                     if (tclvalue(printit) == 1) {
-                      Log(paste("plot.default(x=", as.vector(file[-(1:as.numeric(tclvalue(burnin)))]), 
+                      Log(paste("plot.default(x=", as.vector(file), 
                         ",type=\"l\",ylab=\"Log posterior density\")", 
                         sep = ""), "[SUCCESS] ")
                       Log(paste("title(main=paste(\"mean log posterior density =\",", 
                         mean.lpp, "))", sep = ""), "[SUCCESS] ")
                     }
                     else {
-                      Log(paste("plot.default(x=", as.vector(file[-(1:as.numeric(tclvalue(burnin)))]), 
+                      Log(paste("plot.default(x=", as.vector(file), 
                         ",type=\"l\",ylab=\"Log posterior density\")", 
                         sep = ""), "[SUCCESS] ")
                       Log(paste("title(main=paste(\"mean log posterior density =\",", 
@@ -1423,16 +1423,14 @@ function (lib.loc = NULL)
                 Sys.sleep(0.5)
                 if (tclvalue(printit) == 1) {
                   err <- try(PosteriorMode(coordinates = globalcoordinates, 
-                    path.mcmc = tclvalue(outputdir), write = as.logical(tclvalue(write)), 
-                    plotit = as.logical(tclvalue(plotit)), printit = TRUE, 
-                    file = tclvalue(printfile), main.title = tclvalue(maintitle)), 
-                    silent = TRUE)
+                    path.mcmc = tclvalue(outputdir), plotit = as.logical(tclvalue(plotit)), 
+                    printit = TRUE, file = tclvalue(printfile), 
+                    main.title = tclvalue(maintitle)), silent = TRUE)
                 }
                 else {
                   err <- try(PosteriorMode(coordinates = globalcoordinates, 
-                    path.mcmc = tclvalue(outputdir), write = as.logical(tclvalue(write)), 
-                    plotit = as.logical(tclvalue(plotit)), printit = FALSE, 
-                    file = "", main.title = as.character(tclvalue(maintitle))), 
+                    path.mcmc = tclvalue(outputdir), plotit = as.logical(tclvalue(plotit)), 
+                    printit = FALSE, file = "", main.title = as.character(tclvalue(maintitle))), 
                     silent = TRUE)
                 }
                 tkdestroy(tttry)
@@ -1440,8 +1438,7 @@ function (lib.loc = NULL)
                 if (class(err) == "try-error") {
                   if (tclvalue(printit) == 1) {
                     Log(paste("PosteriorMode(coordinates=", matrix2str(globalcoordinates), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",write=", 
-                      as.logical(tclvalue(write)), ",plotit=", 
+                      ",path.mcmc=\"", tclvalue(outputdir), "\",plotit=", 
                       as.logical(tclvalue(plotit)), ",printit=TRUE,file=\"", 
                       tclvalue(printfile), "\",main.title=\"", 
                       tclvalue(maintitle), "\")", sep = ""), 
@@ -1449,8 +1446,7 @@ function (lib.loc = NULL)
                   }
                   else {
                     Log(paste("PosteriorMode(coordinates=", matrix2str(globalcoordinates), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",write=", 
-                      as.logical(tclvalue(write)), ",plotit=", 
+                      ",path.mcmc=\"", tclvalue(outputdir), "\",plotit=", 
                       as.logical(tclvalue(plotit)), ",printit=FALSE,file=\"", 
                       tclvalue(printfile), "\",main.title=\"", 
                       tclvalue(maintitle), "\")", sep = ""), 
@@ -1462,8 +1458,7 @@ function (lib.loc = NULL)
                 else {
                   if (tclvalue(printit) == 1) {
                     Log(paste("PosteriorMode(coordinates=", matrix2str(globalcoordinates), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",write=", 
-                      as.logical(tclvalue(write)), ",plotit=", 
+                      ",path.mcmc=\"", tclvalue(outputdir), "\",plotit=", 
                       as.logical(tclvalue(plotit)), ",printit=TRUE,file=\"", 
                       tclvalue(printfile), "\",main.title=\"", 
                       tclvalue(maintitle), "\")", sep = ""), 
@@ -1471,8 +1466,7 @@ function (lib.loc = NULL)
                   }
                   else {
                     Log(paste("PosteriorMode(coordinates=", matrix2str(globalcoordinates), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",write=", 
-                      as.logical(tclvalue(write)), ",plotit=", 
+                      ",path.mcmc=\"", tclvalue(outputdir), "\",plotit=", 
                       as.logical(tclvalue(plotit)), ",printit=FALSE,file=\"", 
                       tclvalue(printfile), "\",main.title=\"", 
                       tclvalue(maintitle), "\")", sep = ""), 
@@ -1502,14 +1496,6 @@ function (lib.loc = NULL)
                 command = getprintfile, width = 15, state = "disable")
             filelabel.widget <- tklabel(ttposm, textvariable = printfile, 
                 width = 50)
-            writelabel.widget <- tklabel(ttposm, text = "Write in ASCII(readable) format:")
-            wwrite <- .Tk.subwin(ttposm)
-            writeoptionmenu.widget <- tcl("tk_optionMenu", wwrite, 
-                write, "FALSE", "TRUE")
-            plotitlabel.widget <- tklabel(ttposm, text = "Plot the map:")
-            wplotit <- .Tk.subwin(ttposm)
-            plotitoptionmenu.widget <- tcl("tk_optionMenu", wplotit, 
-                plotit, "FALSE", "TRUE")
             maintitle.widget <- tkentry(ttposm, width = "20", 
                 textvariable = maintitle)
             maintitlelabel.widget <- tklabel(ttposm, text = "Graph title:")
@@ -1522,10 +1508,6 @@ function (lib.loc = NULL)
             tkgrid(maintitlelabel.widget, row = 2, column = 1, 
                 sticky = "w")
             tkgrid(maintitle.widget, row = 2, column = 2, sticky = "w")
-            tkgrid(writelabel.widget, row = 4, column = 1, sticky = "w")
-            tkgrid(wwrite, row = 4, column = 2, sticky = "w")
-            tkgrid(plotitlabel.widget, row = 5, column = 1, sticky = "w")
-            tkgrid(wplotit, row = 5, column = 2, sticky = "w")
             nextbutton <- tkbutton(ttposm, image = imagedraw, 
                 text = "Draw >>", command = Drawposm)
             tkgrid(nextbutton, row = 7, column = 2, sticky = "e")
@@ -2921,15 +2903,12 @@ function (lib.loc = NULL)
             }
             tkinsert(txt, "end", auxtxt)
             auxtxt <- "\n\n\n----\n\n"
-            if (length(globallabels) == 1) {
-                for (i in 1:row) {
-                  auxtxt <- paste(auxtxt, "Sample ", sep = "")
-                  auxtxt <- paste(auxtxt, i, sep = "")
-                  auxtxt <- paste(auxtxt, "\n", sep = "")
-                }
-                tkconfigure(left, width = numberofdigits(row) + 
-                  7)
+            for (i in 1:row) {
+                auxtxt <- paste(auxtxt, "Sample ", sep = "")
+                auxtxt <- paste(auxtxt, i, sep = "")
+                auxtxt <- paste(auxtxt, "\n", sep = "")
             }
+            tkconfigure(left, width = numberofdigits(row) + 7)
             tkinsert(left, "end", auxtxt)
             tkdestroy(tttry)
             tkgrid(txt, row = 2, column = 2)
