@@ -14,7 +14,7 @@ function (lib.loc = NULL)
     tcl("after", "3000", "destroy", tt)
     require(Geneland)
     idb.dataset <- 0
-    globalcoordinates <- 0
+    globalcoordinates <- NULL
     globalgenotypes <- 0
     globallabels <- NA
     burnin <- tclVar(0)
@@ -90,17 +90,21 @@ function (lib.loc = NULL)
         return(i)
     }
     matrix2str <- function(mat) {
-        str = "rbind("
-        for (i in 1:NROW(mat)) {
-            str = paste(str, "c(", mat[i, 1], sep = "")
-            for (j in 2:NCOL(mat)) {
-                str = paste(str, ",", as.character(mat[i, j]), 
-                  sep = "")
+        if (is.null(mat)) 
+            str = "NULL"
+        else {
+            str = "rbind("
+            for (i in 1:NROW(mat)) {
+                str = paste(str, "c(", mat[i, 1], sep = "")
+                for (j in 2:NCOL(mat)) {
+                  str = paste(str, ",", as.character(mat[i, j]), 
+                    sep = "")
+                }
+                str = paste(str, "),", sep = "")
             }
-            str = paste(str, "),", sep = "")
+            str = strtrim(str, nchar(str) - 1)
+            str = paste(str, ")", sep = "")
         }
-        str = strtrim(str, nchar(str) - 1)
-        str = paste(str, ")", sep = "")
         return(str)
     }
     fadvanced <- function() {
@@ -168,7 +172,7 @@ function (lib.loc = NULL)
                 tclvalue(labelcoordtext) = "Coordinate: File loaded"
             }
             else {
-                globalcoordinates <<- 0
+                globalcoordinates <<- NULL
                 tclvalue(labelcoordtext) = "Coordinate: Data unloaded"
             }
             tkfocus(tt)
@@ -801,36 +805,33 @@ function (lib.loc = NULL)
                 Sys.sleep(0.5)
                 if (tclvalue(printit) == 1) {
                   err <- try(PlotFreq(genotypes = globalgenotypes, 
-                    allele.numbers = NA, path.mcmc = tclvalue(outputdir), 
-                    ipop = as.numeric(tclvalue(ipop)), iloc = as.numeric(tclvalue(iloc)), 
-                    iall = as.numeric(tclvalue(iall)), printit = TRUE, 
-                    path = tclvalue(printfile)), silent = TRUE)
+                    path.mcmc = tclvalue(outputdir), ipop = as.numeric(tclvalue(ipop)), 
+                    iloc = as.numeric(tclvalue(iloc)), iall = as.numeric(tclvalue(iall)), 
+                    printit = TRUE, path = tclvalue(printfile)), 
+                    silent = TRUE)
                 }
                 else {
                   err <- try(PlotFreq(genotypes = globalgenotypes, 
-                    allele.numbers = NA, path.mcmc = tclvalue(outputdir), 
-                    ipop = as.numeric(tclvalue(ipop)), iloc = as.numeric(tclvalue(iloc)), 
-                    iall = as.numeric(tclvalue(iall)), printit = FALSE), 
-                    silent = TRUE)
+                    path.mcmc = tclvalue(outputdir), ipop = as.numeric(tclvalue(ipop)), 
+                    iloc = as.numeric(tclvalue(iloc)), iall = as.numeric(tclvalue(iall)), 
+                    printit = FALSE), silent = TRUE)
                 }
                 tkdestroy(tttry)
                 print("Done.")
                 if (class(err) == "try-error") {
                   if (tclvalue(printit) == 1) {
                     Log(paste("PlotFreq(genotypes=", matrix2str(globalgenotypes), 
-                      ",allele.numbers=NA,path.mcmc=\"", tclvalue(outputdir), 
-                      "\",ipop=", as.numeric(tclvalue(ipop)), 
-                      ",iloc=", as.numeric(tclvalue(iloc)), ",iall=", 
-                      as.numeric(tclvalue(iall)), ",printit=TRUE,path=\"", 
+                      ",path.mcmc=\"", tclvalue(outputdir), "\",ipop=", 
+                      as.numeric(tclvalue(ipop)), ",iloc=", as.numeric(tclvalue(iloc)), 
+                      ",iall=", as.numeric(tclvalue(iall)), ",printit=TRUE,path=\"", 
                       tclvalue(printfile), "\")", sep = ""), 
                       "[FAILED] ")
                   }
                   else {
                     Log(paste("PlotFreq(genotypes=", matrix2str(globalgenotypes), 
-                      ",allele.numbers=NA,path.mcmc=\"", tclvalue(outputdir), 
-                      "\",ipop=", as.numeric(tclvalue(ipop)), 
-                      ",iloc=", as.numeric(tclvalue(iloc)), ",iall=", 
-                      as.numeric(tclvalue(iall)), ",printit=FALSE", 
+                      ",path.mcmc=\"", tclvalue(outputdir), "\",ipop=", 
+                      as.numeric(tclvalue(ipop)), ",iloc=", as.numeric(tclvalue(iloc)), 
+                      ",iall=", as.numeric(tclvalue(iall)), ",printit=FALSE", 
                       ")", sep = ""), "[FAILED] ")
                   }
                   tkmessageBox(message = err, icon = "error", 
@@ -839,19 +840,17 @@ function (lib.loc = NULL)
                 else {
                   if (tclvalue(printit) == 1) {
                     Log(paste("PlotFreq(genotypes=", matrix2str(globalgenotypes), 
-                      ",allele.numbers=NA,path.mcmc=\"", tclvalue(outputdir), 
-                      "\",ipop=", as.numeric(tclvalue(ipop)), 
-                      ",iloc=", as.numeric(tclvalue(iloc)), ",iall=", 
-                      as.numeric(tclvalue(iall)), ",printit=TRUE,path=\"", 
+                      ",path.mcmc=\"", tclvalue(outputdir), "\",ipop=", 
+                      as.numeric(tclvalue(ipop)), ",iloc=", as.numeric(tclvalue(iloc)), 
+                      ",iall=", as.numeric(tclvalue(iall)), ",printit=TRUE,path=\"", 
                       tclvalue(printfile), "\")", sep = ""), 
                       "[SUCCESS] ")
                   }
                   else {
                     Log(paste("PlotFreq(genotypes=", matrix2str(globalgenotypes), 
-                      ",allele.numbers=NA,path.mcmc=\"", tclvalue(outputdir), 
-                      "\",ipop=", as.numeric(tclvalue(ipop)), 
-                      ",iloc=", as.numeric(tclvalue(iloc)), ",iall=", 
-                      as.numeric(tclvalue(iall)), ",printit=FALSE)", 
+                      ",path.mcmc=\"", tclvalue(outputdir), "\",ipop=", 
+                      as.numeric(tclvalue(ipop)), ",iloc=", as.numeric(tclvalue(iloc)), 
+                      ",iall=", as.numeric(tclvalue(iall)), ",printit=FALSE)", 
                       sep = ""), "[SUCCESS] ")
                   }
                 }
@@ -1947,7 +1946,7 @@ function (lib.loc = NULL)
                 tkfocus(tttry)
                 print("Starting...")
                 Sys.sleep(0.5)
-                if (length(globalcoordinates) == 1 || tclvalue(prevcoord) == 
+                if (is.null(globalcoordinates) || tclvalue(prevcoord) == 
                   0) 
                   idb.dataset <<- try(simdata(nindiv = as.numeric(tclvalue(nindiv)), 
                     coord.lim = c(as.numeric(tclvalue(absmin)), 
@@ -1977,7 +1976,7 @@ function (lib.loc = NULL)
                   idb.dataset <<- 0
                 }
                 else {
-                  if (length(globalcoordinates) == 1 || tclvalue(prevcoord) == 
+                  if (is.null(globalcoordinates) || tclvalue(prevcoord) == 
                     0) 
                     Log(paste("simdata(nindiv=", as.numeric(tclvalue(nindiv)), 
                       ",coord.lim=", c(as.numeric(tclvalue(absmin)), 
@@ -2138,8 +2137,8 @@ function (lib.loc = NULL)
         filename <- tclVar("")
         tkwm.title(ttcon, "Convert loaded data into genepop format")
         gltgp <- function() {
-            if (tclvalue(filename) == "" | length(globalcoordinates) == 
-                1 | length(globalgenotypes) == 1) {
+            if (tclvalue(filename) == "" | is.null(globalcoordinates) | 
+                length(globalgenotypes) == 1) {
                 tkmessageBox(message = "You must define filename, coordinate file and genotype file", 
                   icon = "error", type = "ok")
             }
@@ -2216,7 +2215,7 @@ function (lib.loc = NULL)
                 tkfocus(tttry)
                 print("Starting...")
                 Sys.sleep(0.5)
-                if (length(globalcoordinates) == 1 || tclvalue(prevcoord) == 
+                if (is.null(globalcoordinates) || tclvalue(prevcoord) == 
                   0) 
                   idb.dataset <<- try(simdata(nindiv = as.numeric(tclvalue(nindiv)), 
                     coord.lim = c(as.numeric(tclvalue(absmin)), 
@@ -2252,7 +2251,7 @@ function (lib.loc = NULL)
                   idb.dataset <<- 0
                 }
                 else {
-                  if (length(globalcoordinates) == 1 || tclvalue(prevcoord) == 
+                  if (is.null(globalcoordinates) || tclvalue(prevcoord) == 
                     0) 
                     Log(paste("simdata(nindiv=", as.numeric(tclvalue(nindiv)), 
                       ",coord.lim=", c(as.numeric(tclvalue(absmin)), 
@@ -2530,7 +2529,7 @@ function (lib.loc = NULL)
     Reset <- function() {
         auxblink <<- 0
         idb.dataset <<- 0
-        globalcoordinates <<- 0
+        globalcoordinates <<- NULL
         globalgenotypes <<- 0
         globallabels <<- NA
         tclvalue(coordinatesfile) <<- ""

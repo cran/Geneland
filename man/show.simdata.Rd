@@ -4,7 +4,7 @@
 \title{Graphical display of data simulated by simdata}
 \description{
   Graphical display of data simulated by simdata}
-}
+
 \usage{
 show.simdata(dataset,
 plot.coord = FALSE,

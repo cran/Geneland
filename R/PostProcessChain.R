@@ -11,6 +11,8 @@ function (coordinates, genotypes, path.mcmc, nxdom, nydom, burnin)
     nit <- as.numeric(param[param[, 1] == "nit", 3])
     thinning <- as.numeric(param[param[, 1] == "thinning", 3])
     ploidy <- as.numeric(param[param[, 1] == "ploidy", 3])
+    filter.null.alleles <- as.logical(param[param[, 1] == "filter.null.alleles", 
+        3])
     if (ploidy == 1) {
         data.tmp <- matrix(nrow = nrow(genotypes), ncol = ncol(genotypes) * 
             2)
@@ -22,6 +24,9 @@ function (coordinates, genotypes, path.mcmc, nxdom, nydom, burnin)
     data.tmp <- FormatGenotypes(as.matrix(genotypes))
     genotypes <- data.tmp$genotypes
     allele.numbers <- data.tmp$allele.numbers
+    if (filter.null.alleles) {
+        allele.numbers <- allele.numbers + 1
+    }
     filenpop <- paste(path.mcmc, "populations.numbers.txt", sep = "")
     filenpp <- paste(path.mcmc, "nuclei.numbers.txt", sep = "")
     fileu <- paste(path.mcmc, "coord.nuclei.txt", sep = "")
@@ -46,16 +51,15 @@ function (coordinates, genotypes, path.mcmc, nxdom, nydom, burnin)
     xlim <- ylim <- rep(-999, 2)
     out.res <- .Fortran(name = "postprocesschain", PACKAGE = "Geneland", 
         as.integer(nxdom), as.integer(nydom), as.integer(burnin), 
-        as.integer(npopmax), as.integer(nb.nuclei.max), as.integer(nloc), 
-        as.integer(nindiv), as.integer(nloc), as.integer(nallmax), 
-        as.single(xlim), as.single(ylim), as.single(delta.coord), 
-        as.integer(nit/thinning), as.character(filenpp), as.character(filenpop), 
-        as.character(fileu), as.character(filec), as.character(filef), 
-        as.character(filefperm), as.character(filedom), as.character(filedomperm), 
-        as.single(t(coordinates)), as.single(u), as.integer(c), 
-        as.single(dom), as.single(domperm), as.single(coorddom), 
-        as.integer(indvois), as.single(distvois), as.single(f11), 
-        as.single(orderf11))
+        as.integer(npopmax), as.integer(nb.nuclei.max), as.integer(nindiv), 
+        as.integer(nloc), as.integer(nallmax), as.single(xlim), 
+        as.single(ylim), as.single(delta.coord), as.integer(nit/thinning), 
+        as.character(filenpp), as.character(filenpop), as.character(fileu), 
+        as.character(filec), as.character(filef), as.character(filefperm), 
+        as.character(filedom), as.character(filedomperm), as.single(t(coordinates)), 
+        as.single(u), as.integer(c), as.single(dom), as.single(domperm), 
+        as.single(coorddom), as.integer(indvois), as.single(distvois), 
+        as.single(f11), as.single(orderf11))
     param <- c(paste("nxdom :", nxdom), paste("nydom :", nydom))
     write.table(param, file = paste(path.mcmc, "postprocess.parameters.txt", 
         sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)

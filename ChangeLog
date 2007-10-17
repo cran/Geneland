@@ -1,6 +1,30 @@
-	Changes from version 2.0.7 to version 2.0.8:
+	Changes from version 2.0.8 to version 2.0.9:
 	--------------------------------------------
 
 * R
 
-- GUI complies with change from 2.06 to 2.0.7 
+- Function mcmcFmodel 
+	. passes path.mcmc instead of all file names to Fortran
+	. jcf set to FALSE as default value
+	. number of alleles at each locus not passed as an optionnal argument
+	. test for coordinates if spatial==TRUE and pass a dummy matrix if coord are missing and spatial==FALSE
+
+- Function nullify 
+	. returns a matrix instead of a list
+	. corrupts alleles whose indice is passed in a vector
+
+- Function PostProcessChain 
+	. reads whether null alleles have been filtered 
+	. if(filter.null.alleles){allele.numbers <-  allele.numbers + 1}
+
+- Function PlotFreq 
+	. does not any longer take number of alleles at each locus as an optionnal argument
+	. if(filter.null.alleles){allele.numbers <-  allele.numbers + 1}
+	. ylim=c(0,1)
+
+- Function PlotFreqA 
+	. ylim=c(0,1)
+
+- Fortran code alarousset.f:
+	. cleaning all warning popping-up during build under windows
+	

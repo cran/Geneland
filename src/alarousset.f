@@ -10,7 +10,7 @@
 *     output
       double precision a(nindiv,nindiv)
 *     working variables 
-      integer iloc,iall,iindiv1,iindiv2
+      integer iloc,iindiv1,iindiv2
       double precision sum,b,w,ssb,ssw
 
 c$$$      write(*,*) 'debut rousset1'
@@ -29,9 +29,9 @@ c$$$      write(*,*) 'a=',a
 c            write(*,*) 'iindiv1=',iindiv1
 c            write(*,*) 'iindiv2=',iindiv2
             b = ssb(iindiv1,iindiv2,iloc,z,
-     &           nindiv,nloc,nloc2,nall,nallmax)
+     &           nindiv,nloc,nloc2,nall)
             w = ssw(iindiv1,iindiv2,iloc,z,
-     &           nindiv,nloc,nloc2,nall,nallmax)
+     &           nindiv,nloc,nloc2,nall)
             a(iindiv1,iindiv2) = 2*b - w 
 *            a(iindiv1,iindiv2) = b 
             sum = sum + w
@@ -61,8 +61,8 @@ c            write(*,*) 'iindiv2=',iindiv2
 *     output
       double precision a(nindiv,nindiv)
 *     working variables 
-      integer iloc,iall,iindiv1,iindiv2
-      double precision sum,b,w,ssb,ssw,num,denom
+      integer iloc,iindiv1,iindiv2
+      double precision sum,b,w,ssb,ssw,num
 
 c$$$      write(*,*) 'debut rousset1'
 c$$$      write(*,*) 'iloc=',iloc
@@ -85,9 +85,9 @@ c$$$      write(*,*) 'a=',a
          do iindiv1 = 1,nindiv-1
             do iindiv2 = iindiv1+1,nindiv
                b = ssb(iindiv1,iindiv2,iloc,z,
-     &              nindiv,nloc,nloc2,nall,nallmax)
+     &              nindiv,nloc,nloc2,nall)
                w = ssw(iindiv1,iindiv2,iloc,z,
-     &              nindiv,nloc,nloc2,nall,nallmax)
+     &              nindiv,nloc,nloc2,nall)
                a(iindiv1,iindiv2) = a(iindiv1,iindiv2) + 2*b - w 
                sum = sum + w
             enddo
@@ -138,8 +138,8 @@ c$$$      enddo
 *     output
       double precision a(nindiv,nindiv)
 *     working variables 
-      integer iloc,iall,iindiv1,iindiv2
-      double precision sum,b,w,ssb,ssw,num,denom
+      integer iloc,iindiv1,iindiv2
+      double precision sum,b,w,ssb,ssw
 
 c$$$      write(*,*) 'debut rousset1'
 c$$$      write(*,*) 'iloc=',iloc
@@ -162,9 +162,9 @@ c$$$      write(*,*) 'a=',a
          do iindiv1 = 1,nindiv-1
             do iindiv2 = iindiv1+1,nindiv
                b = ssb(iindiv1,iindiv2,iloc,z,
-     &              nindiv,nloc,nloc2,nall,nallmax)
+     &              nindiv,nloc,nloc2,nall)
                w = ssw(iindiv1,iindiv2,iloc,z,
-     &              nindiv,nloc,nloc2,nall,nallmax)
+     &              nindiv,nloc,nloc2,nall)
                a(iindiv1,iindiv2) = a(iindiv1,iindiv2) + b 
                sum = sum + w
             enddo
@@ -185,9 +185,9 @@ c$$$      write(*,*) 'a=',a
 
 ************************************************************************
       double precision function ssw(iindiv1,iindiv2,iloc,z,
-     &     nindiv,nloc,nloc2,nall,nallmax)
+     &     nindiv,nloc,nloc2,nall)
       implicit none
-      integer iindiv1,iindiv2,iloc,z,nindiv,nloc,nloc2,nall,nallmax
+      integer iindiv1,iindiv2,iloc,z,nindiv,nloc,nloc2,nall
       dimension z(nindiv,nloc2),nall(nloc)
       integer iindiv,igene,listindiv,iall
       double precision x,propindiv
@@ -240,12 +240,12 @@ c      write(*,*) 'ssw=',ssw
 
 ************************************************************************
       double precision function ssb(iindiv1,iindiv2,iloc,z,
-     &     nindiv,nloc,nloc2,nall,nallmax)
+     &     nindiv,nloc,nloc2,nall)
       implicit none
-      integer iindiv1,iindiv2,iloc,z,nindiv,nloc,nloc2,nall,nallmax
+      integer iindiv1,iindiv2,iloc,z,nindiv,nloc,nloc2,nall
       dimension z(nindiv,nloc2),nall(nloc)
-      integer iindiv,igene,listindiv,iall
-      double precision x,propindiv,proppair
+      integer iindiv,listindiv,iall
+      double precision propindiv,proppair
       dimension listindiv(2)
 
 *     propindiv = Xi.:u of Rousset

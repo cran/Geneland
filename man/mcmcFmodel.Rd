@@ -4,9 +4,10 @@
 \title{ Inference in a  spatial statistical model  }
 \description{ Markov Chain Monte-Carlo inference in the spatial F-model}
 \usage{
-mcmcFmodel(coordinates,genotypes,allele.numbers,ploidy,
+mcmcFmodel(coordinates,genotypes,ploidy,
 path.mcmc, rate.max, delta.coord, npopmin, npopinit,
-npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial,jcf)
+npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial,jcf,
+filter.null.alleles)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -15,11 +16,11 @@ npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial,jcf)
   \item{genotypes}{Genotypes of individuals. A matrix with one line per
     individual and 2  columns (resp. one column) per locus for diploid
     data (resp. haploid data).}
-  \item{allele.numbers}{Number of observed alleles at each loci. Default
-  value is NULL and then the numbers used are the observed number
-  computed by FormatGenotypes.}
+ %  \item{allele.numbers}{Number of observed alleles at each loci. Default
+%   value is NULL and then the numbers used are the observed number
+%   computed by FormatGenotypes.}
   \item{ploidy}{An integer equal to 1 for haploid data and 2 for diploid
-  data.}
+    data.}
   \item{path.mcmc}{ Path to output files directory. It seems that the
     path should be given in the Unix style even under Windows (use \/
     instead of \\).
@@ -72,6 +73,7 @@ npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial,jcf)
     are not used  and the locations of  the nuclei are initialized and
     kept fixed at the locations of individuals.}
   \item{jcf}{Logical: if true update of c and f are performed jointly}
+  \item{filter.null.alleles}{Logical: if TRUE, tries to filter out null allele}
 }
 
 

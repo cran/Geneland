@@ -1,6 +1,6 @@
 `PlotFreq` <-
-function (genotypes, allele.numbers = NA, path.mcmc, ipop, iloc, 
-    iall, printit = FALSE, path) 
+function (genotypes, path.mcmc, ipop, iloc, iall, printit = FALSE, 
+    path) 
 {
     allele.numbers <- as.matrix(allele.numbers)
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "")
@@ -8,6 +8,8 @@ function (genotypes, allele.numbers = NA, path.mcmc, ipop, iloc,
     nit <- as.numeric(param[param[, 1] == "nit", 3])
     thinning <- as.numeric(param[param[, 1] == "thinning", 3])
     ploidy <- as.numeric(param[param[, 1] == "ploidy", 3])
+    filter.null.alleles <- as.logical(param[param[, 1] == "filter.null.alleles", 
+        3])
     if (ploidy == 1) {
         data.tmp <- matrix(nrow = nrow(genotypes), ncol = ncol(genotypes) * 
             2)
@@ -15,8 +17,9 @@ function (genotypes, allele.numbers = NA, path.mcmc, ipop, iloc,
         data.tmp[, seq(2, ncol(genotypes) * 2, 2)] <- genotypes
         genotypes <- data.tmp
     }
-    if (is.na(allele.numbers)) {
-        allele.numbers <- FormatGenotypes(genotypes)$allele.numbers
+    allele.numbers <- FormatGenotypes(genotypes)$allele.numbers
+    if (filter.null.alleles) {
+        allele.numbers <- allele.numbers + 1
     }
     filef <- paste(path.mcmc, "frequencies.txt", sep = "")
     f <- as.matrix(read.table(filef))
@@ -32,7 +35,7 @@ function (genotypes, allele.numbers = NA, path.mcmc, ipop, iloc,
     sub <- rep(c(sub1, sub2, sub3), times = nit/thinning)
     plot(f[sub, ipop], xlab = paste("Index of MCMC iteration", 
         " (x ", thinning, ")", sep = ""), ylab = paste("Frequency of allele", 
-        iall, "at locus", iloc), type = "l")
+        iall, "at locus", iloc), type = "l", ylim = c(0, 1))
     title(main = ifelse(iall == 1, paste("Allele frequencies in population", 
         ipop, "for locus", iloc), ""))
     if (printit == TRUE) {
@@ -49,7 +52,8 @@ function (genotypes, allele.numbers = NA, path.mcmc, ipop, iloc,
         sub <- rep(c(sub1, sub2, sub3), times = nit/thinning)
         plot(f[sub, ipop], xlab = paste("Index of MCMC iteration", 
             " (x ", thinning, ")", sep = ""), ylab = paste("Frequency of allele", 
-            iall, "at locus", iloc), type = "l")
+            iall, "at locus", iloc), type = "l", ylim = c(0, 
+            1))
         title(main = ifelse(iall == 1, paste("Allele frequencies in population", 
             ipop, "for locus", iloc), ""))
         dev.off()

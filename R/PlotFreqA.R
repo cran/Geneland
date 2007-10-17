@@ -6,6 +6,8 @@ function (genotypes, path.mcmc, iloc, iall, printit = FALSE,
     param <- as.matrix(read.table(fileparam))
     thinning <- as.numeric(param[param[, 1] == "thinning", 3])
     ploidy <- as.numeric(param[param[, 1] == "ploidy", 3])
+    filter.null.alleles <- as.logical(param[param[, 1] == "filter.null.alleles", 
+        3])
     if (ploidy == 1) {
         data.tmp <- matrix(nrow = nrow(genotypes), ncol = ncol(genotypes) * 
             2)
@@ -14,13 +16,16 @@ function (genotypes, path.mcmc, iloc, iall, printit = FALSE,
         genotypes <- data.tmp
     }
     allele.numbers <- FormatGenotypes(genotypes)$allele.numbers
+    if (filter.null.alleles) {
+        allele.numbers <- allele.numbers + 1
+    }
     nloc <- length(allele.numbers)
     filefa <- paste(path.mcmc, "ancestral.frequencies.txt", sep = "")
     fa <- as.matrix(read.table(filefa))
     get(getOption("device"))()
     plot(fa[, (iloc - 1) * max(allele.numbers) + iall], xlab = paste("Index of MCMC iteration", 
         " (x ", thinning, ")", sep = ""), ylab = paste("Frequency of allele", 
-        iall, "at locus", iloc), type = "l")
+        iall, "at locus", iloc), type = "l", ylim = c(0, 1))
     title(main = ifelse(iall == 1, paste("Allele freq. in ancestral pop. at locus", 
         iloc), ""))
     if (printit == T) {
@@ -28,7 +33,8 @@ function (genotypes, path.mcmc, iloc, iall, printit = FALSE,
             iloc, ".ps", sep = ""))
         plot(fa[, (iloc - 1) * max(allele.numbers) + iall], xlab = paste("Index of MCMC iteration", 
             " (x ", thinning, ")", sep = ""), ylab = paste("Frequency of allele", 
-            iall, "at locus", iloc), type = "l")
+            iall, "at locus", iloc), type = "l", ylim = c(0, 
+            1))
         title(main = ifelse(iall == 1, paste("Allele freq. in ancestral pop. at locus", 
             iloc), ""))
         dev.off()

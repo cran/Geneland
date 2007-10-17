@@ -1,6 +1,6 @@
       subroutine  postprocesschain(nxdommax,nydommax,burn,
      &     npopmax,nppmax,
-     &     nlocmax,nindiv,nloc,nallmax,xlim,ylim,dt,nchain,filenpp,
+     &     nindiv,nloc,nallmax,xlim,ylim,dt,nchain,filenpp,
      &     filenpop,fileu,filec,filef,filefperm,filedom,filedomperm,
      &     s,u,c,dom,domperm,coorddom,indvois,distvois,f,orderf)
       implicit none
@@ -10,7 +10,7 @@
       
       integer nchain,npp,npop,ichain,nindiv,nxdommax,
      &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indvois,
-     &     ipop,nloc, nlocmax,nallmax,ijunk,orderf,ipopperm,burn
+     &     ipop,nloc,nallmax,ijunk,orderf,ipopperm,burn
       real s,u,xlim,ylim,coorddom,dom,domperm,distvois,f,dt
 
 *     dimensionnement 
@@ -25,14 +25,14 @@
 **************************
 *     lecture des données
 **************************
-      write(6,*) '      *****************************************'
-      write(6,*) '      *  Computing posterior probabilities     '
-      write(6,*) '      *  of population membership for pixels   '
-      write(6,*) '      *****************************************'
-      write(6,*) ''
-      write(6,*) ''
-      write(6,*) ''
-      write(6,*) ''
+c$$$      write(6,*) '      *****************************************'
+c$$$      write(6,*) '      *  Computing posterior probabilities     '
+c$$$      write(6,*) '      *  of population membership for pixels   '
+c$$$      write(6,*) '      *****************************************'
+c$$$      write(6,*) ''
+c$$$      write(6,*) ''
+c$$$      write(6,*) ''
+c$$$      write(6,*) ''
 
       call limit(nindiv,s,xlim,ylim,dt)
 
@@ -146,15 +146,15 @@ c      write(*,*) coorddom
       real pmp,distcell,u,s
 
       integer iit,ipp,iindiv,ipop
-      character*255 fileu,filec,filenpp,filenpop
+      character*255 fileu,filec,filenpp
       
 
       dimension indcell(nindiv),distcell(nindiv),
      &     pmp(nindiv,npopmax),u(2,nppmax),c(nppmax),s(2,nindiv)
-      write(6,*) '      **********************************************'
-      write(6,*) '      *  Computing posterior probabilities          '
-      write(6,*) '      *  of population membership for individuals   '
-      write(6,*) '      **********************************************'
+c$$$      write(6,*) '      **********************************************'
+c$$$      write(6,*) '      *  Computing posterior probabilities          '
+c$$$      write(6,*) '      *  of population membership for individuals   '
+c$$$      write(6,*) '      **********************************************'
 c$$$      write(*,*) 'nindiv=',nindiv
 c$$$      write(*,*) 's=',s
 c$$$      write(*,*) 'npopmax=',npopmax
