@@ -3,18 +3,18 @@
   library.dynam("Geneland",pkg, lib)
 
   
-  cat('---------------------------------------------------------------------------------',fill=T)
-  cat('-   Geneland-2.0.9 is loaded                                                    -',fill=T)
-  cat('-                                                                               -',fill=T)
-  cat('-       *** Please ***                                                          -',fill=T)
-  cat('-                                                                               -',fill=T)
-  cat('-      - Send a short email at guillot@inapg.inra.fr                            -',fill=T)
-  cat('-        notifying that you are using Geneland.                                 -',fill=T)
-  cat('-                                                                               -',fill=T)  
-  cat('-      - See                                                                    -',fill=T)
-  cat('-        www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/Geneland.html    -',fill=T)  
-  cat('-        for an introduction to Geneland                                        -',fill=T)
-  cat('---------------------------------------------------------------------------------',fill=T)
+  cat('---------------------------------------------------------------------------------',fill=TRUE)
+  cat('-   Geneland-2.0.10 is loaded                                                   -',fill=TRUE)
+  cat('-                                                                               -',fill=TRUE)
+  cat('-       *** Please ***                                                          -',fill=TRUE)
+  cat('-                                                                               -',fill=TRUE)
+  cat('-        Send a short email at guillot@inapg.inra.fr                            -',fill=TRUE)
+  cat('-        notifying that you are using Geneland.                                 -',fill=TRUE)
+  cat('-                                                                               -',fill=TRUE)  
+  cat('-        See                                                                    -',fill=TRUE)
+  cat('-        www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/Geneland.html    -',fill=TRUE)  
+  cat('-        for an introduction to Geneland                                        -',fill=TRUE)
+  cat('---------------------------------------------------------------------------------',fill=TRUE)
 
 }
 

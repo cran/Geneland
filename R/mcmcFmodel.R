@@ -2,7 +2,7 @@
 function (coordinates = NULL, genotypes, ploidy = 2, path.mcmc, 
     rate.max, delta.coord, npopmin, npopinit, npopmax, nb.nuclei.max, 
     nit, thinning = 1, freq.model = "Dirichlet", varnpop, spatial = TRUE, 
-    jcf = FALSE, filter.null.alleles = FALSE) 
+    jcf = FALSE, filter.null.alleles = TRUE) 
 {
     if ((nit%%thinning) != 0) {
         stop("nit/thinning is not an integer")
@@ -20,6 +20,12 @@ function (coordinates = NULL, genotypes, ploidy = 2, path.mcmc,
             coordinates <- matrix(nr = nindiv, ncol = 2, runif(nindiv * 
                 2))
         }
+    }
+    if (!spatial & (nb.nuclei.max < ncol(genotypes))) {
+        stop("With the option spatial=FALSE, nb.nuclei.max should be at least equal to the number of individuals")
+    }
+    if (freq.model == "Falush" & filter.null.alleles == TRUE) {
+        stop("The options freq.model=\"Falush\" & filter.null.alleles=TRUE can not be used together")
     }
     if (ploidy == 1) {
         data.tmp <- matrix(nrow = nrow(genotypes), ncol = ncol(genotypes) * 

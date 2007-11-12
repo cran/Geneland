@@ -16,9 +16,6 @@ filter.null.alleles)
   \item{genotypes}{Genotypes of individuals. A matrix with one line per
     individual and 2  columns (resp. one column) per locus for diploid
     data (resp. haploid data).}
- %  \item{allele.numbers}{Number of observed alleles at each loci. Default
-%   value is NULL and then the numbers used are the observed number
-%   computed by FormatGenotypes.}
   \item{ploidy}{An integer equal to 1 for haploid data and 2 for diploid
     data.}
   \item{path.mcmc}{ Path to output files directory. It seems that the
@@ -50,8 +47,10 @@ filter.null.alleles)
     can also be used in order to speed up computations. The relevance of
     the value set can be
     checked by inspection of the MCMC run. The number of tiles should not
-    go too close from \code{nb.nuclei.max}. If it does, you should re-run your
-    chain  with a larger value for \code{nb.nuclei.max}.}
+    go too close to \code{nb.nuclei.max}. If it does, you should re-run your
+    chain  with a larger value for \code{nb.nuclei.max}. In case of use
+    of the option \code{SPATIAL=FALSE}, \code{nb.nuclei.max} should be
+    set equal to the number of individuals.}
   \item{nit}{Number of MCMC iterations}
   \item{thinning}{Number of MCMC iterations between two writing steps (if \code{thinning}=1, all
     states are saved whereas if e.g. \code{thinning}=10 only each 10 iteration is saved)}
@@ -73,7 +72,11 @@ filter.null.alleles)
     are not used  and the locations of  the nuclei are initialized and
     kept fixed at the locations of individuals.}
   \item{jcf}{Logical: if true update of c and f are performed jointly}
-  \item{filter.null.alleles}{Logical: if TRUE, tries to filter out null allele}
+  \item{filter.null.alleles}{Logical: if TRUE, tries to filter out null
+    allele. An extra fictive null allele is created at each locus coding
+  for all putative null allele. Its frequency  is estimated and can be
+  viewed with function \code{PlotFreq}. This option is available only
+  with \code{freq.model="Dirichlet"}.}
 }
 
 

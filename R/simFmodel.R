@@ -109,7 +109,7 @@ function (nindiv, coordinates, coord.lim, number.nuclei, coord.nuclei,
                   iclass, 2 * (iloc - 1) + 2]), breaks = seq(0.5, 
                   nall[iloc] + 0.5, 1), prob = TRUE, main = paste("Histogram of freq. in pop.", 
                   iclass, ", locus", iloc), xlab = "", ylim = c(0, 
-                  1), axes = F)
+                  1), axes = FALSE)
                 points(1:nall[iloc], freq[iclass, iloc, 1:nall[iloc]], 
                   type = "h", col = 2)
             }

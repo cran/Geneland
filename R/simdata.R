@@ -238,7 +238,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), rate,
         iall2 <- seq(2, 2 * nloc, 2)
         heter <- mean(z[, iall1] != z[, iall2])
     }
-    res <- list(coord.lim = coord.lim, coord.indiv = coord.indiv, 
+    res <- list(coord.lim = coord.lim, coord.indiv = t(coord.indiv), 
         npop = npop, allele.numbers = allele.numbers, model = model, 
         alpha = alpha, beta = beta, gamma = gamma, genotypes = z, 
         allele.numbers = allele.numbers, number.nuclei = number.nuclei, 

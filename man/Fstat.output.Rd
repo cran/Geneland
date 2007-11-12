@@ -15,7 +15,6 @@ Fstat.output(genotypes,path.mcmc)
     individual and 2 columns per locus}
   \item{path.mcmc}{ Path to output files directory }
 }
-}
 \value{A list with components 
   \item{Pairwise.Fis }{A matrix of real numbers estimating the pairwise Fis}
   \item{Pairwise.Fst }{A matrix of real numbers estimating the pairwise Fst}

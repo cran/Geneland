@@ -34,6 +34,7 @@ function (lib.loc = NULL)
     imagepleasewait <- tclVar()
     imageibd <- tclVar()
     imageconvert <- tclVar()
+    imageline <- tclVar()
     tcl("image", "create", "photo", imageconfigure, file = system.file("images/icon-configure.gif", 
         package = "Geneland", lib.loc = lib.loc))
     tcl("image", "create", "photo", imagerun, file = system.file("images/icon-run.gif", 
@@ -57,6 +58,8 @@ function (lib.loc = NULL)
     tcl("image", "create", "photo", imagepleasewait, file = system.file("images/pleasewait.gif", 
         package = "Geneland", lib.loc = lib.loc))
     tcl("image", "create", "photo", imageconvert, file = system.file("images/icon-convert.gif", 
+        package = "Geneland", lib.loc = lib.loc))
+    tcl("image", "create", "photo", imageline, file = system.file("images/line.gif", 
         package = "Geneland", lib.loc = lib.loc))
     tkwait.window(tt)
     coordinatesfile <- tclVar("")
@@ -125,7 +128,7 @@ function (lib.loc = NULL)
         run()
     }
     helpWindow <- function() {
-        help.start(Geneland)
+        help.start("Geneland")
         tkfocus(tt)
     }
     creditsWindow <- function() {
@@ -134,13 +137,13 @@ function (lib.loc = NULL)
         label1.widget <- tklabel(ttcredits, text = "Authors:")
         label2.widget <- tklabel(ttcredits, text = " ")
         label3.widget <- tklabel(ttcredits, text = "Gilles Guillot:")
-        label4.widget <- tklabel(ttcredits, text = " Fortran and R Code")
+        label4.widget <- tklabel(ttcredits, text = " Fortran and R code")
         label5.widget <- tklabel(ttcredits, text = "")
         label6.widget <- tklabel(ttcredits, text = "Filipe Santos:")
-        label7.widget <- tklabel(ttcredits, text = " Graphical Interface (code and design)")
+        label7.widget <- tklabel(ttcredits, text = " Graphical interface (code and design)")
         label8.widget <- tklabel(ttcredits, text = "")
         label9.widget <- tklabel(ttcredits, text = "Arnaud Estoup:")
-        label10.widget <- tklabel(ttcredits, text = " Graphical Interface (design and test)")
+        label10.widget <- tklabel(ttcredits, text = " Graphical interface (design and test)")
         tkgrid(label1.widget, row = 1, column = 1, sticky = "w")
         tkgrid(label2.widget, row = 2, column = 1, sticky = "w")
         tkgrid(label3.widget, row = 3, column = 1, sticky = "w")
@@ -249,6 +252,7 @@ function (lib.loc = NULL)
     }
     run <- function() {
         tclvalue(burnin) <<- 0
+        testnumberpop <- tclVar(0)
         RunmcmcFmodel <- function() {
             if (tclvalue(ploidy) == "Haploid") 
                 dploidy <- 1
@@ -263,58 +267,369 @@ function (lib.loc = NULL)
             warn <- tklabel(tttry, image = imagepleasewait)
             tkpack(warn)
             tkfocus(tttry)
-            print("Starting...")
-            Sys.sleep(0.5)
-            err <- try(mcmcFmodel(coordinates = globalcoordinates, 
-                genotypes = globalgenotypes, ploidy = dploidy, 
-                path.mcmc = tclvalue(outputdir), rate.max = as.numeric(tclvalue(rate)), 
-                delta.coord = as.numeric(tclvalue(delta)), npopmin = as.numeric(tclvalue(npopmin)), 
-                npopinit = as.numeric(tclvalue(npopinit)), npopmax = as.numeric(tclvalue(npopmax)), 
-                nb.nuclei.max = as.numeric(tclvalue(nuclei)), 
-                nit = as.numeric(tclvalue(nit)), thinning = as.numeric(tclvalue(thinning)), 
-                freq.model = tclvalue(freq), varnpop = varnpop, 
-                spatial = as.logical(tclvalue(spatial)), jcf = as.logical(tclvalue(jcf))), 
-                silent = TRUE)
-            tkdestroy(tttry)
-            print("Done.")
-            if (class(err) == "try-error") {
-                Log(paste("mcmcFmodel(coordinates=", matrix2str(globalcoordinates), 
-                  ",genotypes=", matrix2str(globalgenotypes), 
-                  ",ploidy=", dploidy, ",path.mcmc=\"", tclvalue(outputdir), 
-                  "\",rate.max=", as.numeric(tclvalue(rate)), 
-                  ",delta.coord=", as.numeric(tclvalue(delta)), 
-                  ",npopmin=", as.numeric(tclvalue(npopmin)), 
-                  ",npopinit=", as.numeric(tclvalue(npopinit)), 
-                  ",npopmax=", as.numeric(tclvalue(npopmax)), 
-                  ",nb.nuclei.max=", as.numeric(tclvalue(nuclei)), 
-                  ",nit=", as.numeric(tclvalue(nit)), ",thinning=", 
-                  as.numeric(tclvalue(thinning)), ",freq.model=\"", 
-                  tclvalue(freq), "\",varnpop=", varnpop, ",spatial=", 
-                  as.logical(tclvalue(spatial)), ",jcf=", as.logical(tclvalue(jcf)), 
-                  ")", sep = ""), "[FAILED] ")
-                tkmessageBox(message = err, icon = "error", type = "ok", 
-                  parent = tt)
+            if (tclvalue(testnumberpop) == 0) {
+                print("Starting...")
+                Sys.sleep(0.5)
+                err <- try(mcmcFmodel(coordinates = globalcoordinates, 
+                  genotypes = globalgenotypes, ploidy = dploidy, 
+                  path.mcmc = tclvalue(outputdir), rate.max = as.numeric(tclvalue(rate)), 
+                  delta.coord = as.numeric(tclvalue(delta)), 
+                  npopmin = as.numeric(tclvalue(npopmin)), npopinit = as.numeric(tclvalue(npopinit)), 
+                  npopmax = as.numeric(tclvalue(npopmax)), nb.nuclei.max = as.numeric(tclvalue(nuclei)), 
+                  nit = as.numeric(tclvalue(nit)), thinning = as.numeric(tclvalue(thinning)), 
+                  freq.model = tclvalue(freq), varnpop = varnpop, 
+                  spatial = as.logical(tclvalue(spatial)), jcf = as.logical(tclvalue(jcf)), 
+                  filter.null.alleles = as.logical(tclvalue(null))), 
+                  silent = TRUE)
+                tkdestroy(tttry)
+                print("Done.")
+                if (class(err) == "try-error") {
+                  Log(paste("mcmcFmodel(coordinates=", matrix2str(globalcoordinates), 
+                    ",genotypes=", matrix2str(globalgenotypes), 
+                    ",ploidy=", dploidy, ",path.mcmc=\"", tclvalue(outputdir), 
+                    "\",rate.max=", as.numeric(tclvalue(rate)), 
+                    ",delta.coord=", as.numeric(tclvalue(delta)), 
+                    ",npopmin=", as.numeric(tclvalue(npopmin)), 
+                    ",npopinit=", as.numeric(tclvalue(npopinit)), 
+                    ",npopmax=", as.numeric(tclvalue(npopmax)), 
+                    ",nb.nuclei.max=", as.numeric(tclvalue(nuclei)), 
+                    ",nit=", as.numeric(tclvalue(nit)), ",thinning=", 
+                    as.numeric(tclvalue(thinning)), ",freq.model=\"", 
+                    tclvalue(freq), "\",varnpop=", varnpop, ",spatial=", 
+                    as.logical(tclvalue(spatial)), ",jcf=", as.logical(tclvalue(jcf)), 
+                    ",filter.null.alleles =", as.logical(tclvalue(null)), 
+                    ")", sep = ""), "[FAILED] ")
+                  tkmessageBox(message = err, icon = "error", 
+                    type = "ok", parent = tt)
+                }
+                else {
+                  Log(paste("mcmcFmodel(coordinates=", matrix2str(globalcoordinates), 
+                    ",genotypes=", matrix2str(globalgenotypes), 
+                    ",ploidy=", dploidy, ",path.mcmc=\"", tclvalue(outputdir), 
+                    "\",rate.max=", as.numeric(tclvalue(rate)), 
+                    ",delta.coord=", as.numeric(tclvalue(delta)), 
+                    ",npopmin=", as.numeric(tclvalue(npopmin)), 
+                    ",npopinit=", as.numeric(tclvalue(npopinit)), 
+                    ",npopmax=", as.numeric(tclvalue(npopmax)), 
+                    ",nb.nuclei.max=", as.numeric(tclvalue(nuclei)), 
+                    ",nit=", as.numeric(tclvalue(nit)), ",thinning=", 
+                    as.numeric(tclvalue(thinning)), ",freq.model=\"", 
+                    tclvalue(freq), "\",varnpop=", varnpop, ",spatial=", 
+                    as.logical(tclvalue(spatial)), ",jcf=", as.logical(tclvalue(jcf)), 
+                    ",filter.null.alleles =", as.logical(tclvalue(null)), 
+                    ")", sep = ""), "[SUCCESS] ")
+                  tkmessageBox(message = "Terminated with success", 
+                    type = "ok", parent = tt)
+                  if (tclvalue(freq) == "Falush") 
+                    falush <<- 1
+                  else falush <<- 0
+                }
             }
             else {
-                Log(paste("mcmcFmodel(coordinates=", matrix2str(globalcoordinates), 
-                  ",genotypes=", matrix2str(globalgenotypes), 
-                  ",ploidy=", dploidy, ",path.mcmc=\"", tclvalue(outputdir), 
-                  "\",rate.max=", as.numeric(tclvalue(rate)), 
-                  ",delta.coord=", as.numeric(tclvalue(delta)), 
-                  ",npopmin=", as.numeric(tclvalue(npopmin)), 
-                  ",npopinit=", as.numeric(tclvalue(npopinit)), 
-                  ",npopmax=", as.numeric(tclvalue(npopmax)), 
-                  ",nb.nuclei.max=", as.numeric(tclvalue(nuclei)), 
-                  ",nit=", as.numeric(tclvalue(nit)), ",thinning=", 
-                  as.numeric(tclvalue(thinning)), ",freq.model=\"", 
-                  tclvalue(freq), "\",varnpop=", varnpop, ",spatial=", 
-                  as.logical(tclvalue(spatial)), ",jcf=", as.logical(tclvalue(jcf)), 
-                  ")", sep = ""), "[SUCCESS] ")
-                tkmessageBox(message = "Terminated with success", 
-                  type = "ok", parent = tt)
+                probs <<- c()
+                pops <<- c()
+                runs <<- c()
+                reburnvalue <- tclVar(0)
+                allpops <- matrix(ncol = as.integer(tclvalue(ntestpop)), 
+                  nrow = as.integer(as.integer(tclvalue(nit))%/%as.integer(tclvalue(thinning))))
+                allprobs <- matrix(ncol = as.integer(tclvalue(ntestpop)), 
+                  nrow = as.integer(as.integer(tclvalue(nit))%/%as.integer(tclvalue(thinning))))
+                Sort <- function() {
+                  sorted <- order(probs, decreasing = TRUE)
+                  new <- rbind(probs[sorted], pops[sorted], runs[sorted])
+                  tkdelete(left, "1.0", "end")
+                  tkdelete(midle, "1.0", "end")
+                  tkdelete(right, "1.0", "end")
+                  for (i in 1:length(runs)) {
+                    tkinsert(left, "end", as.character(new[3, 
+                      i]))
+                    tkinsert(left, "end", "\n")
+                    tkinsert(midle, "end", new[2, i])
+                    tkinsert(midle, "end", "\n")
+                    tkinsert(right, "end", as.character(new[1, 
+                      i]))
+                    tkinsert(right, "end", "\n")
+                  }
+                }
+                Reburn <- function() {
+                  if (as.numeric(tclvalue(reburnvalue)) >= as.numeric(tclvalue(nit))/as.numeric(tclvalue(thinning))) {
+                    tclvalue(reburnvalue) <- as.numeric(tclvalue(nit))/as.numeric(tclvalue(thinning)) - 
+                      1
+                    tkconfigure(burnentry, textvariable = reburnvalue)
+                  }
+                  tkdelete(left, "1.0", "end")
+                  tkdelete(midle, "1.0", "end")
+                  tkdelete(right, "1.0", "end")
+                  probs <<- c()
+                  pops <<- c()
+                  runs <<- c()
+                  for (i in 1:as.numeric(tclvalue(ntestpop))) {
+                    auxprobs <- c()
+                    auxpops <- c()
+                    tkinsert(left, "end", as.character(i))
+                    tkinsert(left, "end", "\n")
+                    runs <<- c(runs, i)
+                    for (j in 1:length(file)) {
+                      auxprobs <- c(auxprobs, allprobs[j, i])
+                      auxpops <- c(auxpops, allpops[j, i])
+                    }
+                    if (as.numeric(tclvalue(reburnvalue)) != 
+                      0) {
+                      auxpops <- auxpops[-(1:as.numeric(tclvalue(reburnvalue)))]
+                      auxprobs <- auxprobs[-(1:as.numeric(tclvalue(reburnvalue)))]
+                    }
+                    dist <- hist(auxpops, plot = FALSE, breaks = seq(0.5, 
+                      max(auxpops) + 0.5, 1))
+                    firsttime <- 0
+                    straux <- ""
+                    for (j in 1:length(dist$counts)) {
+                      if (dist$counts[j] == max(dist$counts)) {
+                        if (firsttime == 0) {
+                          straux <- as.character(dist$mids[j])
+                          firsttime <- 1
+                        }
+                        else {
+                          straux <- paste(straux, " and ", sep = "")
+                          straux <- paste(straux, as.character(dist$mids[j]), 
+                            sep = "")
+                        }
+                      }
+                    }
+                    straux <- paste(straux, " ( ", sep = "")
+                    straux <- paste(straux, as.character(as.double(max(dist$density) * 
+                      100)), sep = "")
+                    straux <- paste(straux, " %) ", sep = "")
+                    tkinsert(midle, "end", straux)
+                    pops <<- c(pops, straux)
+                    tkinsert(midle, "end", "\n")
+                    mpd <- mean(auxprobs)
+                    tkinsert(right, "end", mpd)
+                    tkinsert(right, "end", "\n")
+                    probs <<- c(probs, mpd)
+                  }
+                }
+                Output <- function() {
+                  outfile <- tclvalue(tkgetSaveFile(filetypes = "{{.txt} *.txt}", 
+                    title = "Save to file"))
+                  if (outfile != "") {
+                    zz1 <- file(outfile, "w")
+                    for (i in 1:length(runs)) {
+                      cat(as.character(tkget(left, paste(i, ".0", 
+                        sep = ""), paste(i, ".end", sep = ""))), 
+                        "\t", file = zz1)
+                      cat(as.character(tkget(midle, paste(i, 
+                        ".0", sep = ""), paste(i, ".end", sep = ""))), 
+                        "\t", file = zz1)
+                      cat(as.character(tkget(right, paste(i, 
+                        ".0", sep = ""), paste(i, ".end", sep = ""))), 
+                        "\n", file = zz1)
+                    }
+                    close(zz1)
+                    tkmessageBox(message = paste("Wrote: ", outfile, 
+                      sep = ""), icon = "info", type = "ok", 
+                      parent = tt)
+                  }
+                }
+                tttextpop <- tktoplevel(parent = .TkRoot)
+                tkwm.title(tttextpop, "Multiple runs for inferring the number of populations")
+                left <- tktext(tttextpop)
+                midle <- tktext(tttextpop)
+                right <- tktext(tttextpop)
+                posx <- tclVar("")
+                posy <- tclVar("")
+                yscr <- tkscrollbar(tttextpop, repeatinterval = 5, 
+                  command = function(...) {
+                    tkyview(midle, ...)
+                    tkyview(left, ...)
+                    tkyview(right, ...)
+                  })
+                ltop <- tktext(tttextpop, font = "courier", height = 1, 
+                  width = 20, wrap = "none")
+                mtop <- tktext(tttextpop, font = "courier", height = 1, 
+                  width = 30, wrap = "none")
+                rtop <- tktext(tttextpop, font = "courier", height = 1, 
+                  width = 30, wrap = "none")
+                tkconfigure(left, font = "courier", wrap = "none", 
+                  width = 20, yscrollcommand = function(...) {
+                    tkset(yscr, ...)
+                    tkyview.moveto(midle, as.double(...))
+                    tkyview.moveto(right, as.double(...))
+                  })
+                tkconfigure(midle, font = "courier", wrap = "none", 
+                  width = 30, yscrollcommand = function(...) {
+                    tkset(yscr, ...)
+                    tkyview.moveto(left, as.double(...))
+                    tkyview.moveto(right, as.double(...))
+                  })
+                tkconfigure(right, font = "courier", wrap = "none", 
+                  width = 30, yscrollcommand = function(...) {
+                    tkset(yscr, ...)
+                    tkyview.moveto(left, as.double(...))
+                    tkyview.moveto(midle, as.double(...))
+                  })
+                sortbutton <- tkbutton(tttextpop, text = "Sort by density", 
+                  command = Sort)
+                burnbutton <- tkbutton(tttextpop, text = "Recalculate\n with burnin", 
+                  command = Reburn)
+                burnentry <- tkentry(tttextpop, width = "10", 
+                  textvariable = reburnvalue)
+                timelabel.widget <- tklabel(tttextpop, text = "...", 
+                  foreground = "blue")
+                outputbutton <- tkbutton(tttextpop, text = "Save to file", 
+                  command = Output)
+                tkinsert(ltop, "end", "Run")
+                tkinsert(mtop, "end", "Number of populations")
+                tkinsert(rtop, "end", "Mean of probability density")
+                tkgrid(ltop, row = 1, column = 1)
+                tkgrid(mtop, row = 1, column = 2, columnspan = 2)
+                tkgrid(rtop, row = 1, column = 4)
+                tkgrid(left, row = 2, column = 1)
+                tkgrid(midle, row = 2, column = 2, columnspan = 2)
+                tkgrid(right, row = 2, column = 4)
+                tkgrid(yscr, row = 2, column = 5, sticky = "ns")
+                tkgrid(sortbutton, row = 3, column = 1)
+                tkgrid(burnentry, row = 3, column = 3, sticky = "w")
+                tkgrid(burnbutton, row = 3, column = 2, sticky = "e")
+                tkgrid(outputbutton, row = 3, column = 4)
+                tkgrid(timelabel.widget, row = 4, column = 1, 
+                  columnspan = 4)
+                print("Starting...")
+                initialtime <- as.numeric(Sys.time(), "secs")
+                for (i in 1:as.numeric(tclvalue(ntestpop))) {
+                  Sys.sleep(0.5)
+                  err <- try(mcmcFmodel(coordinates = globalcoordinates, 
+                    genotypes = globalgenotypes, ploidy = dploidy, 
+                    path.mcmc = tclvalue(outputdir), rate.max = as.numeric(tclvalue(rate)), 
+                    delta.coord = as.numeric(tclvalue(delta)), 
+                    npopmin = as.numeric(tclvalue(npopmin)), 
+                    npopinit = as.numeric(tclvalue(npopinit)), 
+                    npopmax = as.numeric(tclvalue(npopmax)), 
+                    nb.nuclei.max = as.numeric(tclvalue(nuclei)), 
+                    nit = as.numeric(tclvalue(nit)), thinning = as.numeric(tclvalue(thinning)), 
+                    freq.model = tclvalue(freq), varnpop = varnpop, 
+                    spatial = as.logical(tclvalue(spatial)), 
+                    jcf = as.logical(tclvalue(jcf)), filter.null.alleles = as.logical(tclvalue(null))), 
+                    silent = TRUE)
+                  print("Done")
+                  if (class(err) == "try-error") {
+                    Log(paste("mcmcFmodel(coordinates=", matrix2str(globalcoordinates), 
+                      ",genotypes=", matrix2str(globalgenotypes), 
+                      ",ploidy=", dploidy, ",path.mcmc=\"", tclvalue(outputdir), 
+                      "\",rate.max=", as.numeric(tclvalue(rate)), 
+                      ",delta.coord=", as.numeric(tclvalue(delta)), 
+                      ",npopmin=", as.numeric(tclvalue(npopmin)), 
+                      ",npopinit=", as.numeric(tclvalue(npopinit)), 
+                      ",npopmax=", as.numeric(tclvalue(npopmax)), 
+                      ",nb.nuclei.max=", as.numeric(tclvalue(nuclei)), 
+                      ",nit=", as.numeric(tclvalue(nit)), ",thinning=", 
+                      as.numeric(tclvalue(thinning)), ",freq.model=\"", 
+                      tclvalue(freq), "\",varnpop=", varnpop, 
+                      ",spatial=", as.logical(tclvalue(spatial)), 
+                      ",jcf=", as.logical(tclvalue(jcf)), ",filter.null.alleles =", 
+                      as.logical(tclvalue(null)), ")", sep = ""), 
+                      "[FAILED] ")
+                    tkinsert(left, "end", as.character(i))
+                    tkinsert(left, "end", "\n")
+                    tkinsert(midle, "end", "failed\n")
+                    tkinsert(right, "end", "failed\n")
+                    runs <- c(runs, i)
+                    pops <<- c(pops, NA)
+                    probs <<- c(probs, NA)
+                  }
+                  else {
+                    Log(paste("mcmcFmodel(coordinates=", matrix2str(globalcoordinates), 
+                      ",genotypes=", matrix2str(globalgenotypes), 
+                      ",ploidy=", dploidy, ",path.mcmc=\"", tclvalue(outputdir), 
+                      "\",rate.max=", as.numeric(tclvalue(rate)), 
+                      ",delta.coord=", as.numeric(tclvalue(delta)), 
+                      ",npopmin=", as.numeric(tclvalue(npopmin)), 
+                      ",npopinit=", as.numeric(tclvalue(npopinit)), 
+                      ",npopmax=", as.numeric(tclvalue(npopmax)), 
+                      ",nb.nuclei.max=", as.numeric(tclvalue(nuclei)), 
+                      ",nit=", as.numeric(tclvalue(nit)), ",thinning=", 
+                      as.numeric(tclvalue(thinning)), ",freq.model=\"", 
+                      tclvalue(freq), "\",varnpop=", varnpop, 
+                      ",spatial=", as.logical(tclvalue(spatial)), 
+                      ",jcf=", as.logical(tclvalue(jcf)), ",filter.null.alleles =", 
+                      as.logical(tclvalue(null)), ")", sep = ""), 
+                      "[SUCCESS] ")
+                    tkinsert(left, "end", as.character(i))
+                    tkinsert(left, "end", "\n")
+                    runs <- c(runs, i)
+                    file <- try(scan(paste(tclvalue(outputdir), 
+                      "populations.numbers.txt", sep = "")), 
+                      silent = TRUE)
+                    for (j in 1:length(file)) allpops[j, i] <- file[j]
+                    dist <- hist(file, plot = FALSE, breaks = seq(0.5, 
+                      max(file) + 0.5, 1))
+                    firsttime <- 0
+                    straux <- ""
+                    for (j in 1:length(dist$counts)) {
+                      if (dist$counts[j] == max(dist$counts)) {
+                        if (firsttime == 0) {
+                          straux <- as.character(dist$mids[j])
+                          firsttime <- 1
+                        }
+                        else {
+                          straux <- paste(straux, " and ", sep = "")
+                          straux <- paste(straux, as.character(dist$mids[j]), 
+                            sep = "")
+                        }
+                      }
+                    }
+                    straux <- paste(straux, " ( ", sep = "")
+                    straux <- paste(straux, as.character(as.double(max(dist$density) * 
+                      100)), sep = "")
+                    straux <- paste(straux, " %) ", sep = "")
+                    tkinsert(midle, "end", straux)
+                    pops <<- c(pops, straux)
+                    tkinsert(midle, "end", "\n")
+                    file <- try(scan(paste(tclvalue(outputdir), 
+                      "log.posterior.density.txt", sep = "")), 
+                      silent = TRUE)
+                    for (j in 1:length(file)) allprobs[j, i] <- file[j]
+                    mpd <- mean(file)
+                    tkinsert(right, "end", mpd)
+                    tkinsert(right, "end", "\n")
+                    probs <<- c(probs, mpd)
+                    if (i == 1) {
+                      runtime <- as.numeric(Sys.time(), "secs") - 
+                        initialtime
+                      totaltime <- runtime * as.integer(tclvalue(ntestpop))
+                    }
+                    changetotime <- function() {
+                      seconds <- (totaltime - runtime)%%60
+                      aux <- (totaltime - runtime)%/%60
+                      minutes <- aux%%60
+                      aux <- aux%/%60
+                      hours <- aux%%24
+                      aux <- aux%/%24
+                      str <- ""
+                      if (aux != 0) 
+                        str <- paste(str, as.integer(aux), " day(s), ", 
+                          sep = "")
+                      if (hours != 0) 
+                        str <- paste(str, as.integer(hours), 
+                          " hour(s), ", sep = "")
+                      if (minutes != 0) 
+                        str <- paste(str, as.integer(minutes), 
+                          " minute(s), ", sep = "")
+                      str <- paste(str, as.integer(seconds), 
+                        " second(s)", sep = "")
+                      return(str)
+                    }
+                    tkconfigure(timelabel.widget, text = paste("about ", 
+                      changetotime(), " remaining", sep = ""))
+                    totaltime <- totaltime - runtime
+                  }
+                  tkyview.moveto(left, 1)
+                }
+                tkconfigure(timelabel.widget, text = "Done")
                 if (tclvalue(freq) == "Falush") 
                   falush <<- 1
                 else falush <<- 0
+                tkdestroy(tttry)
+                tkfocus(tttextpop)
             }
         }
         ploidylabel.widget <- tklabel(ttrun, text = "Ploidy:")
@@ -403,12 +718,53 @@ function (lib.loc = NULL)
         tkgrid(spatiallabel.widget, row = 12, column = 1, sticky = "w")
         tkgrid(wspatial, row = 12, column = 3, columnspan = 3, 
             sticky = "w")
+        nulllabel.widget <- tklabel(ttrun, text = "Null allele model:")
+        null <- tclVar("TRUE")
+        wnull <- .Tk.subwin(ttrun)
+        nulloptionmenu.widget <- tcl("tk_optionMenu", wnull, 
+            null, "FALSE", "TRUE")
+        tkgrid(nulllabel.widget, row = 13, column = 1, sticky = "w")
+        tkgrid(wnull, row = 13, column = 3, columnspan = 3, sticky = "w")
         jcf <- tclVar("FALSE")
-        labelspace <- tklabel(ttrun, text = " ")
-        tkgrid(labelspace, row = 13, column = 1)
+        labelspace0 <- tklabel(ttrun, text = " ")
+        tkgrid(labelspace0, row = 14, column = 1)
+        labelspace <- tklabel(ttrun, image = imageline)
+        tkgrid(labelspace, row = 15, column = 1, columnspan = 6, 
+            sticky = "news")
+        labelspace1 <- tklabel(ttrun, text = " ")
+        tkgrid(labelspace1, row = 16, column = 1)
+        activatetestpop <- function() {
+            if (tclvalue(testnumberpop) == 1) 
+                tkconfigure(testpop, state = "normal")
+            else tkconfigure(testpop, state = "disable")
+        }
+        ttestpoplabel.widget <- tklabel(ttrun, text = "Multiple runs for inferring\n the number of populations:")
+        ttestpoplabelyes.widget <- tklabel(ttrun, text = "No")
+        ttestpoplabelno.widget <- tklabel(ttrun, text = "Yes")
+        testpopyes.widget <- tkradiobutton(ttrun, command = activatetestpop, 
+            variable = testnumberpop, value = 0, selectcolor = "white")
+        testpopno.widget <- tkradiobutton(ttrun, command = activatetestpop, 
+            variable = testnumberpop, value = 1, selectcolor = "white")
+        ntestpop <- tclVar(1)
+        wtestpop <- .Tk.subwin(ttrun)
+        testpop <- tcl("spinbox", wtestpop, "-textvariable", 
+            ntestpop, "-width", 5, "-increment", 1, "-from", 
+            1, "-to", 999, state = "disable")
+        tkconfigure(testpop, state = "disable")
+        tkgrid(ttestpoplabel.widget, row = 17, column = 1, columnspan = 2, 
+            rowspan = 2, sticky = "w")
+        tkgrid(ttestpoplabelyes.widget, row = 17, column = 3, 
+            sticky = "w")
+        tkgrid(ttestpoplabelno.widget, row = 17, column = 4, 
+            sticky = "w")
+        tkgrid(testpopyes.widget, row = 18, column = 3, sticky = "w")
+        tkgrid(testpopno.widget, row = 18, column = 4, sticky = "w")
+        tkgrid(wtestpop, row = 18, column = 5, sticky = "w")
+        labelspace2 <- tklabel(ttrun, text = " ")
+        tkgrid(labelspace2, row = 19, column = 1)
         nextbutton <- tkbutton(ttrun, image = imagerun2, text = "RUN >>", 
             command = RunmcmcFmodel)
-        tkgrid(nextbutton, row = 14, column = 3, columnspan = 3, 
+        tkgrid(nextbutton, row = 20, column = 3, columnspan = 3, 
             sticky = "e")
         tkfocus(ttrun)
         tkgrid(ratelabel.widget, row = 3, column = 1, sticky = "w")
@@ -1257,7 +1613,7 @@ function (lib.loc = NULL)
                       Log(paste("title(main=paste(\"Posterior density of model (values in log)\\nMean=\"", 
                         mean.lpp, "\"))", sep = ""), "[FAILED] ")
                     }
-                    tkmessageBox(message = err, icon = "error", 
+                    tkmessageBox(message = file, icon = "error", 
                       type = "ok", parent = tt)
                   }
                   else {
@@ -1744,9 +2100,6 @@ function (lib.loc = NULL)
         tkgrid(labelfstat, row = 4, column = 1, sticky = "w")
         tkgrid(buttonfstat, row = 5, column = 1, sticky = "w")
         tkgrid(labelspace2, row = 6, column = 1, sticky = "w")
-        tkgrid(labeldsigma, row = 7, column = 1, sticky = "w")
-        tkgrid(buttondsigma, row = 8, column = 1, sticky = "w")
-        tkgrid(labelspace3, row = 9, column = 1, sticky = "w")
         tkgrid(labeldiff, row = 10, column = 1, sticky = "w")
         tkgrid(buttondiff, row = 11, column = 1, sticky = "w")
     }
@@ -2005,7 +2358,7 @@ function (lib.loc = NULL)
                     "[SUCCESS] ")
                   tkmessageBox(message = "Terminated with success", 
                     type = "ok", parent = tt)
-                  globalcoordinates <<- t(idb.dataset$coord.indiv)
+                  globalcoordinates <<- idb.dataset$coord.indiv
                   tclvalue(labelcoordtext) <- "Coordinate:    Simulated panmictic data loaded"
                   globalgenotypes <<- idb.dataset$genotypes
                   tclvalue(labelgenotext) <- "Genotype:      Simulated panmictic data loaded"
@@ -2016,7 +2369,7 @@ function (lib.loc = NULL)
                     auxgen <- tclVar()
                     tclvalue(auxgen) <- tclvalue(tkgetSaveFile(filetypes = "{{All files} *}", 
                       initialdir = tclvalue(outputdir), title = "Save genotype file to:"))
-                    write.table(t(idb.dataset$coord.indiv), file = tclvalue(auxcoord), 
+                    write.table(idb.dataset$coord.indiv, file = tclvalue(auxcoord), 
                       sep = tclvalue(sep1), row.names = FALSE, 
                       col.names = FALSE)
                     write.table(idb.dataset$genotypes, file = tclvalue(auxgen), 
@@ -2152,13 +2505,13 @@ function (lib.loc = NULL)
                 tkfocus(tttry)
                 print("Starting...")
                 Sys.sleep(0.5)
-                err <- try(gl2gp(coordinates = t(globalcoordinates), 
+                err <- try(gl2gp(coordinates = globalcoordinates, 
                   genotypes = globalgenotypes, file = tclvalue(filename)), 
                   silent = TRUE)
                 tkdestroy(tttry)
                 print("Done.")
                 if (class(err) == "try-error") {
-                  Log(paste("gl2gp(coordinates=", matrix2str(t(globalcoordinates)), 
+                  Log(paste("gl2gp(coordinates=", matrix2str(globalcoordinates), 
                     ",genotypes=", matrix2str(globalgenotypes), 
                     ",file=", tclvalue(filename), ")", sep = ""), 
                     "[FAILED] ")
@@ -2166,7 +2519,7 @@ function (lib.loc = NULL)
                     type = "ok", parent = tt)
                 }
                 else {
-                  Log(paste("gl2gp(coordinates=", matrix2str(t(globalcoordinates)), 
+                  Log(paste("gl2gp(coordinates=", matrix2str(globalcoordinates), 
                     ",genotypes=", matrix2str(globalgenotypes), 
                     ",file=", tclvalue(filename), ")", sep = ""), 
                     "[SUCCESS] ")
@@ -2288,7 +2641,7 @@ function (lib.loc = NULL)
                     ")", sep = ""), "[SUCCESS] ")
                   tkmessageBox(message = "Terminated with success", 
                     type = "ok", parent = tt)
-                  globalcoordinates <<- t(idb.dataset$coord.indiv)
+                  globalcoordinates <<- idb.dataset$coord.indiv
                   tclvalue(labelcoordtext) <- "Coordinate:    Simulated IBD data loaded"
                   globalgenotypes <<- idb.dataset$genotypes
                   tclvalue(labelgenotext) <- "Genotype:       Simulated IBD data loaded"
@@ -2299,7 +2652,7 @@ function (lib.loc = NULL)
                     auxgen <- tclVar()
                     tclvalue(auxgen) <- tclvalue(tkgetSaveFile(filetypes = "{{All files} *}", 
                       initialdir = tclvalue(outputdir), title = "Save genotype file to:"))
-                    write.table(t(idb.dataset$coord.indiv), file = tclvalue(auxcoord), 
+                    write.table(idb.dataset$coord.indiv, file = tclvalue(auxcoord), 
                       sep = tclvalue(sep1), row.names = FALSE, 
                       col.names = FALSE)
                     write.table(idb.dataset$genotypes, file = tclvalue(auxgen), 
@@ -2569,6 +2922,9 @@ function (lib.loc = NULL)
             tkwm.title(tttext, filename)
             posx <- tclVar("")
             posy <- tclVar("")
+            left <- tktext(tttext)
+            txt <- tktext(tttext)
+            top <- tktext(tttext)
             yscr <- tkscrollbar(tttext, repeatinterval = 5, command = function(...) {
                 tkyview(txt, ...)
                 tkyview(left, ...)
@@ -2578,7 +2934,7 @@ function (lib.loc = NULL)
                   tkxview(txt, ...)
                   tkxview(top, ...)
                 })
-            txt <- tktext(tttext, font = "courier", wrap = "none", 
+            tkconfigure(txt, font = "courier", wrap = "none", 
                 yscrollcommand = function(...) {
                   tkset(yscr, ...)
                   tkyview.moveto(left, as.double(...))
@@ -2588,14 +2944,14 @@ function (lib.loc = NULL)
                 })
             row <- NROW(file)
             col <- NCOL(file)
-            top <- tktext(tttext, font = "courier", height = 1, 
-                wrap = "none", xscrollcommand = function(...) {
+            tkconfigure(top, font = "courier", height = 1, wrap = "none", 
+                xscrollcommand = function(...) {
                   tkset(xscr, ...)
                   tkxview.moveto(txt, as.double(...))
                 })
             auxtxt <- ""
             if (class(file2) == "try-error") {
-                left <- tktext(tttext, font = "courier", wrap = "none", 
+                tkconfigure(left, font = "courier", wrap = "none", 
                   width = numberofdigits(row + 6), yscrollcommand = function(...) {
                     tkset(yscr, ...)
                     tkyview.moveto(txt, as.double(...))
@@ -2607,7 +2963,7 @@ function (lib.loc = NULL)
                 }
             }
             else {
-                left <- tktext(tttext, font = "courier", wrap = "none", 
+                tkconfigure(left, font = "courier", wrap = "none", 
                   yscrollcommand = function(...) {
                     tkset(yscr, ...)
                     tkyview.moveto(txt, as.double(...))
@@ -2676,6 +3032,9 @@ function (lib.loc = NULL)
             tkwm.title(tttext, filename)
             posx <- tclVar("")
             posy <- tclVar("")
+            txt <- tktext(tttext)
+            left <- tktext(tttext)
+            top <- tktext(tttext)
             yscr <- tkscrollbar(tttext, repeatinterval = 5, command = function(...) {
                 tkyview(txt, ...)
                 tkyview(left, ...)
@@ -2685,7 +3044,7 @@ function (lib.loc = NULL)
                   tkxview(txt, ...)
                   tkxview(top, ...)
                 })
-            txt <- tktext(tttext, font = "courier", wrap = "none", 
+            tkconfigure(txt, font = "courier", wrap = "none", 
                 yscrollcommand = function(...) {
                   tkset(yscr, ...)
                   tkyview.moveto(left, as.double(...))
@@ -2695,12 +3054,12 @@ function (lib.loc = NULL)
                 })
             row <- NROW(file)
             col <- NCOL(file)
-            top <- tktext(tttext, font = "courier", height = 1, 
-                wrap = "none", xscrollcommand = function(...) {
+            tkconfigure(top, font = "courier", height = 1, wrap = "none", 
+                xscrollcommand = function(...) {
                   tkset(xscr, ...)
                   tkxview.moveto(txt, as.double(...))
                 })
-            left <- tktext(tttext, font = "courier", wrap = "none", 
+            tkconfigure(left, font = "courier", wrap = "none", 
                 yscrollcommand = function(...) {
                   tkset(yscr, ...)
                   tkyview.moveto(txt, as.double(...))
@@ -2774,6 +3133,9 @@ function (lib.loc = NULL)
             tkwm.title(tttext, filename)
             posx <- tclVar("")
             posy <- tclVar("")
+            txt <- tktext(tttext)
+            left <- tktext(tttext)
+            top <- tktext(tttext)
             yscr <- tkscrollbar(tttext, repeatinterval = 5, command = function(...) {
                 tkyview(txt, ...)
                 tkyview(left, ...)
@@ -2783,7 +3145,7 @@ function (lib.loc = NULL)
                   tkxview(txt, ...)
                   tkxview(top, ...)
                 })
-            txt <- tktext(tttext, font = "courier", wrap = "none", 
+            tkconfigure(txt, font = "courier", wrap = "none", 
                 yscrollcommand = function(...) {
                   tkset(yscr, ...)
                   tkyview.moveto(left, as.double(...))
@@ -2793,12 +3155,12 @@ function (lib.loc = NULL)
                 })
             row <- NROW(file)
             col <- NCOL(file)
-            top <- tktext(tttext, font = "courier", height = 1, 
-                wrap = "none", xscrollcommand = function(...) {
+            tkconfigure(top, font = "courier", height = 1, wrap = "none", 
+                xscrollcommand = function(...) {
                   tkset(xscr, ...)
                   tkxview.moveto(txt, as.double(...))
                 })
-            left <- tktext(tttext, font = "courier", wrap = "none", 
+            tkconfigure(left, font = "courier", wrap = "none", 
                 yscrollcommand = function(...) {
                   tkset(yscr, ...)
                   tkyview.moveto(txt, as.double(...))
@@ -3103,7 +3465,6 @@ function (lib.loc = NULL)
     tkgrid(labelspace, row = 6, column = 1, sticky = "w")
     tkgrid(labelsimulation, row = 7, column = 1, sticky = "w")
     tkgrid(buttonsimfmodel, row = 8, column = 1, sticky = "we")
-    tkgrid(buttonibd, row = 9, column = 1, sticky = "we")
     tkgrid(buttonplot2, row = 10, column = 1, sticky = "we")
     coordownlabel.widget <- tklabel(tt, textvariable = labelcoordtext, 
         foreground = "blue")

@@ -1,30 +1,22 @@
-	Changes from version 2.0.8 to version 2.0.9:
+	Changes from version 2.0.9 to version 2.0.10:
 	--------------------------------------------
 
 * R
 
-- Function mcmcFmodel 
-	. passes path.mcmc instead of all file names to Fortran
-	. jcf set to FALSE as default value
-	. number of alleles at each locus not passed as an optionnal argument
-	. test for coordinates if spatial==TRUE and pass a dummy matrix if coord are missing and spatial==FALSE
-
-- Function nullify 
-	. returns a matrix instead of a list
-	. corrupts alleles whose indice is passed in a vector
-
-- Function PostProcessChain 
-	. reads whether null alleles have been filtered 
-	. if(filter.null.alleles){allele.numbers <-  allele.numbers + 1}
-
 - Function PlotFreq 
-	. does not any longer take number of alleles at each locus as an optionnal argument
-	. if(filter.null.alleles){allele.numbers <-  allele.numbers + 1}
-	. ylim=c(0,1)
+	. first instruction allele.numbers <- as.matrix(allele.numbers) removed
 
-- Function PlotFreqA 
-	. ylim=c(0,1)
+- Function simdata 
+	the coordinates are now returned as a n x 2 matrix instead of a 2 x n matrix
+	(to be consistent with simFmodel and mcmcFmodel)
 
-- Fortran code alarousset.f:
-	. cleaning all warning popping-up during build under windows
+- Function mcmcFmodel
+	. stop() instruction if nb.nuclei.max < nindiv when SPATIAL=FALSE
+
+	. Now an extra argument filter.null.allelles set to TRUE by default.
+	  This option is not programmed for freq.model="Falush" (with argument check)
+          If filter.null.allelles IS TRUE an extra allele is created at each locus
+          It's frequency can plotted with PlotFreq
+
 	
+

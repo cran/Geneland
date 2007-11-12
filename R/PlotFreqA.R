@@ -28,7 +28,7 @@ function (genotypes, path.mcmc, iloc, iall, printit = FALSE,
         iall, "at locus", iloc), type = "l", ylim = c(0, 1))
     title(main = ifelse(iall == 1, paste("Allele freq. in ancestral pop. at locus", 
         iloc), ""))
-    if (printit == T) {
+    if (printit == TRUE) {
         postscript(file = paste(path, "freq.ancestral.pop.loc", 
             iloc, ".ps", sep = ""))
         plot(fa[, (iloc - 1) * max(allele.numbers) + iall], xlab = paste("Index of MCMC iteration", 

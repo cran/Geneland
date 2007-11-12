@@ -37,7 +37,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
             to = dataset$coord.lim[4], length = dataset$npix[2]), 
             matrix(nr = dataset$npix[1], nc = dataset$npix[2], 
                 dataset$color.nuclei[dataset$nearest.nucleus.grid], 
-                byrow = F), xlab = "", ylab = "", col = terrain.colors(dataset$npop), 
+                byrow = FALSE), xlab = "", ylab = "", col = terrain.colors(dataset$npop), 
             asp = 1)
         points(dataset$coord.nuclei[1, ], dataset$coord.nuclei[2, 
             ], col = 1, pch = ".", cex = 1.5)
@@ -66,8 +66,8 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
                   length = dataset$npix[1]), seq(from = dataset$coord.lim[3], 
                   to = dataset$coord.lim[4], length = dataset$npix[2]), 
                   matrix(nr = dataset$npix[1], nc = dataset$npix[2], 
-                    FF, byrow = F), col = heat.colors(500), xlab = "", 
-                  ylab = "", zlim = zlim.freq, asp = 1)
+                    FF, byrow = FALSE), col = heat.colors(500), 
+                  xlab = "", ylab = "", zlim = zlim.freq, asp = 1)
                 title(paste("Frequencies of allele #", iall, 
                   "at locus #", iloc))
                 if (!is.na(file.plot.freq.grid)) 

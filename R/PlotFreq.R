@@ -2,7 +2,6 @@
 function (genotypes, path.mcmc, ipop, iloc, iall, printit = FALSE, 
     path) 
 {
-    allele.numbers <- as.matrix(allele.numbers)
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "")
     param <- as.matrix(read.table(fileparam))
     nit <- as.numeric(param[param[, 1] == "nit", 3])
@@ -36,8 +35,14 @@ function (genotypes, path.mcmc, ipop, iloc, iall, printit = FALSE,
     plot(f[sub, ipop], xlab = paste("Index of MCMC iteration", 
         " (x ", thinning, ")", sep = ""), ylab = paste("Frequency of allele", 
         iall, "at locus", iloc), type = "l", ylim = c(0, 1))
-    title(main = ifelse(iall == 1, paste("Allele frequencies in population", 
-        ipop, "for locus", iloc), ""))
+    if (iall < allele.numbers[iloc]) {
+        title(main = paste("Allele frequencies of allele", iall, 
+            "for locus", iloc, "in population", ipop))
+    }
+    if (filter.null.alleles & (iall == allele.numbers[iloc])) {
+        title(main = paste("Frequencies of null alleles", "for locus", 
+            iloc, "in population", ipop))
+    }
     if (printit == TRUE) {
         postscript(file = paste(path, "freq.pop", ipop, ".loc", 
             iloc, ".ps", sep = ""))
@@ -54,8 +59,14 @@ function (genotypes, path.mcmc, ipop, iloc, iall, printit = FALSE,
             " (x ", thinning, ")", sep = ""), ylab = paste("Frequency of allele", 
             iall, "at locus", iloc), type = "l", ylim = c(0, 
             1))
-        title(main = ifelse(iall == 1, paste("Allele frequencies in population", 
-            ipop, "for locus", iloc), ""))
+        if (iall < allele.numbers[iloc]) {
+            title(main = paste("Allele frequencies of allele", 
+                iall, "for locus", iloc, "in population", ipop))
+        }
+        if (filter.null.alleles & (iall == allele.numbers[iloc])) {
+            title(main = paste("Frequencies of null alleles", 
+                "for locus", iloc, "in population", ipop))
+        }
         dev.off()
     }
 }

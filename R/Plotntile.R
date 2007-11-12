@@ -12,13 +12,13 @@ function (path.mcmc, burnin, printit = FALSE, file)
     else {
         sub <- 1:length(npp)
     }
-    if (printit == T) {
+    if (printit == TRUE) {
         postscript(file)
         par(mfrow = c(1, 2))
         plot((1:length(npp)) * thinning, npp, type = "l", ylab = "Number of Tiles", 
             xlab = paste("Index of MCMC iteration", " \n Whole chain", 
                 sep = ""))
-        hist(npp[sub], plot = T, prob = T, xlab = paste("Number of tiles along the chain \n(after a burnin of ", 
+        hist(npp[sub], plot = TRUE, prob = TRUE, xlab = paste("Number of tiles along the chain \n(after a burnin of ", 
             burnin, "x", thinning, " it.)", sep = ""), main = "Number of tiles along the chain  \n  after burnin")
         dev.off()
     }
@@ -27,7 +27,7 @@ function (path.mcmc, burnin, printit = FALSE, file)
         plot((1:length(npp)) * thinning, npp, type = "l", ylab = "Number of Tiles", 
             xlab = paste("Index of MCMC iteration", "\n Whole chain", 
                 sep = ""))
-        hist(npp[sub], plot = T, prob = T, xlab = paste("Number of tiles along the chain \n(after a burnin of ", 
+        hist(npp[sub], plot = TRUE, prob = TRUE, xlab = paste("Number of tiles along the chain \n(after a burnin of ", 
             burnin, "x", thinning, " it.)", sep = ""), main = "Number of tiles along the chain  \n  after burnin")
     }
 }

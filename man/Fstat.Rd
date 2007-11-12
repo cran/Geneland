@@ -19,7 +19,6 @@ Fstat(genotypes,npop,pop.mbrship)
   \item{pop.mbrship}{Vector of integers giving the population membership
      for each individual  }
 }
-}
 \value{A list with components 
   \item{Pairwise.Fis }{A vector of estimations of within-population Fis}
   \item{Pairwise.Fst }{A matrix of estimations the pairwise population

@@ -96,7 +96,7 @@ c$$$      write(6,*) '          *****************************'
 
 c       write(*,*) 'fin de l ouverture'
 
-      call intpr('All files have been opened',-1,0,0)
+c      call intpr('All files have been opened',-1,0,0)
 
  
 ************************
