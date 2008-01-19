@@ -3,9 +3,6 @@
 
 * R
 
-- Function PlotFreq 
-	. first instruction allele.numbers <- as.matrix(allele.numbers) removed
-
 - Function simdata 
 	the coordinates are now returned as a n x 2 matrix instead of a 2 x n matrix
 	(to be consistent with simFmodel and mcmcFmodel)
@@ -15,8 +12,10 @@
 
 	. Now an extra argument filter.null.allelles set to TRUE by default.
 	  This option is not programmed for freq.model="Falush" (with argument check)
-          If filter.null.allelles IS TRUE an extra allele is created at each locus
-          It's frequency can plotted with PlotFreq
-
+          If filter.null.allelles is TRUE an extra allele is created at each locus
+          It's frequency can be plotted with PlotFreq
 	
-
+- Function PlotFreq 
+	. first instruction allele.numbers <- as.matrix(allele.numbers) removed
+	. if filter.null.allelles is TRUE the last allele has been added by mcmcFModel and is fictive
+	  legend for this allele adapted accordingly 

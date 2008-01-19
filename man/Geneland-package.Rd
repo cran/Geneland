@@ -19,7 +19,7 @@
   \tabular{ll}{
     Package: \tab Geneland\cr
     Type: \tab Package\cr
-    Version: \tab 2.0.9\cr
+    Version: \tab 2.0.12\cr
     Date: \tab 2008-10-01\cr
     License: \tab GPL\cr
   }
