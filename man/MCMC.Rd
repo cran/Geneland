@@ -1,23 +1,70 @@
-\name{mcmcFmodel}
-\alias{mcmcFmodel}
+\name{MCMC}
+\alias{MCMC}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Inference in a  spatial statistical model  }
-\description{ Markov Chain Monte-Carlo inference in the spatial F-model}
+\title{ Markov Chain Monte-Carlo inference under various models}
+\description{ Markov Chain Monte-Carlo inference under various models}
 \usage{
-mcmcFmodel(coordinates,genotypes,ploidy,
-path.mcmc, rate.max, delta.coord, npopmin, npopinit,
-npopmax, nb.nuclei.max, nit, thinning, freq.model, varnpop, spatial,jcf,
-filter.null.alleles)
+MCMC(
+      coordinates=NULL,
+      genotypes,## 
+                 ploidy=2,
+                 dominance="Codominant",
+                 allele.numbers,
+                                        # path to output directory
+                 path.mcmc,
+                                        # hyper-prior parameters
+                 rate.max,delta.coord=0,shape1=2,shape2=20,
+                 npopmin=1,npopinit,npopmax,
+                                        # dimensions
+                 nb.nuclei.max,
+                                        # options in mcmc computations
+                 nit,thinning=1,freq.model="Correlated",
+                 varnpop=TRUE,
+                 spatial=TRUE,
+                 jcf=TRUE,
+                 filter.null.alleles=TRUE,
+                 prop.update.cell=0.1,
+                 write.rate.Poisson.process=FALSE,
+                 write.number.nuclei=TRUE,
+                 write.number.pop=TRUE,
+                 write.coord.nuclei=TRUE,
+                 write.color.nuclei=TRUE,
+                 write.freq=TRUE,
+                 write.ancestral.freq=TRUE,
+                 write.drifts=TRUE,
+                 write.logposterior=TRUE,
+                 write.loglikelihood=TRUE,
+                 write.true.coord=TRUE,
+                 write.size.pop=FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
   \item{coordinates}{Spatial coordinates of individuals. A matrix with 2
     columns and one line per individual.}
-  \item{genotypes}{Genotypes of individuals. A matrix with one line per
-    individual and 2  columns (resp. one column) per locus for diploid
-    data (resp. haploid data).}
+  \item{genotypes}{Genotypes of individuals. A matrix with dimension as
+    described below.
+
+
+    For diploid organisms at codominant markers: a matrix with one line per
+    individual and two  columns per locus.
+
+    
+    For diploid organisms at dominant markers: a matrix with one line per
+    individual and one column per locus. Presence/absence of a band should be
+    coded as 0/1 (0 for absence / 1 for presence).
+
+
+    For haploid organisms: a matrix with one line per
+    individual and one  column per locus.}
+    
+
   \item{ploidy}{An integer equal to 1 for haploid data and 2 for diploid
-    data.}
+    data. }
+  \item{dominance}{A character string that should be either "Codominant"
+    (default) for codominant markers such as microsatellites and SNPs
+    or "Dominant" for AFLPs.}
+  \item{allele.numbers}{Vector of integers giving the number of observed
+  alleles at each locus. Only for debugging. Should be left unspecified.}
   \item{path.mcmc}{ Path to output files directory. It seems that the
     path should be given in the Unix style even under Windows (use \/
     instead of \\).
@@ -32,6 +79,10 @@ filter.null.alleles)
     consiered as true coordinates, if \code{delta.coord}>0 it is assumed that observed
   coordinates are true coordinates blurred by an additive noise uniform
   on a square of side \code{delta.coord} centered on 0.}
+\item{shape1}{First parameter in the Beta(shape1,shape2) prior
+  distribution of the drift parameters in the Correlated model.}
+\item{shape2}{Second parameter in the Beta(shape1,shape2) prior
+  distribution of the drift parameters in the Correlated model.}
   \item{npopmin}{Minimum number of populations (integer >=1) }
   \item{npopinit}{Initial number of populations
     ( integer sucht that
@@ -54,14 +105,14 @@ filter.null.alleles)
   \item{nit}{Number of MCMC iterations}
   \item{thinning}{Number of MCMC iterations between two writing steps (if \code{thinning}=1, all
     states are saved whereas if e.g. \code{thinning}=10 only each 10 iteration is saved)}
-  \item{freq.model}{Character: "Falush" or "Dirichlet" (model for
+  \item{freq.model}{Character: "Correlated" or "Uncorrelated" (model for
     frequencies). 
   See also details in detail section of \code{\link{Geneland}} help page.}
   \item{varnpop}{Logical: if TRUE the number of class is treated as
     unknown and will vary along the MCMC inference, if FALSE it will be
     fixed to the initial value \code{npopinit}. 
     \code{varnpop = TRUE} *should not* be used in conjunction with
-    \code{freq.model = "Falush"} as in this case it seems that large numbers
+    \code{freq.model = "Correlated"} as in this case it seems that large numbers
     of populations are not penalized enough and there is a serious risk
     of inferring spurious sub-populations.}
     
@@ -73,10 +124,34 @@ filter.null.alleles)
     kept fixed at the locations of individuals.}
   \item{jcf}{Logical: if true update of c and f are performed jointly}
   \item{filter.null.alleles}{Logical: if TRUE, tries to filter out null
-    allele. An extra fictive null allele is created at each locus coding
+    alleles. An extra fictive null allele is created at each locus coding
   for all putative null allele. Its frequency  is estimated and can be
   viewed with function \code{PlotFreq}. This option is available only
-  with \code{freq.model="Dirichlet"}.}
+  with \code{freq.model="Uncorrelated"}.}
+\item{prop.update.cell}{Integer between 0 and 1. Proportion of cell updated. For
+  debugging only.}
+\item{write.rate.Poisson.process}{Logical: if TRUE (default) write rate
+  of Poisson process simulated by MCMC}
+\item{write.number.nuclei}{Logical: if TRUE (default) write number of nuclei simulated by MCMC }
+\item{write.number.pop}{Logical: if TRUE (default) write number of
+  populations simulated by MCMC }
+\item{write.coord.nuclei}{Logical: if TRUE (default) write coordinates
+  of nuclei simulated by MCMC  }
+\item{write.color.nuclei}{Logical: if TRUE (default) write color of
+  nuclei simulated by MCMC  }
+\item{write.freq}{Logical: if TRUE (default is FALSE) write allele
+  frequencies simulated by MCMC  }
+\item{write.ancestral.freq}{Logical: if TRUE (default is FALSE) write
+  ancestral allele frequencies simulated by MCMC }
+\item{write.drifts}{Logical: if TRUE (default is FALSE) write drifts simulated by MCMC }
+\item{write.logposterior}{Logical: if TRUE (default is FALSE) write
+  logposterior simulated by MCMC }
+\item{write.loglikelihood}{Logical: if TRUE (default is FALSE) write
+  loglikelihood simulated by MCMC }
+\item{write.true.coord}{Logical: if TRUE (default is FALSE) write true
+  spatial coordinates simulated by MCMC }
+\item{write.size.pop}{Logical: if TRUE (default is FALSE) write size of
+  populations simulated by MCMC }
 }
 
 
@@ -85,7 +160,7 @@ Successive states of all blocks of parameters are written in files
 contained in \code{path.mcmc} and named after the type of parameters they contain.
 }
 \section{Storage format}{
-All parameters processed by function \code{\link{mcmcFmodel}} are
+All parameters processed by function \code{\link{MCMC}} are
 written in the directory  specified by \file{path.mcmc} as follows:
 
 \item File \file{population.numbers.txt} contains values of the number of
@@ -123,7 +198,7 @@ In each column values of allele frequencies are stored by increasing
 allele index and and locus index (allele index varying first), and
 values of successive iterations are pasted.
 The file has \code{nallmax*nloc*nit/thinning} lines where \code{nallmax} 
-is the maximum numer of alleles over all loci.
+is the maximum number of alleles over all loci.
 
 \item File \file{Poisson.process.rate.txt} contains rates of Poisson
 process
@@ -147,7 +222,12 @@ current state of parameters in the Markov chain.
   model for landscape genetics. Genetics, 170, 1261-1280, 2005.
 
   G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
-  genetics. Molecular Ecology Notes, 5, 712-715, 2005.}
+  genetics. Molecular Ecology Notes, 5, 712-715, 2005.
+
+   Gilles Guillot, Filipe Santos  and Arnaud Estoup,
+  Analysing georeferenced population genetics data with
+  Geneland: a new algorithm to deal with null alleles and a friendly graphical user interface
+Bioinformatics 2008 24(11):1406-1407.}
 
 
 \author{Gilles Guillot  }
@@ -157,110 +237,7 @@ current state of parameters in the Markov chain.
 \seealso{ \code{\link{simFmodel}}}
 
 \examples{
-  # Below is a sequence 
-  # of R commands using Geneland functions
 
-  # we assume that Geneland is installed
-  # and loaded by library("Geneland")
-
-
- # Simulation of a dataset made of 2 populations
- # 5 loci and 10 alleles per locus
- # on a spatial domain enclosed in a rectangle
- # (x coord. in [0,3], y coord. in [0,1])
- # domain of populations are centered around 
- # points (0.5,0.5) and (2.5,0.5) respectively 
- # (so that the boundary is the vertical line x = 1.5)
-sim = simFmodel(nindiv=100,
-          coord.lim=c(0,3,0,1),
-          number.nuclei=2,
-          coord.nuclei=cbind(c(0.5,0.5),c(2.5,0.5)),
-          color.nuclei=c(1,2),
-          nall=rep(10,5),
-          npop=2,
-          drift=c(.3,.3),
-          plots=FALSE,
-          ploth=FALSE,
-          seed=123)
-
-
-  # you can check the simulated dataset by
-ls()  ## gives a list of existing objects
-
-summary(sim) ## describes what object sim actually contains
-
-  #  define a place for MCMC outputs
-path.mcmc = paste(tempdir(),"/",sep="")
-
-\dontrun{
-  # First run of MCMC algorithm
-  # in order to get the posterior mode of the number of populations
-
-mcmcFmodel(sim$coordinates,
-           sim$genotypes,
-           path.mcmc=path.mcmc,
-           rate.max=100,
-           delta.coord=0,
-           npopmin=1,
-           npopinit=5,
-           npopmax=10,
-           nb.nuclei.max=200,
-           nit=50000,
-           thinning=50,
-           freq.model="Dirichlet",
-           varnpop=TRUE,
-           spatial=TRUE)
-
-  # Trace of number of populations
-  # Should display a mode at 2
-Plotnpop(path.mcmc)
-
-
- # Then re-run the chain with fixed number of populations
-mcmcFmodel(sim$coordinates,
-           sim$genotypes,
-           path.mcmc=path.mcmc,
-           rate.max=100,
-           delta.coord=0,
-           npopmin=1,
-           npopinit=2,
-           npopmax=2,
-           nb.nuclei.max=200,
-           nit=5000,
-           thinning=10,
-           freq.model="Dirichlet",
-           varnpop=FALSE,
-           spatial=TRUE)
-
-   # Post-processing the chain 
-PostProcessChain(sim$coordinates,sim$genotypes,
-                  path.mcmc=path.mcmc,
-                  nxdom=50,
-                  nydom=50,
-                  burnin=0)
-
-   # Plots allele frequencies of allele #1 at locus  #1 in sub-population  #1
- PlotFreq(sim$allele.numbers,
-path.mcmc=path.mcmc,ipop=1,iloc=1,iall=1)
-
-   # Map of posterior probabilites
-   # of population membership
- PlotTessellation(sim$coordinates,path.mcmc=path.mcmc)
-
-
-   # Map of posterior mode 
-   # of population membership
- PosteriorMode(sim$coordinates,path.mcmc=path.mcmc,
-               write=FALSE,plotit=TRUE)
-
-
- # read the estimated population for indivuals
- pppm.indiv <- read.table(paste(path.mcmc,"modal.pop.indiv.txt",sep=""))
-
- # add a plot of the individual colored as their estimated population of origin
-points(sim$coordinates,col=pppm.indiv[,3],pch=16)
-
-}
 
 }
 

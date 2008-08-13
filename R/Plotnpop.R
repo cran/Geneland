@@ -1,5 +1,5 @@
 `Plotnpop` <-
-function (path.mcmc, burnin, printit = FALSE, file) 
+function (path.mcmc, burnin, printit = FALSE, file, format = "pdf") 
 {
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "/")
     param <- as.matrix(read.table(fileparam))
@@ -13,23 +13,29 @@ function (path.mcmc, burnin, printit = FALSE, file)
         sub <- 1:length(npop)
     }
     if (printit == TRUE) {
-        postscript(file)
-        par(mfrow = c(1, 2))
-        plot((1:length(npop)) * thinning, npop, type = "l", ylab = "Number of classes", 
-            xlab = paste("Index of MCMC iteration", "\n Whole chain", 
-                sep = ""), ylim = c(1, max(npop) + 0.5))
-        hist(npop[sub], plot = TRUE, prob = TRUE, breaks = seq(0.5, 
-            max(npop) + 0.5, 1), xlab = paste("Nb. of pop. along the chain \n(after a burnin of ", 
-            burnin, "x", thinning, "i t.)", sep = ""), main = "Number of populations along the chain \n after burnin")
-        dev.off()
+        if (format == "ps") {
+            postscript(file)
+        }
+        if (format == "pdf") {
+            pdf(file)
+        }
+        {
+            par(mfrow = c(1, 2))
+            plot((1:length(npop)) * thinning, npop, type = "l", 
+                ylab = "Number of classes", xlab = paste("Index of MCMC iteration", 
+                  "\n Whole chain", sep = ""), ylim = c(1, max(npop) + 
+                  0.5))
+            hist(npop[sub], plot = TRUE, prob = TRUE, breaks = seq(0.5, 
+                max(npop) + 0.5, 1), xlab = paste("Nb. of pop. along the chain \n(after a burnin of ", 
+                burnin, "x", thinning, "i t.)", sep = ""), main = "Number of populations\n along the chain \n after burnin")
+            dev.off()
+        }
     }
-    else {
-        par(mfrow = c(1, 2))
-        plot((1:length(npop)) * thinning, npop, type = "l", ylab = "Number of classes", 
-            xlab = paste("Index of MCMC iteration", "\n Whole chain", 
-                sep = ""), ylim = c(1, max(npop) + 0.5))
-        hist(npop[sub], plot = TRUE, prob = TRUE, breaks = seq(0.5, 
-            max(npop) + 0.5, 1), xlab = paste("Nb. of pop. along the chain \n(after a burnin of ", 
-            burnin, "x", thinning, " it.)", sep = ""), main = "Number of populations along the chain  \n after burnin")
-    }
+    par(mfrow = c(1, 2))
+    plot((1:length(npop)) * thinning, npop, type = "l", ylab = "Number of classes", 
+        xlab = paste("Index of MCMC iteration", "\n Whole chain", 
+            sep = ""), ylim = c(1, max(npop) + 0.5))
+    hist(npop[sub], plot = TRUE, prob = TRUE, breaks = seq(0.5, 
+        max(npop) + 0.5, 1), xlab = paste("Nb. of pop. along the chain \n(after a burnin of ", 
+        burnin, "x", thinning, "i t.)", sep = ""), main = "Number of populations\n along the chain \n after burnin")
 }

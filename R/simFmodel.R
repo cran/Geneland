@@ -1,11 +1,11 @@
 `simFmodel` <-
-function (nindiv, coordinates, coord.lim, number.nuclei, coord.nuclei, 
-    color.nuclei, nall, npop, freq.model = "Dirichlet", drift, 
-    seed, plots = FALSE, ploth = FALSE) 
+function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei, 
+    coord.nuclei, color.nuclei, nall, npop, freq.model = "Uncorrelated", 
+    drift, dominance = "Codominant", plots = FALSE, ploth = FALSE) 
 {
-    if (!missing(seed)) {
-        set.seed(seed)
-    }
+    if (dominance == "Dominant" & sum(nall != rep(2, length(nall))) > 
+        0) 
+        stop("Dominant option only for bi-allelic loci")
     if (missing(coordinates)) {
         coordinates <- rbind(runif(min = coord.lim[1], max = coord.lim[2], 
             nindiv), runif(min = coord.lim[3], max = coord.lim[4], 
@@ -32,9 +32,9 @@ function (nindiv, coordinates, coord.lim, number.nuclei, coord.nuclei,
         ppvois[iindiv] <- k
     }
     nloc <- length(nall)
-    if (freq.model == "Falush") {
+    if (freq.model == "Correlated") {
         if (missing(drift)) {
-            drift <- rbeta(shape1 = 2, shape2 = 20, npop)
+            drift <- rbeta(shape1 = 2, shape2 = 20, n = npop)
         }
         fa <- matrix(nr = nloc, nc = max(nall), data = -999)
         for (iloc in 1:nloc) {
@@ -46,14 +46,14 @@ function (nindiv, coordinates, coord.lim, number.nuclei, coord.nuclei,
     freq <- array(dim = c(npop, nloc, max(nall)), data = -999)
     for (iclass in 1:npop) {
         for (iloc in 1:nloc) {
-            if (freq.model == "Dirichlet") {
+            if (freq.model == "Uncorrelated") {
                 freq[iclass, iloc, 1:nall[iloc]] <- rgamma(n = nall[iloc], 
                   scale = 1, shape = 1)
                 freq[iclass, iloc, 1:nall[iloc]] <- freq[iclass, 
                   iloc, 1:nall[iloc]]/sum(freq[iclass, iloc, 
                   1:nall[iloc]])
             }
-            if (freq.model == "Falush") {
+            if (freq.model == "Correlated") {
                 freq[iclass, iloc, 1:nall[iloc]] <- rgamma(n = nall[iloc], 
                   scale = 1, shape = fa[iloc, (1:nall[iloc])] * 
                     (1 - drift[iclass])/drift[iclass])
@@ -90,7 +90,7 @@ function (nindiv, coordinates, coord.lim, number.nuclei, coord.nuclei,
         text(coordinates[1, ], coordinates[2, ], ppvois, pos = 1)
     }
     if (ploth == TRUE) {
-        if (freq.model == "Falush") {
+        if (freq.model == "Correlated") {
             get(getOption("device"))()
             par(mfrow = c(floor(sqrt(nloc) + 1), floor(sqrt(nloc))))
             for (iloc in 1:nloc) {
@@ -115,14 +115,25 @@ function (nindiv, coordinates, coord.lim, number.nuclei, coord.nuclei,
             }
         }
     }
-    if (freq.model == "Dirichlet") {
+    if (dominance == "Dominant") {
+        for (iloc in 1:nloc) {
+            for (iindiv in 1:nindiv) {
+                if (sum(z[iindiv, c(2 * iloc - 1, 2 * iloc)]) == 
+                  3) 
+                  z[iindiv, c(2 * iloc - 1, 2 * iloc)] <- c(2, 
+                    2)
+            }
+        }
+        z <- z[, seq(1, 2 * nloc - 1, 2)]
+    }
+    if (freq.model == "Uncorrelated") {
         res <- list(coordinates = t(coordinates), genotypes = z, 
             allele.numbers = nall, number.nuclei = number.nuclei, 
             coord.nuclei = t(coord.nuclei), color.nuclei = color.nuclei, 
             frequencies = freq, index.nearest.nucleus = ppvois)
         return(res)
     }
-    if (freq.model == "Falush") {
+    if (freq.model == "Correlated") {
         res <- list(coordinates = t(coordinates), genotypes = z, 
             allele.numbers = nall, number.nuclei = number.nuclei, 
             coord.nuclei = t(coord.nuclei), color.nuclei = color.nuclei, 

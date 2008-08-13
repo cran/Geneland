@@ -6,45 +6,45 @@
 
 \docType{package}
 
-\title{Simulation and inference of a 
-  spatial statistical model for landscape genetics.}
+\title{Simulation and inference for subdivided populations }
 
 \description{
-  The main function \code{\link{mcmcFmodel}} 
-  takes geo-referenced individual multilocus genetic data and tries to detect
-  population structure (i.e sub-populations), making use of both spatial and genetic information.
+  The main function \code{\link{MCMC}} 
+  takes multilocus genetic data and tries to detect
+  population structure (i.e sub-populations),
+  making use of both genetic (and optionally geographic) information.
 }
 
 \details{
   \tabular{ll}{
     Package: \tab Geneland\cr
     Type: \tab Package\cr
-    Version: \tab 2.0.12\cr
-    Date: \tab 2008-10-01\cr
+    Version: \tab 3.0.0\cr
+    Date: \tab 2008-11-15\cr
     License: \tab GPL\cr
   }
   
-  The overall population is viewed as a co-existence of sub-populations at 
-  Hardy-Weiberg equilibrium. The sub-populations are supposed to be spatially 
-  organised through the so-called 
-  colored Poisson-Voronoi tessellation. 
-  Allele frequencies are assumed to be drawn from the F-model 
-  as described in (Falush 2003) although 
-  the particular case of independent Dirichlet allele frequencies, 
-  as described by Pritchard (2000),  is also handled. 
-  Individuals within populations are assumed to be randomly 
-  located and  Hardy-Weinberg equilibrium 
-  and linkage equilibrium are assumed.
+%   The overall population is viewed as a co-existence of sub-populations at 
+%   Hardy-Weiberg equilibrium. The sub-populations are supposed to be spatially 
+%   organised through the so-called 
+%   colored Poisson-Voronoi tessellation. 
+%   Allele frequencies are assumed to be drawn from the F-model 
+%   as described in (Falush 2003) although 
+%   the particular case of independent Uncorrelated allele frequencies, 
+%   as described by Pritchard (2000),  is also handled. 
+%   Individuals within populations are assumed to be randomly 
+%   located and  Hardy-Weinberg equilibrium 
+%   and linkage equilibrium are assumed.
   
   The main purpose of the program is to perform Bayesian inference of all the parameters involved 
   through Markov Chain Monte-Carlo simulation.
-  This is achievied by the function   \code{\link{mcmcFmodel}}.
+  This is achievied by the function   \code{\link{MCMC}}.
   Function \code{\link{PostProcessChain}} read some output files of
-  \code{\link{mcmcFmodel}}
+  \code{\link{MCMC}}
   and computes some statistics suitable to print maps of inferred
   populations.
   
-  See \code{Storage format} section in \code{\link{mcmcFmodel} help page.}
+  See \code{Storage format} section in \code{\link{MCMC} help page.}
 
   The following functions are provided by the package:
 
@@ -57,7 +57,7 @@
 
    \code{\link{show.simdata}}:  Graphical display of data simulated by simdata
   
-  \code{\link{mcmcFmodel}}: Full Bayesian Markov Chain Monte Carlo
+  \code{\link{MCMC}}: Full Bayesian Markov Chain Monte Carlo
   inference of parameters in the spatial F-model
   
   \code{\link{PostProcessChain}}: Post-procesing of MCMC output
@@ -68,7 +68,7 @@
 
   The following  functions are very basic and are only intended to be an
   aid for those not familiar with R. Most probably you may want to use
-  directly the output files of \code{\link{mcmcFmodel}} and
+  directly the output files of \code{\link{MCMC}} and
   \code{\link{PostProcessChain}} to print your own figures.
   
   \code{\link{PlotDrift}}: Graphical display of drift factors along MCMC
@@ -100,7 +100,7 @@
     
    \code{\link{FormatGenotypes}}: Internal function. 
    Transform a file of genotypes into
-   a format suitable for function \code{\link{mcmcFmodel}}
+   a format suitable for function \code{\link{MCMC}}
 
 
    
@@ -129,8 +129,11 @@ S. , Cargnelutti B., Galan M., Hewison A.J.M. Genetics structure is
 influenced by lansdcape features. Empirical evidence from a roe deer
 population. Molecular Ecology, 15 1669-1679, 2006.
 
-[4] G. Guillot, F. Santos, A. Estoup.  Inference in population genetics with Geneland: a sensitivity analysis to spatial sampling scheme, 
-null alleles and isolation by distance. Submitted.
+[4] G. Guillot, F. Santos and A. Estoup.
+  Analysing georeferenced population genetics data with Geneland:
+  a new algorithm to deal with null alleles and a friendly graphical
+  user interface. To appear in Bioinformatics.
+  
 }
 \keyword{ }
 

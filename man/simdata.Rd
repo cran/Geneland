@@ -61,13 +61,13 @@ plot.pairs.borders=FALSE)
     \code{RandomFields}
     for details)}
   \item{alpha}{Parameter of the spatial Dirichlet vector field
-    underlying the frequencies (a positive real) }
+    of frequencies (a positive real) }
   \item{beta}{Scale parameter of the spatial covariance function used for the
-    underlying Gaussian fields. A positive real number (see documentation of the package
+    underlying Gaussian fields. A positive real number (see documentation of package
     \code{RandomFields}
     for details)}
   \item{gamma}{Smoothing parameter of spatial covariance function used for the
-    underlying Gaussian fields. (see documentation of the package
+    underlying Gaussian fields. (see documentation of package
     \code{RandomFields}
   for details)}
   \item{npop}{Number of Populations}
@@ -108,6 +108,7 @@ plot.pairs.borders=FALSE)
 \seealso{Function \code{show.simdata} to make graphical display of
   simulated data.}
 \examples{
+\dontrun{
 dataset <- simdata(nindiv=100,
              number.nuclei=10,
              allele.numbers=rep(5,3),
@@ -125,6 +126,7 @@ dataset <- simdata(nindiv=100,
              comp.diff=TRUE,
              width=0.1,
              plot.pairs.borders=TRUE)
+}
 }
 
 \keyword{}

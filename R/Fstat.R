@@ -1,9 +1,15 @@
 `Fstat` <-
-function (genotypes, npop, pop.mbrship) 
+function (genotypes, npop, pop.mbrship, ploidy = 2) 
 {
-    allele.numbers <- FormatGenotypes(genotypes)$allele.numbers
-    if (sum(is.na(genotypes)) != 0) 
+    if (ploidy == 1) 
+        stop("Fstat not implemented for haploid data")
+    format <- FormatGenotypes(genotypes)
+    genotypes <- format$genotypes
+    allele.numbers <- format$allele.numbers
+    if (sum(is.na(genotypes)) != 0) {
         warning("Genotypes contain missing values which might bias computations")
+        genotypes[is.na(genotypes)] <- -999
+    }
     Fis = rep(-999, npop)
     Fst = matrix(nr = npop, nc = npop, -999)
     if (npop > 1) {
@@ -29,8 +35,8 @@ function (genotypes, npop, pop.mbrship)
                     as.integer(nloc2), as.integer(allele.numbers), 
                     as.integer(2), as.integer(effcl), as.integer(ztmp), 
                     as.integer(pop.mbrshiptmp), as.integer(tabindiv), 
-                    as.integer(kk), as.single(Fistmp), as.single(Fsttmp), 
-                    as.single(Fittmp))
+                    as.integer(kk), as.double(Fistmp), as.double(Fsttmp), 
+                    as.double(Fittmp))
                   Fst[iclass1, iclass2] <- res[[12]][1]
                 }
             }
@@ -53,10 +59,14 @@ function (genotypes, npop, pop.mbrship)
                 as.integer(nindivtmp), as.integer(nloc), as.integer(nloc2), 
                 as.integer(allele.numbers), as.integer(2), as.integer(effcl), 
                 as.integer(ztmp), as.integer(pop.mbrshiptmp), 
-                as.integer(tabindiv), as.integer(kk), as.single(Fistmp), 
-                as.single(Fsttmp), as.single(Fittmp))
+                as.integer(tabindiv), as.integer(kk), as.double(Fistmp), 
+                as.double(Fsttmp), as.double(Fittmp))
             Fis[iclass1] <- res[[11]][1]
         }
     }
+    Fst[lower.tri(Fst, diag = TRUE)] <- 0
+    Fst <- Fst + t(Fst)
+    Fis[Fis == -999] <- NA
+    Fst[Fst == -999] <- NA
     list(Fis = Fis, Fst = Fst)
 }

@@ -5,11 +5,16 @@
   object}
 \description{Computes F statistics according to Weir and Cockerham's 
   estimators.
-  Missing values are allowed but as of today, the NA code is only treated as an extra
-  allele which alters the result.}
+  Missing values are allowed and accounting for in the computation of
+  Fst.
+  The presence of missing values involves a downward bias in the
+  computation of Fis.
+  This function should not be used on haploid data.
+}
+
 
 \usage{
-Fstat(genotypes,npop,pop.mbrship)
+Fstat(genotypes,npop,pop.mbrship,ploidy)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -17,11 +22,14 @@ Fstat(genotypes,npop,pop.mbrship)
     individual and 2 columns per locus}
   \item{npop}{total number of popluation present in the dataset}
   \item{pop.mbrship}{Vector of integers giving the population membership
-     for each individual  }
-}
+    for each individual}
+   \item{ploidy}{Integer: 1 or 2 (default is 2) under development. Do
+     not use for haploid data.}
+  }
+
 \value{A list with components 
-  \item{Pairwise.Fis }{A vector of estimations of within-population Fis}
-  \item{Pairwise.Fst }{A matrix of estimations the pairwise population
+  \item{Fis }{A vector of estimations of within-population Fis}
+  \item{Fst }{A matrix of estimations the pairwise population
     Fst. (Only the upper triangular part is returned).}
 }
 
@@ -36,3 +44,4 @@ Fstat(genotypes,npop,pop.mbrship)
 }
 
 \keyword{}
+ 

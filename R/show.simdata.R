@@ -12,16 +12,16 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
             get(getOption("device"))()
         }
         else postscript(file.plot.coord)
-        plot(dataset$coord.indiv[1, ], dataset$coord.indiv[2, 
-            ], xlab = "x dataset$coordinates", ylab = "y dataset$coordinates", 
+        plot(dataset$coord.indiv[, 1], dataset$coord.indiv[, 
+            2], xlab = "x dataset$coordinates", ylab = "y dataset$coordinates", 
             asp = )
-        points(dataset$coord.nuclei[1, ], dataset$coord.nuclei[2, 
-            ], col = 2)
-        text(dataset$coord.nuclei[1, ], dataset$coord.nuclei[2, 
-            ], 1:dataset$number.nuclei, pos = 1, col = 2, pch = 2, 
+        points(dataset$coord.nuclei[, 1], dataset$coord.nuclei[, 
+            2], col = 2)
+        text(dataset$coord.nuclei[, 1], dataset$coord.nuclei[, 
+            2], 1:dataset$number.nuclei, pos = 1, col = 2, pch = 2, 
             cex = 1.2)
-        text(dataset$coord.indiv[1, ], dataset$coord.indiv[2, 
-            ], dataset$color.nuclei[dataset$nearest.nucleus.indiv], 
+        text(dataset$coord.indiv[, 1], dataset$coord.indiv[, 
+            2], dataset$color.nuclei[dataset$nearest.nucleus.indiv], 
             pos = 2)
         title(main = "Location of individuals")
         if (!is.na(file.plot.coord)) 

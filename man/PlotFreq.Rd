@@ -17,7 +17,7 @@ PlotFreq(genotypes, path.mcmc,ipop,iloc,iall,printit=FALSE,path)
    \item{path.mcmc}{ Path to output files directory }
    \item{ipop} {Integer number : index of population}
    \item{iloc}{Integer number : index of locus}
-   \item{iall}{Integer number : index of allele. If \code{mcmcFmodel}
+   \item{iall}{Integer number : index of allele. If \code{MCMC}
      was launched with option \code{filter.null.alleles=TRUE}, an extra
      fictive allele standing for putative null alleles is created. It
      estimated frequency can be also plotted. If there is say, 5 alleles

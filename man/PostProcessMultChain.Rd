@@ -1,5 +1,5 @@
-\name{PostProcessChain}
-\alias{PostProcessChain}
+\name{PostProcessMultChain}
+\alias{PostProcessMultChain}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{ Computation for  maps of posterior probability of population membership}
 \description{
@@ -7,8 +7,8 @@
  of the spatial domain. 
 }
 \usage{
-PostProcessChain(coordinates,genotypes,
-path.mcmc,nxdom, nydom,burnin)
+PostProcessMultChain(coordinates,genotypes,
+path.all,nrun,nxdom, nydom,burnin)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -16,7 +16,8 @@ path.mcmc,nxdom, nydom,burnin)
     columns and one line per individual.}
   \item{genotypes}{Genotypes of individuals. A matrix with one line per
     individual and 2 columns per locus}
-  \item{path.mcmc}{ Path to output files directory }
+  \item{path.all}{Path to output files directory }
+   \item{nrun}{Number of runs}
   \item{nxdom}{Number of pixel for discretization of the spatial domain
     in the horizontal direction}
   \item{nydom}{Number of pixel for discretization of the spatial domain

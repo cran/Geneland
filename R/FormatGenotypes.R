@@ -18,6 +18,5 @@ function (genotypes)
         nall[ic] <- max.ens
     }
     formatted <- as.matrix(formatted)
-    formatted[is.na(formatted)] <- -999
     list(genotypes = formatted, allele.numbers = nall)
 }

@@ -1,21 +1,84 @@
-	Changes from version 2.0.9 to version 2.0.10:
-	--------------------------------------------
+	---------------------------------------------
+	Changes from version 2.0.12 to version 3.0.0
+	---------------------------------------------
 
+******
 * R
+******
 
-- Function simdata 
-	the coordinates are now returned as a n x 2 matrix instead of a 2 x n matrix
-	(to be consistent with simFmodel and mcmcFmodel)
+- Function Fstat
+	 . reformat genotypes first
 
-- Function mcmcFmodel
-	. stop() instruction if nb.nuclei.max < nindiv when SPATIAL=FALSE
+- Function Fstat.output
+	. extra arguments: coord and  burnin
 
-	. Now an extra argument filter.null.allelles set to TRUE by default.
-	  This option is not programmed for freq.model="Falush" (with argument check)
-          If filter.null.allelles is TRUE an extra allele is created at each locus
-          It's frequency can be plotted with PlotFreq
+- Function mcmcFmodel becomes function MCMC
+	. test ncol(coordinates) only if passed as an argument
+	. test freq.model=="Correlated" & varnpop==TRUE 
+	. test nb.nuclei.max > 3*rate.max
+	. init nb.nuclei.max depends on whether spatial is TRUE
+	. 3 bugs corrected in bdpop9
+	. new function sm: same job as (corrected) bdpop9 but faster
+	. requires prior parameters shape1 and shape2 as input 
+	. new variable output.files specifying output files to be created
+	. possible values "Falush" and "Dirichlet" for parameter freq.model become "Correlated" and "Uncorrelated"
+	. freq.model set to "Correlated" by default
+	. npopmin set to 1 by default
+	. npopinit set to npopmax if missing
+
+- Function simFmodel
+	. remove argument seed
+
+- Function PosterioMode
+	. plots coordinates
+	. correction of a minor bug that created inconcistency between modal pop maps of indiv and pixels 
+	in case different pop have same posterior proba
+
+- New function PlanarProj
+	. project points with coordinates given as (lon,lat) on a plan and return cartesian coordinates
 	
-- Function PlotFreq 
-	. first instruction allele.numbers <- as.matrix(allele.numbers) removed
-	. if filter.null.allelles is TRUE the last allele has been added by mcmcFModel and is fictive
-	  legend for this allele adapted accordingly 
+
+- New function PostProcMultChain
+	. concatenate the output of sevral MCMC runs  
+	into a single run and postprocess it 
+
+
+	
+*************
+* In Fortran
+*************
+	
+- All computations in double precision	
+
+- Use R RNG instead of randlib	
+	
+- mcmcfmodel become subroutine mcmcgld 
+	. allele freq initialized form the full conditionnal
+	. new variable ofile specifying output files to be created
+	
+- PostProcesschain 
+	. attempt to relabel populations to avoid label switching
+	. have two extra arguments regarding I/O 
+
+- Subroutine udcf 
+	. do not compute MH ratio if ipop1 .eq. ipop2
+	. more direct computation of ratio (does not depend on freq)
+	  + error in parenthesis in algama
+
+- New subroutine sm and smd (replace bdpop9 and bdpop9bis)
+	. attempt to split and merge populations
+	. computes ratio more directly (not depending of frequencies)
+	. attemt to split a pop even if 0 of its cells are selected
+	. corrects errors in ratio on split-merge with Correlated model: 
+	     . q=1-d/d instead of d/(1-d)
+	     . normalising constant wrongly coded
+	. propose new drifts through a RJ technique instead of from the prior    
+	
+- Subroutines udcf, udcf2 and updurw	
+	. attempt to update the color or location of one tile only 
+
+
+- New function postprocmultchain
+
+
+- New function pppmindivmultchain

@@ -1,8 +1,9 @@
-`PostProcessChain` <-
-function (coordinates = NULL, genotypes, path.mcmc, nxdom, nydom, 
+`PostProcessMultChain` <-
+function (coordinates, genotypes, path.all, nrun, nxdom, nydom, 
     burnin) 
 {
-    print("Reading MCMC parameter file")
+    print("Reading parameters")
+    path.mcmc <- paste(path.all, "1/", sep = "/")
     param <- as.matrix(read.table(paste(path.mcmc, "parameters.txt", 
         sep = "")))
     delta.coord <- as.numeric(param[param[, 1] == "delta.coord", 
@@ -31,24 +32,27 @@ function (coordinates = NULL, genotypes, path.mcmc, nxdom, nydom,
     }
     nindiv <- nrow(genotypes)
     nloc <- length(allele.numbers)
-    filenpop <- paste(path.mcmc, "populations.numbers.txt", sep = "")
-    filenpp <- paste(path.mcmc, "nuclei.numbers.txt", sep = "")
-    fileu <- paste(path.mcmc, "coord.nuclei.txt", sep = "")
-    filec <- paste(path.mcmc, "color.nuclei.txt", sep = "")
-    filef <- paste(path.mcmc, "frequencies.txt", sep = "")
-    fileperm <- paste(path.mcmc, "perm.txt", sep = "")
-    filedom <- paste(path.mcmc, "proba.pop.membership.txt", sep = "")
-    filedomperm <- paste(path.mcmc, "proba.pop.membership.perm.txt", 
-        sep = "")
-    print("Estimating number of populations")
-    npop <- scan(paste(path.mcmc, "populations.numbers.txt", 
-        sep = ""))
+    npop <- rep(NA, nit/thinning)
+    for (irun in 1:nrun) {
+        path.mcmc <- paste(path.all, irun, "/", sep = "/")
+        npop[(1:(nit/thinning)) + (irun - 1) * nit/thinning] <- scan(paste(path.mcmc, 
+            "populations.numbers.txt", sep = ""), quiet = TRUE)
+    }
     npop.est <- order(hist(npop[-(1:burnin)], breaks = seq(0.5, 
         npopmax + 0.5, 1), plot = FALSE)$counts, decreasing = TRUE)[1]
-    lpd <- scan(paste(path.mcmc, "log.posterior.density.txt", 
-        sep = ""))
-    subK <- (npop == npop.est) & ((1:(nit/thinning)) > burnin)
-    pivot <- order(lpd[subK], decreasing = TRUE)[1]
+    lpd <- rep(NA, nit/thinning)
+    for (irun in 1:nrun) {
+        path.mcmc <- paste(path.all, irun, "/", sep = "/")
+        lpd[(1:(nit/thinning)) + (irun - 1) * nit/thinning] <- scan(paste(path.mcmc, 
+            "log.posterior.density.txt", sep = ""), quiet = TRUE)
+    }
+    pivot <- order(lpd, decreasing = TRUE)[1]
+    irun.piv <- 1 + floor((pivot - 1)/(nit/thinning))
+    char.irun.piv <- paste(irun.piv)
+    tmp <- character(255)
+    substr(tmp, 1, nchar(path.all)) <- path.all
+    nchar.path.all <- nchar(path.all)
+    nchar.irun.piv <- nchar(char.irun.piv)
     dom <- matrix(nr = nxdom * nydom, nc = npopmax, data = 0)
     domperm <- matrix(nr = nxdom * nydom, nc = npopmax, data = 0)
     coorddom <- matrix(nr = 2, nc = nxdom * nydom, data = -999)
@@ -61,21 +65,19 @@ function (coordinates = NULL, genotypes, path.mcmc, nxdom, nydom,
     xlim <- ylim <- rep(-999, 2)
     f <- fpiv <- array(dim = c(npopmax, nloc, nalmax), -999)
     ninrub = 0
-    print("Calling Fortran function postprocesschain2")
-    out.res <- .Fortran(name = "postprocesschain2", PACKAGE = "Geneland", 
+    out.res <- .Fortran(name = "postprocessmultchain", PACKAGE = "Geneland", 
         as.integer(nxdom), as.integer(nydom), as.integer(burnin), 
         as.integer(ninrub), as.integer(npopmax), as.integer(nb.nuclei.max), 
         as.integer(nindiv), as.integer(nloc), as.integer(allele.numbers), 
         as.integer(nalmax), as.double(xlim), as.double(ylim), 
         as.double(delta.coord), as.integer(nit), as.integer(thinning), 
-        as.character(filenpop), as.character(filenpp), as.character(fileu), 
-        as.character(filec), as.character(filef), as.character(fileperm), 
-        as.character(filedom), as.double(t(coordinates)), as.double(u), 
-        as.integer(c), as.double(f), as.integer(pivot), as.double(fpiv), 
-        as.double(dom), as.double(coorddom), as.integer(indvois), 
-        as.double(distvois), as.integer(orderf), as.integer(orderftmp), 
-        as.integer(npop.est))
-    print("End of Fortran function postprocesschain2")
+        as.integer(nrun), as.character(path.all), as.integer(nchar.path.all), 
+        as.double(t(coordinates)), as.double(u), as.integer(c), 
+        as.double(f), as.integer(pivot), as.character(char.irun.piv), 
+        as.integer(nchar.irun.piv), as.double(fpiv), as.double(dom), 
+        as.double(coorddom), as.integer(indvois), as.double(distvois), 
+        as.integer(orderf), as.integer(orderftmp), as.integer(npop.est))
+    filedom <- paste(path.all, "proba.pop.membership.txt", sep = "")
     coord.grid <- read.table(filedom)[, 1:2]
     pmbr <- as.matrix(read.table(filedom)[, -(1:2)])
     pmp <- rep(NA, dim(pmbr)[1])
@@ -90,24 +92,29 @@ function (coordinates = NULL, genotypes, path.mcmc, nxdom, nydom,
     u <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
     c <- rep(times = nb.nuclei.max, -999)
     pmp <- matrix(nr = nindiv, nc = npopmax, data = 0)
-    out.res <- .Fortran(name = "pppmindiv2", PACKAGE = "Geneland", 
+    nchar.path.all <- nchar(path.all)
+    out.res <- .Fortran(name = "pppmindivmultchain", PACKAGE = "Geneland", 
         as.integer(nindiv), as.double(t(coordinates)), as.integer(npopmax), 
         as.integer(nb.nuclei.max), as.integer(indvois), as.double(distvois), 
-        as.double(u), as.integer(c), as.double(pmp), as.character(filenpop), 
-        as.character(filenpp), as.character(fileu), as.character(filec), 
-        as.character(fileperm), as.integer(nit), as.integer(thinning), 
-        as.integer(burnin), as.integer(orderf), as.integer(npop.est), 
-        as.integer(pivot))
+        as.double(u), as.integer(c), as.double(pmp), as.character(path.all), 
+        as.integer(nchar.path.all), as.integer(nrun), as.integer(nit), 
+        as.integer(thinning), as.integer(burnin), as.integer(orderf), 
+        as.integer(npop.est), as.integer(pivot))
     pmp <- matrix(nr = nindiv, nc = npopmax, data = out.res[[9]])
-    mod.pop.indiv <- t(apply(pmp, 1, order))[, npopmax]
-    write.table(cbind(coordinates, pmp), file = paste(path.mcmc, 
+    mod.pop.indiv <- numeric(nindiv)
+    for (iindiv in 1:nindiv) {
+        mod.pop.indiv[iindiv] <- order(pmp[iindiv, ], decreasing = TRUE)[1]
+    }
+    write.table(cbind(coordinates, pmp), file = paste(path.all, 
         "proba.pop.membership.indiv.txt", sep = ""), quote = FALSE, 
         row.name = FALSE, col.name = FALSE)
-    write.table(cbind(coordinates, mod.pop.indiv), file = paste(path.mcmc, 
+    write.table(cbind(coordinates, mod.pop.indiv), file = paste(path.all, 
         "modal.pop.indiv.txt", sep = ""), quote = FALSE, row.name = FALSE, 
         col.name = FALSE)
-    param <- c(paste("nxdom :", nxdom), paste("nydom :", nydom), 
-        paste("burnin :", burnin))
-    write.table(param, file = paste(path.mcmc, "postprocess.parameters.txt", 
+    param <- rbind(param, paste("nrun :", nrun))
+    write.table(param, file = paste(path.all, "parameters.txt", 
+        sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
+    param <- c(paste("nxdom :", nxdom), paste("nydom :", nydom))
+    write.table(param, file = paste(path.all, "postprocess.parameters.txt", 
         sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
 }

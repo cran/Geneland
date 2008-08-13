@@ -4,15 +4,19 @@
 \title{Computes F statistics on the output of an inference by MCMC simulation}
 \description{Computes F statistics according to Weir and Cockerham's 
   estimators.    Missing values are allowed but as of today, the NA code is only treated as an extra
-  allele which might bias the result.}
+  allele which might bias the result. This function should not be used on haploid data.}
 
 \usage{
-Fstat.output(genotypes,path.mcmc)
+Fstat.output(coordinates,genotypes,ploidy,burnin,path.mcmc)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+  \item{coordinates}{Matrix with one line per individual and two columns}
    \item{genotypes}{Genotypes of individuals. A matrix with one line per
-    individual and 2 columns per locus}
+     individual and 2 columns per locus}
+   \item{burnin}{Integer: number of saved iterations to discard.}
+   \item{ploidy}{Integer: 1 or 2 (default is 2).
+     Do not use for haploid data.}
   \item{path.mcmc}{ Path to output files directory }
 }
 \value{A list with components 

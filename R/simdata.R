@@ -87,8 +87,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), rate,
             }
         }
     }
-    print("data arranged")
-    if (length(alpha) == 1) {
+    if (alpha == 1) {
         y <- qexp(pnorm(e), rate = 1)
     }
     else {

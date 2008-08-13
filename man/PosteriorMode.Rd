@@ -6,7 +6,7 @@
   color code for each pixel.}
 
 \usage{
-PosteriorMode(coordinates,path.mcmc,plotit=TRUE,
+PosteriorMode(coordinates,path.mcmc,plotit=TRUE,format="pdf",
                           printit=FALSE,file,main.title)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -16,6 +16,7 @@ PosteriorMode(coordinates,path.mcmc,plotit=TRUE,
   \item{path.mcmc}{ Path to output files directory }
   \item{plotit}{Logical: if TRUE the map is plotted}
   \item{printit}{Logical : if TRUE, figures are also printed}
+  \item{format}{\code{"ps"} or \code{"pdf"}}
   \item{file}{Character : Path to file where figures
     should be printed}
   \item{main.title}{Character : Title to appear on top of the graphic}

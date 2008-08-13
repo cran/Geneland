@@ -9,7 +9,7 @@
   Build a new matrix with alleles codes as consecutive integers.
   If a locus  has 7 alleles they will be coded as 1,2,...7.
   Since version 1.0.1, this function does not have to be called by
-  users. It is called through mcmcFmodel.
+  users. It is called through MCMC.
 }
 \usage{FormatGenotypes(genotypes)}
 %- maybe also 'usage' for other objects documented here.

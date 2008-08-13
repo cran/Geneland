@@ -8,7 +8,7 @@
 }
 \usage{
 simFmodel(nindiv, coordinates, coord.lim, number.nuclei,
-coord.nuclei, color.nuclei,nall, npop, freq.model="Dirichlet",drift, seed, plots = FALSE, ploth = FALSE)
+coord.nuclei, color.nuclei,nall, npop, freq.model="Uncorrelated",drift,dominance="Codominant", plots = FALSE, ploth = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -22,10 +22,13 @@ coord.nuclei, color.nuclei,nall, npop, freq.model="Dirichlet",drift, seed, plots
   \item{color.nuclei}{Population labels of the nuclei (vector of integers of size \code{number.nuclei})}
   \item{nall}{ Vector of integers giving number of alleles at each locus}
   \item{npop}{Number of populations }
-  \item{freq.model}{model for frequencies:"Falush" or "Dirichlet" }
+  \item{freq.model}{model for frequencies:"Correlated" or "Uncorrelated" }
   \item{drift}{Vector (of size \code{npop}) of drift factors between 0
-  and 1 (only for the Falush model)}
-  \item{seed}{Seed to initialize the random number generator}
+    and 1 (only for the Correlated model)}
+  \item{dominance}{A character string "Codominant" or "Dominant". If
+    "Dominant" is chosen, the first allele (labelled 1) is treated as a recessive
+    allele and all heterozigous are converted into homozigous for the
+    dominant allele (labelled 2).}
   \item{plots}{Logical: if TRUE, spatial coordinates are ploted}
   \item{ploth}{Logical: if TRUE, barplots for allele frequencies are ploted}
 }
@@ -50,7 +53,7 @@ equilibrium and linkage equilibrium.}
 coordinates, genotypes, allele.numbers, number.nuclei, coord.nuclei, color.nuclei, 
 frequencies,  ancestral.frequencies, drifts, index.nearest.nucleus}
 
-\references{Falush D., M. Stephens, J.K. Pritchard, 
+\references{Correlated D., M. Stephens, J.K. Pritchard, 
   Inference of population structure using multilocus genotype data:
   Linked loci and correlated allele frequencies, Genetics, pp 1567-1587,
   vol 164, 2003
