@@ -13,8 +13,6 @@ function (coordinates = NULL, genotypes, ploidy = 2, dominance = "Codominant",
     if (substring(path.mcmc, first = nchar(path.mcmc), last = nchar(path.mcmc)) != 
         "/") 
         stop(" path.mcmc has to end with /")
-    if (!file.exists(path.mcmc)) 
-        stop(paste(path.mcmc, " does not exist"))
     if ((nit%%thinning) != 0) 
         stop("nit/thinning is not an integer")
     if (missing(npopinit)) 

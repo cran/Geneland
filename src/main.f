@@ -4489,10 +4489,10 @@ c            write(*,*) '         ctmp= ',ctmp(1),ctmp(2)
 c            write(*,*) '       Rc=',lratio 
             
 *     terme des frequences
-            lratio = lratio 
-     &           + lTfd(isplit,ntmp,npopmax,nloc,nal,nalmax)  
-     &           + lTfd(npop+1,ntmp,npopmax,nloc,nal,nalmax) 
-     &           - lTfd(isplit,n,npopmax,nloc,nal,nalmax) 
+            lratio = lratio +
+     &           lTfd(isplit,ntmp,npopmax,nloc,nal,nalmax)  +
+     &           lTfd(npop+1,ntmp,npopmax,nloc,nal,nalmax) -
+     &           lTfd(isplit,n,npopmax,nloc,nal,nalmax) 
 
 c            write(*,*) 'in smd Tf=',
 c     &           lTfd(isplit,ntmp,npopmax,nloc,nal,nalmax)  
@@ -4565,9 +4565,9 @@ c            write(*,*) 'mort'
 c            write(*,*) 'terme en c lratio =',lratio
 *     term des freq
             lratio = lratio + 
-     &           + lTfd(ipophost,ntmp,npopmax,nloc,nal,nalmax)  
-     &           - lTfd(ipophost,n,npopmax,nloc,nal,nalmax) 
-     &           - lTfd(ipoprem,n,npopmax,nloc,nal,nalmax) 
+     &           lTfd(ipophost,ntmp,npopmax,nloc,nal,nalmax) -  
+     &           lTfd(ipophost,n,npopmax,nloc,nal,nalmax) - 
+     &           lTfd(ipoprem,n,npopmax,nloc,nal,nalmax) 
 c            write(*,*) 'terme en f=',
 c     &           lTfd(ipophost,ntmp,npopmax,nloc,nal,nalmax)  
 c     &           - lTfd(ipophost,n,npopmax,nloc,nal,nalmax) 
@@ -5839,63 +5839,63 @@ c      Write(*,*) 'sptmp=',sptmp
       end function spf
 
       
- 
-
-************************************************
-      SUBROUTINE PERMUT (N,E)
-C<title> CALCULATES ALL PERMUTATIONS OF AN ARRAY (E1,.....EN) </title>
-C=====IN LEXICOGRAPHIC ORDER WITHOUT REPETITION.
-      INTEGER N
-      INTEGER E
-      DIMENSION E(N)
-C
-C  ARGUMENTS:
-C   N:NUMBER OF ELEMENTS TO PERMUTE
-C   E:COMPONENTS OF VECTOR E ARE THE NUMBERS TO BE PERMUTED,
-C     THEY MUST BE ORDERED SO,THAT E(I-1) <= E(I),
-C     THE ORIGINAL ORDER WILL BE RESTORED.
-C  SUM IS A ROUTINE TO BE CALLED BY CALL SUM(N,E) AFTER EACH
-C      PERMUTATION TO ACT ON IT.
-C
-      INTEGER*4 G,H
-      IF (N.GT.1) GO TO 10
-c      CALL SUM(N,E)
-      write(*,*) 'E=',E
-90    RETURN
-10    CONTINUE
-      I=N-2
-c      CALL SUM(N,E)
-      write(*,*) 'E=',E
-      G=E(N-1)
-      H=E(N)
-      IF (G.EQ.H) GO TO 20
-      E(N)=G
-      E(N-1)=H
-c      CALL SUM(N,E)
-      write(*,*) 'E=',E
-      E(N-1)=G
-      E(N)=H
-20    CONTINUE
-      IF (I.EQ.0) GO TO 90
-      H=E(I)
-      I1=I+1
-      DO 30 J=I1,N
-      IF (E(J) .LE. H) GO TO 30
-      E(I)=E(J)
-      E(J)=H
-      GO TO 10
-30    CONTINUE
-31    CONTINUE
-      DO 40 J=I1,N
-      E(J-1)=E(J)
-40    CONTINUE
-      E(N)=H
-      I=(I-1)
-      GO TO 20
-      END
-      
- 
- 
-
-
-C     
+c$$$ 
+c$$$
+c$$$************************************************
+c$$$      SUBROUTINE PERMUT (N,E)
+c$$$C<title> CALCULATES ALL PERMUTATIONS OF AN ARRAY (E1,.....EN) </title>
+c$$$C=====IN LEXICOGRAPHIC ORDER WITHOUT REPETITION.
+c$$$      INTEGER N
+c$$$      INTEGER E
+c$$$      DIMENSION E(N)
+c$$$C
+c$$$C  ARGUMENTS:
+c$$$C   N:NUMBER OF ELEMENTS TO PERMUTE
+c$$$C   E:COMPONENTS OF VECTOR E ARE THE NUMBERS TO BE PERMUTED,
+c$$$C     THEY MUST BE ORDERED SO,THAT E(I-1) <= E(I),
+c$$$C     THE ORIGINAL ORDER WILL BE RESTORED.
+c$$$C  SUM IS A ROUTINE TO BE CALLED BY CALL SUM(N,E) AFTER EACH
+c$$$C      PERMUTATION TO ACT ON IT.
+c$$$C
+c$$$      INTEGER*4 G,H
+c$$$      IF (N.GT.1) GO TO 10
+c$$$c      CALL SUM(N,E)
+c$$$      write(*,*) 'E=',E
+c$$$90    RETURN
+c$$$10    CONTINUE
+c$$$      I=N-2
+c$$$c      CALL SUM(N,E)
+c$$$      write(*,*) 'E=',E
+c$$$      G=E(N-1)
+c$$$      H=E(N)
+c$$$      IF (G.EQ.H) GO TO 20
+c$$$      E(N)=G
+c$$$      E(N-1)=H
+c$$$c      CALL SUM(N,E)
+c$$$      write(*,*) 'E=',E
+c$$$      E(N-1)=G
+c$$$      E(N)=H
+c$$$20    CONTINUE
+c$$$      IF (I.EQ.0) GO TO 90
+c$$$      H=E(I)
+c$$$      I1=I+1
+c$$$      DO 30 J=I1,N
+c$$$      IF (E(J) .LE. H) GO TO 30
+c$$$      E(I)=E(J)
+c$$$      E(J)=H
+c$$$      GO TO 10
+c$$$30    CONTINUE
+c$$$31    CONTINUE
+c$$$      DO 40 J=I1,N
+c$$$      E(J-1)=E(J)
+c$$$40    CONTINUE
+c$$$      E(N)=H
+c$$$      I=(I-1)
+c$$$      GO TO 20
+c$$$      END
+c$$$      
+c$$$ 
+c$$$C      
+c$$$
+c$$$
+c$$$C     
