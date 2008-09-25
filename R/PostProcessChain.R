@@ -22,6 +22,24 @@ function (coordinates = NULL, genotypes, path.mcmc, nxdom, nydom,
         data.tmp[, seq(2, ncol(genotypes) * 2, 2)] <- genotypes
         genotypes <- data.tmp
     }
+    if (is.null(coordinates)) {
+        if (spatial) {
+            stop("Please give spatial coordinates of individuals or set argument spatial to FALSE")
+        }
+        else {
+            nindiv <- nrow(genotypes)
+            n.int <- ceiling(sqrt(nindiv))
+            x <- rep(seq(from = 0, to = 1, length = n.int), n.int)
+            y <- rep(seq(from = 0, to = 1, length = n.int), n.int)
+            y <- as.vector(t(matrix(nr = n.int, nc = n.int, y, 
+                byrow = FALSE)))
+            coordinates <- cbind(x, y)[1:nindiv, ]
+        }
+    }
+    else {
+        if (ncol(coordinates) != 2) 
+            stop("matrix of coordinates does not have 2 columns")
+    }
     coordinates <- as.matrix(coordinates)
     data.tmp <- FormatGenotypes(as.matrix(genotypes))
     genotypes <- data.tmp$genotypes

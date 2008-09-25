@@ -21,7 +21,7 @@ function (coordinates, path.mcmc, printit = FALSE, path)
             length = nydom), matrix(dom.post[, iclass], nr = nxdom, 
             nc = nydom, byrow = TRUE), xlab = "x coordinates", 
             ylab = "y coordinates", asp = 1)
-        title(main = paste("Map of posterior probability to belong to class ", 
+        title(main = paste("Map of posterior probability to belong to cluster ", 
             iclass))
         contour(seq(min(coordinates[, 1] - delta.coord/2), max(coordinates[, 
             1] + delta.coord/2), length = nxdom), seq(min(coordinates[, 
@@ -39,7 +39,7 @@ function (coordinates, path.mcmc, printit = FALSE, path)
                   iclass], nr = nxdom, nc = nydom, byrow = TRUE), 
                 xlab = "x coordinates", ylab = "y coordinates", 
                 asp = 1)
-            title(main = paste("Map of posterior probability to belong to class ", 
+            title(main = paste("Map of posterior probability to belong to cluster ", 
                 iclass))
             contour(seq(min(coordinates[, 1] - delta.coord/2), 
                 max(coordinates[, 1] + delta.coord/2), length = nxdom), 

@@ -18,7 +18,7 @@ gl2gp(coordinates, genotypes, file)
 \value{An ascci file is written. This file may need to be
 process in order to convert eol character from unix style to dos style. }
 
-\author{Gilles Guillot}
+\author{Gilles Guillot and Tanguy de l'Argentaye}
 
 
 \keyword{}

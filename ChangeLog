@@ -1,24 +1,26 @@
 	---------------------------------------------
-	Changes from version 2.0.12 to version 3.0.0
+	Changes from version 3.0.2 to version 3.1.0
 	---------------------------------------------
 
-******
-* In R
-******
+************
+*   In R
+************
+- function MCMC takes extra argument miss.loc for status of doubly missing genotypes
 
-- Function MCMC
-	. removed  if(!file.exists(path.mcmc)) stop(paste(path.mcmc," does not exist")) 
-	that do not work under wiundows
+- function Planarproj removed
 
+- added packages maps and mapproj to DEPENDS field in DESCRIPTION file
+
+- in functiob MCMC changed default freq. model to uncorrelated	
 
 	
-******
-* In Fortran
-******
+******************
+*   In Fortran
+******************
+- Subroutine mcmcgld takes extra argument missloc for status of doubly missing genotypes
 
-- in subroutine smd 
-	corrected   + lTf(ipophost,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax)  
-              1
-Warning: Extension: Unary operator following arithmetic operator (use parentheses) at (1)
-main.f:4619.31:
+
+- Subroutine udyNA takes extra argument missloc for status of doubly missing genotypes	
+	
+
 

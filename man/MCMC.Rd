@@ -4,9 +4,9 @@
 \title{ Markov Chain Monte-Carlo inference under various models}
 \description{ Markov Chain Monte-Carlo inference under various models}
 \usage{
-MCMC(
-      coordinates=NULL,
-      genotypes,## 
+          MCMC(
+                coordinates=NULL,
+                 genotypes,## 
                  ploidy=2,
                  dominance="Codominant",
                  allele.numbers,
@@ -18,7 +18,7 @@ MCMC(
                                         # dimensions
                  nb.nuclei.max,
                                         # options in mcmc computations
-                 nit,thinning=1,freq.model="Correlated",
+                 nit,thinning=1,freq.model="Uncorrelated",
                  varnpop=TRUE,
                  spatial=TRUE,
                  jcf=TRUE,
@@ -35,7 +35,8 @@ MCMC(
                  write.logposterior=TRUE,
                  write.loglikelihood=TRUE,
                  write.true.coord=TRUE,
-                 write.size.pop=FALSE)
+                 write.size.pop=FALSE,
+                 miss.loc)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -152,6 +153,12 @@ MCMC(
   spatial coordinates simulated by MCMC }
 \item{write.size.pop}{Logical: if TRUE (default is FALSE) write size of
   populations simulated by MCMC }
+\item{miss.loc}{A matrix with \code{nindiv} lines and \code{nloc}
+  columns of 0 or 1. For each individual, at each locus it says if the
+  locus is genuinely missing (no attempt to measure it). This info is
+    used under the option \code{filterNA=TRUE} do decide how a double
+    missing value should be treated (genuine missing data
+    or double null allele).}
 }
 
 

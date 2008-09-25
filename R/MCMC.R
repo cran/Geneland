@@ -2,13 +2,13 @@
 function (coordinates = NULL, genotypes, ploidy = 2, dominance = "Codominant", 
     allele.numbers, path.mcmc, rate.max, delta.coord = 0, shape1 = 2, 
     shape2 = 20, npopmin = 1, npopinit, npopmax, nb.nuclei.max, 
-    nit, thinning = 1, freq.model = "Correlated", varnpop = TRUE, 
+    nit, thinning = 1, freq.model = "Uncorrelated", varnpop = TRUE, 
     spatial = TRUE, jcf = TRUE, filter.null.alleles = TRUE, prop.update.cell = 0.1, 
     write.rate.Poisson.process = FALSE, write.number.nuclei = TRUE, 
     write.number.pop = TRUE, write.coord.nuclei = TRUE, write.color.nuclei = TRUE, 
     write.freq = TRUE, write.ancestral.freq = TRUE, write.drifts = TRUE, 
     write.logposterior = TRUE, write.loglikelihood = TRUE, write.true.coord = TRUE, 
-    write.size.pop = FALSE) 
+    write.size.pop = FALSE, miss.loc = NULL) 
 {
     if (substring(path.mcmc, first = nchar(path.mcmc), last = nchar(path.mcmc)) != 
         "/") 
@@ -30,8 +30,12 @@ function (coordinates = NULL, genotypes, ploidy = 2, dominance = "Codominant",
         }
         else {
             nindiv <- nrow(genotypes)
-            coordinates <- matrix(nr = nindiv, ncol = 2, runif(nindiv * 
-                2))
+            n.int <- ceiling(sqrt(nindiv))
+            x <- rep(seq(from = 0, to = 1, length = n.int), n.int)
+            y <- rep(seq(from = 0, to = 1, length = n.int), n.int)
+            y <- as.vector(t(matrix(nr = n.int, nc = n.int, y, 
+                byrow = FALSE)))
+            coordinates <- cbind(x, y)[1:nindiv, ]
         }
     }
     else {
@@ -49,6 +53,10 @@ function (coordinates = NULL, genotypes, ploidy = 2, dominance = "Codominant",
             stop()
         }
     }
+    nindiv <- nrow(genotypes)
+    if (is.null(miss.loc)) 
+        miss.loc <- matrix(nr = nindiv, nc = ifelse(ploidy == 
+            2, ncol(genotypes)/2, ncol(genotypes)), data = 0)
     if (missing(rate.max)) 
         rate.max <- nrow(genotypes)
     if (missing(nb.nuclei.max)) {
@@ -151,7 +159,7 @@ function (coordinates = NULL, genotypes, ploidy = 2, dominance = "Codominant",
         as.integer(cellclass), as.integer(listcell), as.integer(fmodel), 
         as.integer(kfix), as.integer(spatial), as.integer(jcf), 
         as.integer(true.genotypes), as.double(full.cond.y), as.integer(output.files), 
-        as.double(prop.update.cell))
+        as.double(prop.update.cell), as.integer(miss.loc))
     param <- c(paste("ploidy :", ploidy), paste("dominance :", 
         dominance), paste("rate.max :", rate.max), paste("delta.coord :", 
         delta.coord), paste("npopmin :", npopmin), paste("npopinit :", 

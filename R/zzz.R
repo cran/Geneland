@@ -3,7 +3,7 @@
   library.dynam("Geneland",pkg, lib)
   
   cat('ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo',fill=TRUE)
-  cat('o        Geneland-3.0.2 is loaded                                 o',fill=TRUE)
+  cat('o        Geneland is loaded                                       o',fill=TRUE)
   cat('o                                                                 o',fill=TRUE)
   cat('o                * Please *                                       o',fill=TRUE)
   cat('o                                                                 o',fill=TRUE)  
@@ -16,12 +16,9 @@
   cat('o                                                                 o',fill=TRUE)
   cat('o        See also                                                 o',fill=TRUE)
   cat('o        http://folk.uio.no/gillesg/Geneland/faq.html             o',fill=TRUE)
-  cat('o        for frequently asked questions.                          o',fill=TRUE)  
+  cat('o        for frequently asked questions.                          o',fill=TRUE)
+  cat('o                                                                 o',fill=TRUE)
+  cat('o       This is Geneland-3.1.0                                    o',fill=TRUE)
+  cat('o                                                                 o',fill=TRUE)
   cat('ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo',fill=TRUE)
-
 }
-
-
- 
- 
- 

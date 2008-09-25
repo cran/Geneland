@@ -6,12 +6,12 @@
      &     indcell,indcelltmp,
      &     distcell,distcelltmp,xlim,ylim,n,ntmp,a,ptmp,
      &     cellpop,listcell,fmodel,kfix,spatial,jcf,
-     &     y,fcy,ofiles,pudcel) 
+     &     y,fcy,ofiles,pudcel,missloc) 
       implicit none 
 
 *     data
       integer nindiv,nloc,nloc2,
-     &     nal,nalmax,z,ploidy,dom,jcf,nchpath
+     &     nal,nalmax,z,ploidy,dom,jcf,nchpath,missloc
       double precision s
 
 *     hyper parameters
@@ -45,7 +45,7 @@
      &     fa(nloc,nalmax),drift(npopmax),
      &     ftmp(npopmax,nloc,nalmax),drifttmp(npopmax),
      &     cellpop(nppmax),listcell(nppmax),cellpophost(nppmax),
-     &     y(nindiv,nloc2),fcy(nalmax,2),ofiles(12)
+     &     y(nindiv,nloc2),fcy(nalmax,2),ofiles(12),missloc(nindiv,nloc)
 
 
       call intpr('***************************************',-1,0,0)
@@ -419,7 +419,7 @@ c     write(*,*) 'update npop'
 c            call udy2(nindiv,nloc,nloc2,nal,nalmax,y,z,
 c     &           npopmax,f,fcy,npop)
             call udyNA(nindiv,nloc,nloc2,nal,nalmax,nppmax,y,z,
-     &     c,indcell,npopmax,f,fcy,npop) 
+     &     c,indcell,npopmax,f,fcy,npop,missloc) 
          endif    
 *     in the case of dominant data
          if(dom .eq. 1) then
@@ -566,24 +566,21 @@ c$$$      end subroutine udy2
 *     if given genotypes are true corrupted by the presence
 *     of null alleles
       subroutine udyNA(nindiv,nloc,nloc2,nal,nalmax,nppmax,y,z,
-     &     c,indcell,npopmax,f,fcy,npop)
+     &     c,indcell,npopmax,f,fcy,npop,missloc)
       implicit none
       integer nindiv,nloc,nloc2,nal,nalmax,y,z,npopmax,npop,nppmax,
-     &     c,indcell
+     &     c,indcell,missloc
       double precision f,fcy
       dimension nal(nloc),y(nindiv,nloc2),z(nindiv,nloc2),
      &     f(npopmax,nloc,nalmax),fcy(nalmax,2),c(nppmax),
-     &     indcell(nindiv)
-
+     &     indcell(nindiv),missloc(nindiv,nloc)
       integer iindiv,iloc,ial1,ipop,ial2,ial,yy,alpha
       double precision u,ggrunif,sp
-
 c      write(*,*) 'debut udyNA'
-
       do iloc = 1,nloc
          do ipop = 1,npop
 *     computes posterior proba of true genotypes 
-*     given allele freq and observed genotypes (= true genotypes 
+*     given allele freq and observed genotypes (i.e. true genotypes 
 *     blurred by null alleles)
             call postpyNA(ipop,iloc,f,nal,npopmax,nloc,nalmax,fcy)
 *     sample y
@@ -592,11 +589,12 @@ c      write(*,*) 'debut udyNA'
                if(c(indcell(iindiv)) .eq. ipop) then
 *     only for indiv with ambigous genotype (homozygous)
                   if(z(iindiv,2*iloc-1) .eq. z(iindiv,2*iloc)) then
-*     case doubly missing data
-                     if((z(iindiv,2*iloc-1) .eq. -999)) then 
+*     case doubly missing data NOT at a missing locus
+                     if((z(iindiv,2*iloc-1) .eq. -999) .and.
+     &                    missloc(iindiv,iloc) .eq. 0) then 
                         y(iindiv,2*iloc-1) = nal(iloc)
                         y(iindiv,2*iloc)   = nal(iloc)
-                     else
+                     else   
 *     case homozygous (non missing data)
                         u=ggrunif(0.d0,1.d0)
                         alpha = z(iindiv,2*iloc-1)
@@ -1658,130 +1656,130 @@ c      write(*,*) 'end udcf'
 ***********************************************************************
 
 
+c$$$
+c$$$
+c$$$
+c$$$***********************************************************************
+c$$$*     joint update of c and f under the Dirichlet model
+c$$$*     update of c by splitting a pop
+c$$$*     new f is proposed according to full conditionnal pi(f*|c*,z)
+c$$$      subroutine udcfsplit(npop,npopmax,f,nloc,nloc2,
+c$$$     &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,
+c$$$     &     a,ptmp,ftmp,z,n,ntmp,ploidy,alpha,cellpop,listcell)
+c$$$      implicit none
+c$$$      integer npop,npopmax,nloc,nal(nloc),
+c$$$     &     nalmax,nindiv,npp,nppmax,indcell(nindiv),
+c$$$     &     nloc2,c(nppmax),ctmp(nppmax),z(nindiv,nloc2),
+c$$$     &     n(npopmax,nloc,nalmax),ntmp(npopmax,nloc,nalmax),
+c$$$     &     ploidy,cellpop(nppmax),listcell(nppmax)
+c$$$      double precision f(npopmax,nloc,nalmax),ftmp(npopmax,nloc,nalmax),
+c$$$     &     a(nalmax),ptmp(nalmax)
+c$$$      integer ipop,ipp,ipop1,ipop2,iloc,ial
+c$$$      double precision ggrunif,lrpf,lratio,ratio,llr6
+c$$$      double precision bern,ggrbinom
+c$$$      integer iipp
+c$$$      integer nu1,nu2,nu,n1,n2,ntmp1,ntmp2
+c$$$      double precision junk,termf9bis,gglgamfn
+c$$$      double precision alpha,lrp
+c$$$c      write(*,*) 'debut udcfsplit'
+c$$$* if npop > 1
+c$$$
+c$$$*     choix de la pop qui split and fake init for ipop2
+c$$$      ipop1 = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$      ipop2 = ipop1
+c$$$c      write(*,*) 'ipop1=',ipop1
+c$$$*     recherche des cellules affectees a cette pop
+c$$$      call who(c,ipop1,npp,nppmax,cellpop,nu1)
+c$$$c      write(*,*) 'nu1=',nu1
+c$$$      bern = 1
+c$$$      if(nu1.gt. 0) then
+c$$$*     tirage du nombre de cellules reallouees
+c$$$         nu = idint(dint(dble(nu1+1)*ggrunif(0.d0,1.d0)))
+c$$$c         write(*,*) 'nu=',nu
+c$$$         if(nu .gt. 0) then
+c$$$*     tirage des cellules reallouees
+c$$$            call sample2(cellpop,nppmax,nu,nu1,listcell)
+c$$$*     choix de la pop hote
+c$$$            do while(ipop2 .eq. ipop1)
+c$$$               ipop2 = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$            enddo
+c$$$c            write(*,*) 'ipop2=',ipop2
+c$$$*     proposition de reallocation dans la pop ipop2
+c$$$            call split(ipop2,c,ctmp,nppmax,nu,listcell)
+c$$$         else
+c$$$            do ipp = 1,nppmax
+c$$$               ctmp(ipp) = c(ipp)
+c$$$            enddo
+c$$$         endif
+c$$$      else
+c$$$         do ipp = 1,nppmax
+c$$$            ctmp(ipp) = c(ipp)
+c$$$         enddo
+c$$$c     write(*,*) 'ipop2=',ipop2
+c$$$      endif
+c$$$*     counting alleles for states c and ctmp
+c$$$      call countn(nindiv,nloc,nloc2,npopmax,
+c$$$     &     nppmax,nal,nalmax,z,n,indcell,c,ploidy)
+c$$$      call countn(nindiv,nloc,nloc2,npopmax,
+c$$$     &     nppmax,nal,nalmax,z,ntmp,indcell,ctmp,ploidy)
+c$$$c     write(*,*) 'alleles counted'
+c$$$      lratio = 0
+c$$$      do iloc=1,nloc
+c$$$         n1 = 0
+c$$$         n2 = 0
+c$$$         ntmp1 = 0
+c$$$         ntmp2 = 0
+c$$$         do ial=1,nal(iloc)
+c$$$            lratio = lratio 
+c$$$     &           - gglgamfn(alpha+dble(n(ipop1,iloc,ial)))
+c$$$     &           - gglgamfn(alpha+dble(n(ipop2,iloc,ial)))
+c$$$     &           + gglgamfn(alpha+dble(ntmp(ipop1,iloc,ial)))
+c$$$     &           + gglgamfn(alpha+dble(ntmp(ipop2,iloc,ial)))
+c$$$            n1 = n1 + n(ipop1,iloc,ial)
+c$$$            n2 = n2 + n(ipop2,iloc,ial)
+c$$$            ntmp1 = ntmp1 + ntmp(ipop1,iloc,ial)
+c$$$            ntmp2 = ntmp2 + ntmp(ipop2,iloc,ial)
+c$$$         enddo
+c$$$         lratio = lratio + 
+c$$$     &        gglgamfn(alpha*dble(nal(iloc))+dble(n1)) 
+c$$$     &        + gglgamfn(alpha*dble(nal(iloc))+dble(+n2)) 
+c$$$     &        - gglgamfn(alpha*dble(nal(iloc))+dble(+ntmp1)) 
+c$$$     &        - gglgamfn(alpha*dble(nal(iloc))+dble(+ntmp2))
+c$$$      enddo
+c$$$c      write(*,*) 'lratio=',lratio
+c$$$c      write(*,*) 'lRqc=', gglgamfn(dble(nu2+1))
+c$$$c     &     - gglgamfn(dble(nu1+nu2+2)) - gglgamfn(dble(nu1-nu+1))
+c$$$      lratio = lratio + gglgamfn(dble(nu1+2)) + gglgamfn(dble(nu2+1))
+c$$$     &     - gglgamfn(dble(nu1+nu2+2)) - gglgamfn(dble(nu1-nu+1))
+c$$$      lratio = dmin1(0.d0,lratio)
+c$$$      ratio = dexp(lratio)
+c$$$      bern = ggrbinom(1.d0,ratio)
+c$$$c      if(bern .eq. 1) write(*,*) 'accept in udcf split'
+c$$$      if(bern .eq. 1) then 
+c$$$         call samplef(npop,npopmax,nloc,nloc,
+c$$$     &        nal,nalmax,ipop1,ipop2,ftmp,a,ptmp,ntmp,alpha) 
+c$$$         do iloc=1,nloc
+c$$$            do ial=1,nal(iloc)
+c$$$               f(ipop1,iloc,ial) = ftmp(ipop1,iloc,ial)
+c$$$               f(ipop2,iloc,ial) = ftmp(ipop2,iloc,ial)
+c$$$            enddo
+c$$$         enddo  
+c$$$         do ipp = 1,npp
+c$$$            c(ipp) = ctmp(ipp)
+c$$$         enddo
+c$$$      endif
+c$$$c      write(*,*) 'end udcfsplit'
+c$$$      end subroutine udcfsplit
+c$$$***********************************************************************
+c$$$
+
+
+
 
 
 
 ***********************************************************************
-*     joint update of c and f under the Dirichlet model
-*     update of c by splitting a pop
-*     new f is proposed according to full conditionnal pi(f*|c*,z)
-      subroutine udcfsplit(npop,npopmax,f,nloc,nloc2,
-     &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,
-     &     a,ptmp,ftmp,z,n,ntmp,ploidy,alpha,cellpop,listcell)
-      implicit none
-      integer npop,npopmax,nloc,nal(nloc),
-     &     nalmax,nindiv,npp,nppmax,indcell(nindiv),
-     &     nloc2,c(nppmax),ctmp(nppmax),z(nindiv,nloc2),
-     &     n(npopmax,nloc,nalmax),ntmp(npopmax,nloc,nalmax),
-     &     ploidy,cellpop(nppmax),listcell(nppmax)
-      double precision f(npopmax,nloc,nalmax),ftmp(npopmax,nloc,nalmax),
-     &     a(nalmax),ptmp(nalmax)
-      integer ipop,ipp,ipop1,ipop2,iloc,ial
-      double precision ggrunif,lrpf,lratio,ratio,llr6
-      double precision bern,ggrbinom
-      integer iipp
-      integer nu1,nu2,nu,n1,n2,ntmp1,ntmp2
-      double precision junk,termf9bis,gglgamfn
-      double precision alpha,lrp
-c      write(*,*) 'debut udcfsplit'
-* if npop > 1
-
-*     choix de la pop qui split and fake init for ipop2
-      ipop1 = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-      ipop2 = ipop1
-c      write(*,*) 'ipop1=',ipop1
-*     recherche des cellules affectees a cette pop
-      call who(c,ipop1,npp,nppmax,cellpop,nu1)
-c      write(*,*) 'nu1=',nu1
-      bern = 1
-      if(nu1.gt. 0) then
-*     tirage du nombre de cellules reallouees
-         nu = idint(dint(dble(nu1+1)*ggrunif(0.d0,1.d0)))
-c         write(*,*) 'nu=',nu
-         if(nu .gt. 0) then
-*     tirage des cellules reallouees
-            call sample2(cellpop,nppmax,nu,nu1,listcell)
-*     choix de la pop hote
-            do while(ipop2 .eq. ipop1)
-               ipop2 = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-            enddo
-c            write(*,*) 'ipop2=',ipop2
-*     proposition de reallocation dans la pop ipop2
-            call split(ipop2,c,ctmp,nppmax,nu,listcell)
-         else
-            do ipp = 1,nppmax
-               ctmp(ipp) = c(ipp)
-            enddo
-         endif
-      else
-         do ipp = 1,nppmax
-            ctmp(ipp) = c(ipp)
-         enddo
-c     write(*,*) 'ipop2=',ipop2
-      endif
-*     counting alleles for states c and ctmp
-      call countn(nindiv,nloc,nloc2,npopmax,
-     &     nppmax,nal,nalmax,z,n,indcell,c,ploidy)
-      call countn(nindiv,nloc,nloc2,npopmax,
-     &     nppmax,nal,nalmax,z,ntmp,indcell,ctmp,ploidy)
-c     write(*,*) 'alleles counted'
-      lratio = 0
-      do iloc=1,nloc
-         n1 = 0
-         n2 = 0
-         ntmp1 = 0
-         ntmp2 = 0
-         do ial=1,nal(iloc)
-            lratio = lratio 
-     &           - gglgamfn(alpha+dble(n(ipop1,iloc,ial)))
-     &           - gglgamfn(alpha+dble(n(ipop2,iloc,ial)))
-     &           + gglgamfn(alpha+dble(ntmp(ipop1,iloc,ial)))
-     &           + gglgamfn(alpha+dble(ntmp(ipop2,iloc,ial)))
-            n1 = n1 + n(ipop1,iloc,ial)
-            n2 = n2 + n(ipop2,iloc,ial)
-            ntmp1 = ntmp1 + ntmp(ipop1,iloc,ial)
-            ntmp2 = ntmp2 + ntmp(ipop2,iloc,ial)
-         enddo
-         lratio = lratio + 
-     &        gglgamfn(alpha*dble(nal(iloc))+dble(n1)) 
-     &        + gglgamfn(alpha*dble(nal(iloc))+dble(+n2)) 
-     &        - gglgamfn(alpha*dble(nal(iloc))+dble(+ntmp1)) 
-     &        - gglgamfn(alpha*dble(nal(iloc))+dble(+ntmp2))
-      enddo
-c      write(*,*) 'lratio=',lratio
-c      write(*,*) 'lRqc=', gglgamfn(dble(nu2+1))
-c     &     - gglgamfn(dble(nu1+nu2+2)) - gglgamfn(dble(nu1-nu+1))
-      lratio = lratio + gglgamfn(dble(nu1+2)) + gglgamfn(dble(nu2+1))
-     &     - gglgamfn(dble(nu1+nu2+2)) - gglgamfn(dble(nu1-nu+1))
-      lratio = dmin1(0.d0,lratio)
-      ratio = dexp(lratio)
-      bern = ggrbinom(1.d0,ratio)
-c      if(bern .eq. 1) write(*,*) 'accept in udcf split'
-      if(bern .eq. 1) then 
-         call samplef(npop,npopmax,nloc,nloc,
-     &        nal,nalmax,ipop1,ipop2,ftmp,a,ptmp,ntmp,alpha) 
-         do iloc=1,nloc
-            do ial=1,nal(iloc)
-               f(ipop1,iloc,ial) = ftmp(ipop1,iloc,ial)
-               f(ipop2,iloc,ial) = ftmp(ipop2,iloc,ial)
-            enddo
-         enddo  
-         do ipp = 1,npp
-            c(ipp) = ctmp(ipp)
-         enddo
-      endif
-c      write(*,*) 'end udcfsplit'
-      end subroutine udcfsplit
-***********************************************************************
-
-
-
-
-
-
-
-***********************************************************************
-*     joint update of c and f under the Falush model
+*     joint update of c and f under the CFM
 *     single component update of c
 *     new f is proposed according to full conditionnal pi(f*|c*,z)
       subroutine udcf2(npop,npopmax,f,fa,drift,
@@ -4177,7 +4175,7 @@ c      write(*,*) 'end  sample f'
 ***********************************************************************
 *     sample freq from full contitionnal pi(f|u,c,z)
 *     drifts and ancestral are not changed
-*     if Falush model for allele frequencies
+*     if CFM for allele frequencies
       subroutine samplef2(npop,npopmax,nloc,nlocmax,
      &     nal,nalmax,ipop1,ipop2,f,ftmp,
      &     fa,drift,a,ptmp,ntmp)
@@ -4595,7 +4593,7 @@ c       write(*,*) 'fin smd'
 
 ************************************************************************
 *     split and merge of populations with acceptance according to MH ratio
-*     Falush model
+*     CFM
 *     d* drawn form prior
       subroutine sm(npop,npopmin,npopmax,f,fa,drift,
      &     nloc,nloc2,
@@ -4780,7 +4778,7 @@ c            write(*,*) 'lratio=',lratio
 
 ************************************************************************
 *     split and merge of populations with acceptance according to MH ratio
-*     Falush model
+*     CFM
 *     (d1*,d2*) = d1-u,d2+u
       subroutine sm2(npop,npopmin,npopmax,f,fa,drift,
      &     nloc,nloc2,
@@ -5027,7 +5025,7 @@ c            endif
 
 ***********************************************************************
 *     log of term coming from frequencies in a split-merge
-*     under Falush model
+*     under CFM
       double precision function lTf(ipop,n,fa,drift,npopmax,nloc,nal,
      &     nalmax)
       implicit none
@@ -5075,20 +5073,178 @@ c            endif
       end function lTfd
 
 
+c$$$***********************************************************************
+c$$$      subroutine  postprocesschain2(nxdommax,nydommax,burnin,ninrub,
+c$$$     &     npopmax,nppmax,nindiv,nloc,nal,nalmax,xlim,ylim,dt,nit,
+c$$$     &     thinning,filenpop,filenpp,fileu,filec,filef,fileperm,filedom,
+c$$$     &     s,u,c,f,pivot,fpiv,dom,coorddom,indcel,distcel,
+c$$$     &     order,ordertmp,npopest)
+c$$$      implicit none
+c$$$      character*255 fileu,filec,filenpp,filenpop,filedom,filef,fileperm      
+c$$$      integer nit,thinning,npp,npop,iit,nindiv,nxdommax,
+c$$$     &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indcel,
+c$$$     &     ipop,nloc,nal,nalmax,ijunk,order,ordertmp,ipopperm,burnin,
+c$$$     &     ninrub,npopest,nnit,iloc,ial,pivot
+c$$$      double precision s,u,xlim,ylim,coorddom,dom,domperm,distcel,dt,
+c$$$     &     f,fpiv
+c$$$      integer iitsub
+c$$$*     dimensionnement 
+c$$$      dimension s(2,nindiv),u(2,nppmax),c(nppmax),
+c$$$     &     dom(nxdommax*nydommax,npopmax),xlim(2),ylim(2),
+c$$$     &     domperm(nxdommax*nydommax,npopmax),
+c$$$     &     coorddom(2,nxdommax*nydommax),indcel(nxdommax*nydommax),
+c$$$     &     distcel(nxdommax*nydommax),order(npopmax),ordertmp(npopmax),
+c$$$     &     f(npopmax,nloc,nalmax),fpiv(npopmax,nloc,nalmax),nal(nloc)
+c$$$      open(9,file=filenpop)
+c$$$      open(10,file=filenpp)
+c$$$      open(11,file=fileu)
+c$$$      open(12,file=filec)
+c$$$      open(13,file=filef)
+c$$$      open(14,file=fileperm)
+c$$$      open(15,file=filedom)
+c$$$
+c$$$c      write(6,*) 'debut postproc order=',order
+c$$$
+c$$$c      write(6,*) 'npopest=', npopest
+c$$$
+c$$$*     coordonnées de la grille 
+c$$$      call limit(nindiv,s,xlim,ylim,dt)
+c$$$      idom = 1
+c$$$      do ixdom =1,nxdommax
+c$$$c         write(6,*) 'ixdom=',ixdom
+c$$$         do iydom=1,nydommax
+c$$$c            write(6,*) 'iydom=',iydom
+c$$$            coorddom(1,idom) = xlim(1) + 
+c$$$     &           float(ixdom-1)*(xlim(2) - xlim(1))/float(nxdommax-1)
+c$$$            coorddom(2,idom) = ylim(1) +
+c$$$     &           float(iydom-1)*(ylim(2) - ylim(1))/float(nydommax-1)
+c$$$            do ipop=1,npopmax
+c$$$               dom(idom,ipop) = 0.
+c$$$               domperm(idom,ipop) = 0.
+c$$$            enddo
+c$$$            idom = idom + 1
+c$$$         enddo
+c$$$      enddo
+c$$$
+c$$$****************
+c$$$*     read frequencies for pivot state   
+c$$$c      write(6,*) 'look for pivot state'
+c$$$      do iit=1,pivot
+c$$$         do iloc=1,nloc
+c$$$c            write(6,*) 'iloc=',iloc
+c$$$            do ial=1,nalmax
+c$$$c               write(6,*) 'ial=',ial
+c$$$               read(13,*) (fpiv(ipop,iloc,ial),ipop=1,npopmax)
+c$$$            enddo
+c$$$         enddo
+c$$$      enddo
+c$$$      rewind 13
+c$$$c$$$      iit = 1
+c$$$c$$$      iitsub = 0
+c$$$c$$$      do while(iitsub .lt. pivot)
+c$$$c$$$c         write(6,*) 'iit=',iit
+c$$$c$$$         read(9,*) npop
+c$$$c$$$         do iloc=1,nloc
+c$$$c$$$c     write(6,*) 'iloc=',iloc
+c$$$c$$$            do ial=1,nalmax
+c$$$c$$$c     write(6,*) 'ial=',ial
+c$$$c$$$               read(13,*) (fpiv(ipop,iloc,ial),ipop=1,npopmax)
+c$$$c$$$            enddo
+c$$$c$$$         enddo
+c$$$c$$$         if((npop .eq. 
+c$$$c$$$            iitsub = iitsub + 1
+c$$$c$$$c            write(6,*) 'iitsub=',iitsub
+c$$$c$$$         endif  
+c$$$c$$$         iit = iit + 1
+c$$$c$$$      enddo
+c$$$c$$$c      write(*,*) 'piv = ',iitsub
+c$$$c$$$c      write(*,*) 'en fortran fpiv=',fpiv
+c$$$c$$$      rewind 9
+c$$$c$$$      rewind 13                 
+c$$$
+c$$$      
+c$$$**************
+c$$$*     relabel wrt to pivot or take pivot as estimator
+c$$$c      write(6,*) 'relabel'
+c$$$      nnit = 0
+c$$$      do iit=1,int(float(nit)/float(thinning))
+c$$$         read(9,*) npop
+c$$$         read(10,*) npp
+c$$$         do ipp=1,nppmax
+c$$$            read(11,*) u(1,ipp),u(2,ipp)
+c$$$            read(12,*) c(ipp)
+c$$$         enddo
+c$$$
+c$$$         do iloc=1,nloc
+c$$$c             write(6,*) 'iloc=',iloc
+c$$$            do ial=1,nalmax
+c$$$c                write(6,*) 'ial=',ial
+c$$$               read(13,*) (f(ipop,iloc,ial),ipop=1,npopmax)
+c$$$            enddo
+c$$$         enddo  
+c$$$         if((npop .eq. npopest) .and. (iit .gt. burnin)) then 
+c$$$c            write(6,*) 'avant relab order=',order
+c$$$            nnit = nnit + 1 
+c$$$            if(npopest .lt. 10) then 
+c$$$               call Relabel(npopmax,nloc,nalmax,nal,npopest,f,fpiv,
+c$$$     &              order,ordertmp)
+c$$$c            write(6,*) 'apre relab order=',order
+c$$$               write(14,*) (order(ipop),ipop = 1,npopmax)
+c$$$            endif
+c$$$c            write(6,*) 'iit=',iit
+c$$$c            write(6,*) 'pivot=', pivot
+c$$$            if((npopest .lt. 10) .or. (nnit .eq. pivot)) then 
+c$$$               call calccell(nxdommax*nydommax,coorddom,
+c$$$     &              npp,nppmax,u,indcel,distcel)
+c$$$               do idom=1,nxdommax*nydommax
+c$$$                  ipop = order(c(indcel(idom)))
+c$$$c                  write(*,*) 'ipop=',ipop
+c$$$                  dom(idom,ipop) = dom(idom,ipop) + 1.
+c$$$               enddo
+c$$$            endif
+c$$$         endif
+c$$$      enddo
+c$$$      if(npopest .lt. 10) then 
+c$$$         do idom=1,nxdommax*nydommax
+c$$$            do ipop=1,npopmax
+c$$$               dom(idom,ipop) = dom(idom,ipop)/float(nnit)
+c$$$            enddo
+c$$$         enddo
+c$$$      endif
+c$$$
+c$$$ 2000 format (1000(e15.5,1x))
+c$$$      do idom=1,nxdommax*nydommax
+c$$$         write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
+c$$$     &        (dom(idom,ipop), ipop=1,npopmax)
+c$$$      enddo
+c$$$c      write(*,*) coorddom
+c$$$      close(9)
+c$$$      close(10)
+c$$$      close(11)
+c$$$      close(12)
+c$$$      close(13)
+c$$$      close(14)
+c$$$      close(15)                 
+c$$$      end subroutine postprocesschain2
+
+
 ***********************************************************************
-      subroutine  postprocesschain2(nxdommax,nydommax,burnin,ninrub,
+      subroutine  postprocesschain3(nxdommax,nydommax,burnin,ninrub,
      &     npopmax,nppmax,nindiv,nloc,nal,nalmax,xlim,ylim,dt,nit,
      &     thinning,filenpop,filenpp,fileu,filec,filef,fileperm,filedom,
+     &     filemeanf,
      &     s,u,c,f,pivot,fpiv,dom,coorddom,indcel,distcel,
-     &     order,ordertmp,npopest)
+     &     order,ordertmp,npopest,meanf)
       implicit none
-      character*255 fileu,filec,filenpp,filenpop,filedom,filef,fileperm      
+      character*255 fileu,filec,filenpp,filenpop,filedom,filef,fileperm,
+     &     filemeanf
       integer nit,thinning,npp,npop,iit,nindiv,nxdommax,
      &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indcel,
      &     ipop,nloc,nal,nalmax,ijunk,order,ordertmp,ipopperm,burnin,
      &     ninrub,npopest,nnit,iloc,ial,pivot
       double precision s,u,xlim,ylim,coorddom,dom,domperm,distcel,dt,
-     &     f,fpiv
+     &     f,fpiv,meanf
+
       integer iitsub
 *     dimensionnement 
       dimension s(2,nindiv),u(2,nppmax),c(nppmax),
@@ -5096,7 +5252,8 @@ c            endif
      &     domperm(nxdommax*nydommax,npopmax),
      &     coorddom(2,nxdommax*nydommax),indcel(nxdommax*nydommax),
      &     distcel(nxdommax*nydommax),order(npopmax),ordertmp(npopmax),
-     &     f(npopmax,nloc,nalmax),fpiv(npopmax,nloc,nalmax),nal(nloc)
+     &     f(npopmax,nloc,nalmax),fpiv(npopmax,nloc,nalmax),nal(nloc),
+     &     meanf(npopmax,nloc,nalmax)
       open(9,file=filenpop)
       open(10,file=filenpp)
       open(11,file=fileu)
@@ -5104,10 +5261,18 @@ c            endif
       open(13,file=filef)
       open(14,file=fileperm)
       open(15,file=filedom)
+      open(16,file=filemeanf)
 
 c      write(6,*) 'debut postproc order=',order
 
 c      write(6,*) 'npopest=', npopest
+      do ipop = 1,npopmax
+         do iloc = 1,nloc
+            do ial = 1,nalmax
+               meanf(ipop,iloc,ial) = 0
+            enddo
+         enddo
+      enddo
 
 *     coordonnées de la grille 
       call limit(nindiv,s,xlim,ylim,dt)
@@ -5141,30 +5306,8 @@ c               write(6,*) 'ial=',ial
          enddo
       enddo
       rewind 13
-c$$$      iit = 1
-c$$$      iitsub = 0
-c$$$      do while(iitsub .lt. pivot)
-c$$$c         write(6,*) 'iit=',iit
-c$$$         read(9,*) npop
-c$$$         do iloc=1,nloc
-c$$$c     write(6,*) 'iloc=',iloc
-c$$$            do ial=1,nalmax
-c$$$c     write(6,*) 'ial=',ial
-c$$$               read(13,*) (fpiv(ipop,iloc,ial),ipop=1,npopmax)
-c$$$            enddo
-c$$$         enddo
-c$$$         if((npop .eq. 
-c$$$            iitsub = iitsub + 1
-c$$$c            write(6,*) 'iitsub=',iitsub
-c$$$         endif  
-c$$$         iit = iit + 1
-c$$$      enddo
-c$$$c      write(*,*) 'piv = ',iitsub
-c$$$c      write(*,*) 'en fortran fpiv=',fpiv
-c$$$      rewind 9
-c$$$      rewind 13                 
 
-      
+
 **************
 *     relabel wrt to pivot or take pivot as estimator
 c      write(6,*) 'relabel'
@@ -5176,11 +5319,8 @@ c      write(6,*) 'relabel'
             read(11,*) u(1,ipp),u(2,ipp)
             read(12,*) c(ipp)
          enddo
-
          do iloc=1,nloc
-c             write(6,*) 'iloc=',iloc
             do ial=1,nalmax
-c                write(6,*) 'ial=',ial
                read(13,*) (f(ipop,iloc,ial),ipop=1,npopmax)
             enddo
          enddo  
@@ -5193,6 +5333,7 @@ c            write(6,*) 'avant relab order=',order
 c            write(6,*) 'apre relab order=',order
                write(14,*) (order(ipop),ipop = 1,npopmax)
             endif
+            
 c            write(6,*) 'iit=',iit
 c            write(6,*) 'pivot=', pivot
             if((npopest .lt. 10) .or. (nnit .eq. pivot)) then 
@@ -5203,6 +5344,15 @@ c            write(6,*) 'pivot=', pivot
 c                  write(*,*) 'ipop=',ipop
                   dom(idom,ipop) = dom(idom,ipop) + 1.
                enddo
+*     increment estimated allele frequencies
+               do ipop = 1,npopmax
+                  do iloc = 1,nloc
+                     do ial = 1,nalmax
+                        meanf(ipop,iloc,ial) =  meanf(ipop,iloc,ial) +  
+     &                       f(order(ipop),iloc,ial)
+                     enddo
+                  enddo
+               enddo
             endif
          endif
       enddo
@@ -5212,6 +5362,14 @@ c                  write(*,*) 'ipop=',ipop
                dom(idom,ipop) = dom(idom,ipop)/float(nnit)
             enddo
          enddo
+         do ipop = 1,npopmax
+            do iloc = 1,nloc
+               do ial = 1,nalmax
+                  meanf(ipop,iloc,ial) = meanf(ipop,iloc,ial) / 
+     &                 float(nnit)
+               enddo
+            enddo
+         enddo
       endif
 
  2000 format (1000(e15.5,1x))
@@ -5219,15 +5377,24 @@ c                  write(*,*) 'ipop=',ipop
          write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
      &        (dom(idom,ipop), ipop=1,npopmax)
       enddo
-c      write(*,*) coorddom
+      
+ 3000 format (300(1x,e15.8,1x))
+      do iloc=1,nloc
+         do ial=1,nalmax
+            write(16,3000) (sngl(meanf(ipop,iloc,ial)),ipop=1,npopmax)
+         enddo
+      enddo  
+      
+c     write(*,*) coorddom
       close(9)
       close(10)
       close(11)
       close(12)
       close(13)
       close(14)
-      close(15)                 
-      end subroutine postprocesschain2
+      close(15)
+      close(16)
+      end subroutine postprocesschain3
 
 
 
@@ -5318,12 +5485,11 @@ c     write(6,*) 'ial=',ial
          if(mod(iit-1,int(float(nit)/float(thinning))) .eq. 0) then 
 c            write(*,*) 'iit=',iit
 c            write(*,*) 'irun=',irun
-*     open files
+*     define path to file and  open files (Ref.: book Maryse Ain, p.340) 
 c           write(*,*) 'opening files'
 c            write(*,*) 'pathall=',pathall
-*     cf book Maryse Ain, p.340 
             resirun = irun
-            if(irun .gt. 999)then 
+            if(irun .gt. 999) then 
                path = pathall(1:nchpathall) // 
      &              char(int(aint(float(irun)/1000)) + ichar('0'))
                nchpath = nchpathall + 1
@@ -5741,6 +5907,7 @@ c$$$      write(*,*) 'npp=',npp, '\n'
 ************************************************
       Subroutine Relabel(npopmax,nloc,nalmax,nal,npop,f,fpiv,order,
      &     ordertmp)
+*     find partition that minimizes scalar product between f and fpiv
       implicit none
       Integer npopmax,nloc,nalmax,nal,npop,order,ordertmp
       double precision f,fpiv

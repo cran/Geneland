@@ -3,7 +3,7 @@ function (lib.loc = NULL)
 {
     require(tcltk)
     tt <- tktoplevel()
-    tkwm.title(tt, "Geneland - Graphical Interface - 3.00")
+    tkwm.title(tt, "Geneland - Graphical Interface")
     tkwm.geometry(tt, "+100+100")
     image1 <- tclVar()
     tcl("image", "create", "photo", image1, file = system.file("images/geneland6.gif", 
@@ -70,8 +70,11 @@ function (lib.loc = NULL)
     sep1 <- tclVar("White space")
     sep2 <- tclVar("White space")
     md <- tclVar("NA")
+    processors <- tclVar(1)
+    cluster <- 0
+    usecluster <- FALSE
     tt <- tktoplevel()
-    tkwm.title(tt, "Geneland - Graphical Interface - 3.00")
+    tkwm.title(tt, "Geneland - Graphical Interface")
     tkwm.geometry(tt, "750x600+100+100")
     tkwm.resizable(tt, 0, 0)
     ttconf <- tkframe(tt, borderwidth = 2, relief = "sunken")
@@ -258,8 +261,6 @@ function (lib.loc = NULL)
             if (tclvalue(ploidy) == "Haploid") 
                 dploidy <- 1
             else dploidy <- 2
-            if (tclvalue(freq) == "Independent") 
-                tclvalue(freq) <- "Uncorrelated"
             if (tclvalue(advanced) != 1) 
                 tclvalue(npopinit) <- tclvalue(npopmax)
             varnpop <- TRUE
@@ -276,6 +277,7 @@ function (lib.loc = NULL)
             if (tclvalue(testnumberpop) == 0) {
                 print("Starting...")
                 Sys.sleep(0.5)
+                tcl("update")
                 err <- try(MCMC(coordinates = globalcoordinates, 
                   genotypes = globalgenotypes, ploidy = dploidy, 
                   path.mcmc = tclvalue(outputdir), rate.max = as.numeric(tclvalue(rate)), 
@@ -346,6 +348,8 @@ function (lib.loc = NULL)
                 reburnvalue <- tclVar(0)
                 rbValue <- tclVar(0)
                 auxoutputdir <- outputdir
+                totaltime <- 0
+                runtime <- 0
                 defineOutdir <- function(n) {
                   outputdir <<- tclVar(paste(tclvalue(auxoutputdir), 
                     as.character(n), "/", sep = ""))
@@ -355,7 +359,7 @@ function (lib.loc = NULL)
                 makebutton <- function(n) {
                   rbload <- tclVar()
                   rbload <- tkradiobutton(tttextpop, variable = rbValue, 
-                    value = n, selectcolor = "blue", command = function() defineOutdir(n))
+                    value = n, borderwidth = 2, command = function() defineOutdir(n))
                   tkwindow.create(load, "end", window = rbload)
                 }
                 Sort <- function() {
@@ -370,15 +374,15 @@ function (lib.loc = NULL)
                   txtright <<- c()
                   for (i in 1:length(runs)) {
                     ltext = tklabel(tttextpop, text = as.character(new[3, 
-                      i]), border = 3)
+                      i]), border = 2)
                     tkwindow.create(left, "end", window = ltext)
                     tkinsert(left, "end", "\n")
                     lmiddle = tklabel(tttextpop, text = new[2, 
-                      i], border = 3)
+                      i], border = 2)
                     tkwindow.create(midle, "end", window = lmiddle)
                     tkinsert(midle, "end", "\n")
                     lright = tklabel(tttextpop, text = new[1, 
-                      i], border = 3)
+                      i], border = 2)
                     tkwindow.create(right, "end", window = lright)
                     tkinsert(right, "end", "\n")
                     makebutton(new[3, i])
@@ -406,7 +410,7 @@ function (lib.loc = NULL)
                   pops <<- c()
                   runs <<- c()
                   for (i in 1:as.numeric(tclvalue(ntestpop))) {
-                    tempoutputdir <- paste(tclvalue(outputdir), 
+                    tempoutputdir <- paste(tclvalue(auxoutputdir), 
                       as.character(i), "/", sep = "")
                     ltext = tklabel(tttextpop, text = as.character(i), 
                       border = 3)
@@ -561,7 +565,7 @@ function (lib.loc = NULL)
                   columnspan = 4)
                 print("Starting...")
                 initialtime <- as.numeric(Sys.time(), "secs")
-                for (i in 1:as.numeric(tclvalue(ntestpop))) {
+                mr <- function(i) {
                   tempoutputdir <- paste(tclvalue(outputdir), 
                     as.character(i), "/", sep = "")
                   dir.create(tempoutputdir, showWarnings = FALSE)
@@ -632,7 +636,7 @@ function (lib.loc = NULL)
                       border = 3)
                     tkwindow.create(left, "end", window = ltext)
                     tkinsert(left, "end", "\n")
-                    runs <- c(runs, i)
+                    runs <<- c(runs, i)
                     file <- try(scan(paste(tempoutputdir, "populations.numbers.txt", 
                       sep = "")), silent = TRUE)
                     dist <- hist(file, plot = FALSE, breaks = seq(0.5, 
@@ -669,9 +673,9 @@ function (lib.loc = NULL)
                     tkinsert(right, "end", "\n")
                     probs <<- c(probs, mpd)
                     if (i == 1) {
-                      runtime <- as.numeric(Sys.time(), "secs") - 
+                      runtime <<- as.numeric(Sys.time(), "secs") - 
                         initialtime
-                      totaltime <- runtime * as.integer(tclvalue(ntestpop))
+                      totaltime <<- runtime * as.integer(tclvalue(ntestpop))
                     }
                     makebutton(i)
                     tkinsert(load, "end", "\n")
@@ -698,12 +702,134 @@ function (lib.loc = NULL)
                     }
                     tkconfigure(timelabel.widget, text = paste("about ", 
                       changetotime(), " remaining", sep = ""))
-                    totaltime <- totaltime - runtime
+                    totaltime <<- totaltime - runtime
                     txtleft <- c(txtleft, as.character(i))
                     txtmidle <- c(txtmidle, straux)
                     txtright <- c(txtright, mpd)
                   }
                   tkyview.moveto(left, 1)
+                }
+                mrcluster <- function(i, outdir, crate.max, cdelta.coord, 
+                  cnpopmin, cnpopinit, cnpopmax, cnb.nuclei.max, 
+                  cnit, cthinning, cfreq.model, cshape1, cshape2, 
+                  cspatial, cjcf, cfilter.null.alleles) {
+                  tempoutputdir <- paste(outdir, as.character(i), 
+                    "/", sep = "")
+                  dir.create(tempoutputdir, showWarnings = FALSE)
+                  require("Geneland")
+                  Sys.sleep(0.5)
+                  err <- try(MCMC(coordinates = globalcoordinates, 
+                    genotypes = globalgenotypes, ploidy = dploidy, 
+                    path.mcmc = tempoutputdir, rate.max = crate.max, 
+                    delta.coord = cdelta.coord, npopmin = cnpopmin, 
+                    npopinit = cnpopinit, npopmax = cnpopmax, 
+                    nb.nuclei.max = cnb.nuclei.max, nit = cnit, 
+                    thinning = cthinning, freq.model = cfreq.model, 
+                    shape1 = cshape1, shape2 = cshape2, varnpop = varnpop, 
+                    spatial = cspatial, jcf = cjcf, filter.null.alleles = cfilter.null.alleles), 
+                    silent = TRUE)
+                  zz1 <- file(paste(tempoutputdir, "ClusterLog.txt", 
+                    sep = ""), "a")
+                  cat(err, "\n", file = zz1)
+                  close(zz1)
+                  print("Done")
+                }
+                mrafter <- function(i) {
+                  tempoutputdir <- paste(tclvalue(outputdir), 
+                    as.character(i), "/", sep = "")
+                  ltext = tklabel(tttextpop, text = as.character(i), 
+                    border = 3)
+                  tkwindow.create(left, "end", window = ltext)
+                  tkinsert(left, "end", "\n")
+                  runs <<- c(runs, i)
+                  file <- try(scan(paste(tempoutputdir, "populations.numbers.txt", 
+                    sep = "")), silent = TRUE)
+                  dist <- hist(file, plot = FALSE, breaks = seq(0.5, 
+                    max(file) + 0.5, 1))
+                  firsttime <- 0
+                  straux <- ""
+                  for (j in 1:length(dist$counts)) {
+                    if (dist$counts[j] == max(dist$counts)) {
+                      if (firsttime == 0) {
+                        straux <- as.character(dist$mids[j])
+                        firsttime <- 1
+                      }
+                      else {
+                        straux <- paste(straux, " and ", sep = "")
+                        straux <- paste(straux, as.character(dist$mids[j]), 
+                          sep = "")
+                      }
+                    }
+                  }
+                  straux <- paste(straux, " ( ", sep = "")
+                  straux <- paste(straux, as.character(as.double(max(dist$density) * 
+                    100)), sep = "")
+                  straux <- paste(straux, " %) ", sep = "")
+                  lmiddle = tklabel(tttextpop, text = straux, 
+                    border = 3)
+                  tkwindow.create(midle, "end", window = lmiddle)
+                  pops <<- c(pops, straux)
+                  tkinsert(midle, "end", "\n")
+                  file <- try(scan(paste(tempoutputdir, "log.posterior.density.txt", 
+                    sep = "")), silent = TRUE)
+                  mpd <- mean(file)
+                  lright = tklabel(tttextpop, text = mpd, border = 3)
+                  tkwindow.create(right, "end", window = lright)
+                  tkinsert(right, "end", "\n")
+                  probs <<- c(probs, mpd)
+                  if (i == 1) {
+                    runtime <<- as.numeric(Sys.time(), "secs") - 
+                      initialtime
+                    totaltime <<- runtime * as.integer(tclvalue(ntestpop))
+                  }
+                  makebutton(i)
+                  tkinsert(load, "end", "\n")
+                  changetotime <- function() {
+                    seconds <- (totaltime - runtime)%%60
+                    aux <- (totaltime - runtime)%/%60
+                    minutes <- aux%%60
+                    aux <- aux%/%60
+                    hours <- aux%%24
+                    aux <- aux%/%24
+                    str <- ""
+                    if (aux != 0) 
+                      str <- paste(str, as.integer(aux), " day(s), ", 
+                        sep = "")
+                    if (hours != 0) 
+                      str <- paste(str, as.integer(hours), " hour(s), ", 
+                        sep = "")
+                    if (minutes != 0) 
+                      str <- paste(str, as.integer(minutes), 
+                        " minute(s), ", sep = "")
+                    str <- paste(str, as.integer(seconds), " second(s)", 
+                      sep = "")
+                    return(str)
+                  }
+                  tkconfigure(timelabel.widget, text = paste("about ", 
+                    changetotime(), " remaining", sep = ""))
+                  totaltime <<- totaltime - runtime
+                  txtleft <- c(txtleft, as.character(i))
+                  txtmidle <- c(txtmidle, straux)
+                  txtright <- c(txtright, mpd)
+                  tkyview.moveto(left, 1)
+                }
+                tcl("update")
+                if (usecluster) {
+                  tkconfigure(timelabel.widget, text = "Parallel processing...")
+                  tcl("update")
+                  clusterApply(cluster, 1:tclvalue(ntestpop), 
+                    mrcluster, tclvalue(outputdir), as.numeric(tclvalue(rate)), 
+                    as.numeric(tclvalue(delta)), as.numeric(tclvalue(npopmin)), 
+                    as.numeric(tclvalue(npopinit)), as.numeric(tclvalue(npopmax)), 
+                    as.numeric(tclvalue(nuclei)), as.numeric(tclvalue(nit)), 
+                    cthinning <- as.numeric(tclvalue(thinning)), 
+                    tclvalue(freq), as.numeric(tclvalue(gshape1)), 
+                    as.numeric(tclvalue(gshape2)), as.logical(tclvalue(spatial)), 
+                    as.logical(tclvalue(jcf)), as.logical(tclvalue(null)))
+                  for (i in 1:as.numeric(tclvalue(ntestpop))) mrafter(i)
+                }
+                else {
+                  for (i in 1:as.numeric(tclvalue(ntestpop))) mr(i)
                 }
                 tkconfigure(timelabel.widget, text = "Done")
                 if (tclvalue(freq) == "Correlated") 
@@ -713,8 +839,6 @@ function (lib.loc = NULL)
                 tkfocus(tttextpop)
                 tkgrab("release", tttextpop)
             }
-            if (tclvalue(freq) == "Dirichlet") 
-                tclvalue(freq) <- "Uncorrelated"
         }
         ploidylabel.widget <- tklabel(ttrun, text = "Ploidy:")
         ploidy <- tclVar("Diploid")
@@ -790,10 +914,10 @@ function (lib.loc = NULL)
         tkgrid(thinning.widget, row = 9, column = 3, columnspan = 3, 
             sticky = "w")
         freqlabel.widget <- tklabel(ttrun, text = "Allele frequency model:")
-        freq <- tclVar("Correlated")
+        freq <- tclVar("Uncorrelated")
         wfreq <- .Tk.subwin(ttrun)
         freqoptionmenu.widget <- tcl("tk_optionMenu", wfreq, 
-            freq, "Correlated", "Independent")
+            freq, "Correlated", "Uncorrelated")
         gshape1 <- tclVar(2)
         gshape2 <- tclVar(18)
         shape1.widget <- tkentry(ttrun, width = "6", textvariable = gshape1)
@@ -898,7 +1022,10 @@ function (lib.loc = NULL)
     initialimage <- function() {
         imgAsLabel <- tklabel(ttinit, image = image1, bg = "white")
         tkgrid(imgAsLabel, sticky = "news")
-        notice <- tklabel(ttinit, text = "Geneland-3.0.0 is loaded\n\n* Please *\n\nSend a short email to gilles.guillot@bio.uio.no\nnotifying that you are using Geneland.")
+        notice <- tklabel(ttinit, text = "Geneland is loaded\n\n* Please *\n\nRegister on http://folk.uio.no/gillesg/Geneland/register.php")
+        tkbind(notice, "<Button-1>", function() {
+            browseURL("http://folk.uio.no/gillesg/Geneland/register.php")
+        })
         tkgrid(notice, sticky = "news")
     }
     postproc <- function() {
@@ -3530,6 +3657,108 @@ function (lib.loc = NULL)
             }
         }
     }
+    Parallel <- function() {
+        Setparallel <- function() {
+            if (tclvalue(processors) < 1) {
+                tkmessageBox(message = "Geneland doesn't support abacus", 
+                  icon = "error", type = "ok", parent = ttpara)
+                usecluster <<- FALSE
+                tkconfigure(nextbutton, state = "normal")
+                tkconfigure(cancelbutton, state = "disabled")
+                tkconfigure(info.label, text = "Parallel mode = OFF")
+            }
+            else if (tclvalue(processors) == 1) {
+                tkmessageBox(message = "For parallel processing it is advised to use at least two nodes", 
+                  icon = "error", type = "ok", parent = ttpara)
+                usecluster <<- FALSE
+                tkconfigure(nextbutton, state = "normal")
+                tkconfigure(cancelbutton, state = "disabled")
+                tkconfigure(info.label, text = "Parallel mode = OFF")
+            }
+            else {
+                cluster <<- try(makeCluster(as.numeric(tclvalue(processors)), 
+                  type = tclvalue(pmethod)), silent = TRUE)
+                if (class(cluster) == "try-error") {
+                  tkmessageBox(message = paste("Error, please read snow package documentation.\n The received error message was:", 
+                    cluster, sep = "\n"), icon = "error", type = "ok", 
+                    parent = ttpara)
+                  usecluster <<- FALSE
+                  tkconfigure(nextbutton, state = "normal")
+                  tkconfigure(cancelbutton, state = "disabled")
+                  tkconfigure(info.label, text = "Parallel mode = OFF")
+                }
+                else {
+                  usecluster <<- TRUE
+                  tkconfigure(nextbutton, state = "disabled")
+                  tkconfigure(cancelbutton, state = "normal")
+                  tkconfigure(info.label, text = "Parallel mode = ON")
+                }
+            }
+        }
+        if (require(snow) == FALSE) 
+            tkmessageBox(message = "Snow not found. Install it before using this feature", 
+                icon = "error", type = "ok", parent = ttpara)
+        else {
+            ttpara <- tktoplevel(parent = .TkRoot)
+            tkwm.geometry(ttpara, "+200+100")
+            tkwm.title(ttpara, "Parallel options")
+            processors.label <- tklabel(ttpara, text = "Number of nodes:")
+            processors.entry <- tkentry(ttpara, width = "10", 
+                textvariable = processors)
+            labelspace1 <- tklabel(ttpara, text = " ")
+            method.label <- tklabel(ttpara, text = "Parallelization method:")
+            pmethod <- tclVar("MPI")
+            method.label1 <- tklabel(ttpara, text = "MPI")
+            method.label2 <- tklabel(ttpara, text = "PVM")
+            method.radio1 <- tkradiobutton(ttpara, variable = pmethod, 
+                value = "MPI", selectcolor = "white")
+            method.radio2 <- tkradiobutton(ttpara, variable = pmethod, 
+                value = "PVM", selectcolor = "white")
+            labelspace2 <- tklabel(ttpara, text = " ")
+            info.label <- tklabel(ttpara, text = "", foreground = "blue")
+            labelspace3 <- tklabel(ttpara, text = " ")
+            nextbutton <- tkbutton(ttpara, text = "Start", command = Setparallel)
+            cancelbutton <- tkbutton(ttpara, text = "Stop", command = function() {
+                stopCluster(cluster)
+                usecluster <<- FALSE
+                tkconfigure(nextbutton, state = "normal")
+                tkconfigure(cancelbutton, state = "disable")
+                tkconfigure(info.label, text = "Parallel mode = OFF")
+            })
+            if (usecluster) {
+                tkconfigure(nextbutton, state = "disabled")
+                tkconfigure(cancelbutton, state = "normal")
+                tkconfigure(info.label, text = "Parallel mode = ON")
+            }
+            else {
+                tkconfigure(cancelbutton, state = "disabled")
+                tkconfigure(nextbutton, state = "normal")
+                tkconfigure(info.label, text = "Parallel mode = OFF")
+            }
+            tkgrid(processors.label, row = 1, column = 1, sticky = "e")
+            tkgrid(processors.entry, row = 1, column = 2, columnspan = 3, 
+                sticky = "e")
+            tkgrid(labelspace1, row = 2, column = 1, columnspan = 4, 
+                sticky = "e")
+            tkgrid(method.label, row = 3, column = 1, rowspan = 2, 
+                sticky = "ns")
+            tkgrid(method.label1, row = 3, column = 3, sticky = "we")
+            tkgrid(method.label2, row = 3, column = 4, sticky = "we")
+            tkgrid(method.radio1, row = 4, column = 3, sticky = "we")
+            tkgrid(method.radio2, row = 4, column = 4, sticky = "we")
+            tkgrid(labelspace2, row = 5, column = 1, columnspan = 4, 
+                sticky = "e")
+            tkgrid(info.label, row = 5, column = 1, columnspan = 4, 
+                sticky = "we")
+            tkgrid(labelspace3, row = 7, column = 1, columnspan = 4, 
+                sticky = "e")
+            tkgrid(nextbutton, row = 8, column = 1, columnspan = 2, 
+                sticky = "we")
+            tkgrid(cancelbutton, row = 8, column = 3, columnspan = 2, 
+                sticky = "we")
+            tkfocus(ttpara)
+        }
+    }
     initialimage()
     topMenu <- tkmenu(tt)
     tkconfigure(tt, menu = topMenu)
@@ -3577,6 +3806,8 @@ function (lib.loc = NULL)
         command = function() Convert())
     tkadd(toolsMenu, "command", label = "Simulate null alleles", 
         state = "disabled", command = function() Nullify())
+    tkadd(toolsMenu, "command", label = "Use parallel processing", 
+        command = function() Parallel())
     tkadd(fileMenu, "separator")
     tkadd(fileMenu, "checkbutton", label = "Create log file", 
         variable = LogState, offvalue = 0, onvalue = 1, selectcolor = "blue", 
@@ -3613,7 +3844,8 @@ function (lib.loc = NULL)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttpost)
             tkgrid.remove(ttplot)
-            tkgrid(ttconf, row = 1, column = 2, sticky = "we")
+            tkgrid(ttconf, row = 1, column = 2, sticky = "we", 
+                pady = 10)
         })
     buttonrun <- tkbutton(ttpan, image = imagerun, text = "Run", 
         command = function() {
@@ -3626,7 +3858,8 @@ function (lib.loc = NULL)
             tkgrid.remove(ttplot2)
             tkgrid.remove(ttpost)
             tkgrid.remove(ttplot)
-            tkgrid(ttrun, row = 1, column = 2, sticky = "we")
+            tkgrid(ttrun, row = 1, column = 2, sticky = "we", 
+                pady = 10)
         })
     buttonpostprocess <- tkbutton(ttpan, image = imagepostprocess, 
         text = "Postprocess", command = function() {
@@ -3639,7 +3872,8 @@ function (lib.loc = NULL)
             tkgrid.remove(ttconf)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttplot)
-            tkgrid(ttpost, row = 1, column = 2, sticky = "we")
+            tkgrid(ttpost, row = 1, column = 2, sticky = "we", 
+                pady = 10)
         })
     buttonsimfmodel <- tkbutton(ttpan, image = imagefmodel, text = "F-model", 
         state = "disabled", command = function() {
@@ -3651,7 +3885,8 @@ function (lib.loc = NULL)
             tkgrid.remove(ttplot2)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttplot)
-            tkgrid(ttsimf, row = 1, column = 2, sticky = "we")
+            tkgrid(ttsimf, row = 1, column = 2, sticky = "we", 
+                pady = 10)
         })
     buttonplot <- tkbutton(ttpan, image = imageplot, text = "Plot", 
         command = function() {
@@ -3664,7 +3899,8 @@ function (lib.loc = NULL)
             tkgrid.remove(ttplot2)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttpost)
-            tkgrid(ttplot, row = 1, column = 2, sticky = "we")
+            tkgrid(ttplot, row = 1, column = 2, sticky = "we", 
+                pady = 10)
         })
     buttonibd <- tkbutton(ttpan, image = imageibd, text = "IBD", 
         state = "disabled", command = function() {
@@ -3677,7 +3913,8 @@ function (lib.loc = NULL)
             tkgrid.remove(ttfstat)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttpost)
-            tkgrid(ttibd, row = 1, column = 2, sticky = "we")
+            tkgrid(ttibd, row = 1, column = 2, sticky = "we", 
+                pady = 10)
         })
     buttonplot2 <- tkbutton(ttpan, image = imageplot, text = "Plot2", 
         state = "disabled", command = function() {
@@ -3690,17 +3927,23 @@ function (lib.loc = NULL)
             tkgrid.remove(ttfstat)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttpost)
-            tkgrid(ttplot2, row = 1, column = 2, sticky = "we")
+            tkgrid(ttplot2, row = 1, column = 2, sticky = "we", 
+                pady = 10)
         })
-    tkgrid(labelinference, row = 1, column = 1, sticky = "w")
-    tkgrid(buttonconf, row = 2, column = 1, sticky = "we")
-    tkgrid(buttonrun, row = 3, column = 1, sticky = "we")
-    tkgrid(buttonpostprocess, row = 4, column = 1, sticky = "we")
-    tkgrid(buttonplot, row = 5, column = 1, sticky = "we")
-    tkgrid(labelspace, row = 6, column = 1, sticky = "w")
-    tkgrid(labelsimulation, row = 7, column = 1, sticky = "w")
-    tkgrid(buttonsimfmodel, row = 8, column = 1, sticky = "we")
-    tkgrid(buttonplot2, row = 10, column = 1, sticky = "we")
+    tkgrid(labelinference, row = 1, column = 1, sticky = "w", 
+        padx = 10, pady = 10)
+    tkgrid(buttonconf, row = 2, column = 1, sticky = "we", padx = 10)
+    tkgrid(buttonrun, row = 3, column = 1, sticky = "we", padx = 10)
+    tkgrid(buttonpostprocess, row = 4, column = 1, sticky = "we", 
+        padx = 10)
+    tkgrid(buttonplot, row = 5, column = 1, sticky = "we", padx = 10)
+    tkgrid(labelspace, row = 6, column = 1, sticky = "w", padx = 10)
+    tkgrid(labelsimulation, row = 7, column = 1, sticky = "w", 
+        padx = 10)
+    tkgrid(buttonsimfmodel, row = 8, column = 1, sticky = "we", 
+        padx = 10)
+    tkgrid(buttonplot2, row = 10, column = 1, sticky = "we", 
+        padx = 10)
     coordownlabel.widget <- tklabel(tt, textvariable = labelcoordtext, 
         foreground = "blue")
     genodownlabel.widget <- tklabel(tt, textvariable = labelgenotext, 
@@ -3739,7 +3982,7 @@ function (lib.loc = NULL)
     }
     blink()
     tkgrid(ttpan, row = 1, column = 1, sticky = "we")
-    tkgrid(ttinit, row = 1, column = 2, sticky = "e")
+    tkgrid(ttinit, row = 1, column = 2, sticky = "we", pady = 10)
     tkgrid(coordownlabel.widget, row = 2, column = 1, columnspan = 2, 
         sticky = "w", padx = 3)
     tkgrid(genodownlabel.widget, row = 3, column = 1, columnspan = 2, 
@@ -3748,5 +3991,5 @@ function (lib.loc = NULL)
         sticky = "w", padx = 3)
     tkgrid.columnconfigure(tt, 1, minsize = 200)
     tkgrid.columnconfigure(tt, 2, minsize = 500)
-    tkgrid.rowconfigure(tt, 1, minsize = 450)
+    tkgrid.rowconfigure(tt, 1, minsize = 520)
 }

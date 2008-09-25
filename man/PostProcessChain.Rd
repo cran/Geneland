@@ -33,25 +33,22 @@ path.mcmc,nxdom, nydom,burnin)
 \value{
   \item{Posterior probability of population membership for each pixel:}{
     They  are
-    written in an ascii file called \file{proba.pop.membership.txt}
-    (one column per population,
-    \code{npopmax} values are computed for each pixel.
+    written in an ascii file called \file{proba.pop.membership.txt}.
+    Two first columns are coordinates of pixels then 
+    one column per population (thus \code{npopmax} values are computed
+  for each pixel). 
     Images in each column of \file{proba.pop.membership.txt} are stored
-    column-wise starting from the bottom left pixel.
+    starting from the bottom left pixel.
     First line of \file{proba.pop.membership.txt}  = bottom left pixel ,
     second line of \file{proba.pop.membership.txt} = upward neighboor of
-    the previous pixel, etc...)
-    
-    Another file called \file{proba.pop.membership.perm.txt} tries
-    to get rid of label switching
-    issues by labelling the population according to a fixed constraint.
-    (This has proved to be usefull with a small number of loci, (e.g. nloc=3), for well
-    differentiated populations.)}
+    the previous pixel, etc...}
   
   
   \item{Posterior probability of population membership for each
     individual:}{ They are written in a file named
-    \file{proba.pop.membership.indiv.txt}.
+    \file{proba.pop.membership.indiv.txt}. One line per individuals and
+    \code{2+npopmax} columns per individual. Two first columns are
+    spatial coordinates.
   }
   
   
