@@ -1824,10 +1824,10 @@ c         write(*,*) 'ipp=',ipp
          
          bern = 0
          if(ipop1 .ne. ipop2) then 
-            lratio = lTf(ipop1,ntmp,fa,drift,npopmax,nloc,nal,nalmax)
-     &           + lTf(ipop2,ntmp,fa,drift,npopmax,nloc,nal,nalmax)
-     &           - lTf(ipop1,n,fa,drift,npopmax,nloc,nal,nalmax)
-     &           - lTf(ipop2,n,fa,drift,npopmax,nloc,nal,nalmax)
+            lratio = lTf(ipop1,ntmp,fa,drift,npopmax,nloc,nal,nalmax) + 
+     &           lTf(ipop2,ntmp,fa,drift,npopmax,nloc,nal,nalmax) - 
+     &           lTf(ipop1,n,fa,drift,npopmax,nloc,nal,nalmax) - 
+     &           lTf(ipop2,n,fa,drift,npopmax,nloc,nal,nalmax)
             
             lratio = dmin1(0.d0,lratio)
             alpha = dexp(lratio)
@@ -4676,10 +4676,10 @@ C     nu = idint(dint(dble(ncellpop)*ggrunif(0.d0,1.d0)))
             lratio = lratio + dble(npp)*(dlog(dble(npop)) - 
      &           dlog(dble(npop+1)))
 *     terme des frequences
-            lratio = lratio 
-     &         + lTf(isplit,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax)  
-     &         + lTf(npop+1,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax) 
-     &         - lTf(isplit,n,fa,drift,npopmax,nloc,nal,nalmax) 
+            lratio = lratio + 
+     &          lTf(isplit,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax)  +
+     &          lTf(npop+1,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax) -
+     &          lTf(isplit,n,fa,drift,npopmax,nloc,nal,nalmax) 
 c            write(*,*) 'lratio=',lratio
             lratio = dmin1(0.d0,lratio)
             alpha = dexp(lratio)
@@ -4740,9 +4740,9 @@ c            write(*,*) 'mort'
 c     write(*,*) 'term en c lratio =',lratio
 *     term des freq
             lratio = lratio + 
-     &        + lTf(ipophost,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax)  
-     &        - lTf(ipophost,n,fa,drift,npopmax,nloc,nal,nalmax) 
-     &        - lTf(ipoprem,n,fa,drift,npopmax,nloc,nal,nalmax) 
+     &         lTf(ipophost,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax) -  
+     &         lTf(ipophost,n,fa,drift,npopmax,nloc,nal,nalmax) - 
+     &         lTf(ipoprem,n,fa,drift,npopmax,nloc,nal,nalmax) 
 c$$$            write(*,*) 'term en f=',
 c$$$     &          lTf(ipophost,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax)  
 c$$$     &        - lTf(ipophost,n,fa,drift,npopmax,nloc,nal,nalmax) 
@@ -4872,10 +4872,10 @@ c            rr = ggrunif(0.d0,1.d0)*deltad
                lratio = lratio + dble(npp)*(dlog(dble(npop)) - 
      &              dlog(dble(npop+1)))
 *     terme des frequences
-               lratio = lratio 
-     &         + lTf(isplit,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax)  
-     &         + lTf(npop+1,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax) 
-     &         - lTf(isplit,n,fa,drift,npopmax,nloc,nal,nalmax) 
+               lratio = lratio + 
+     &         lTf(isplit,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax)  +
+     &         lTf(npop+1,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax) -
+     &         lTf(isplit,n,fa,drift,npopmax,nloc,nal,nalmax) 
 *     term proposal drift
                lratio = lratio + dlog(2*deltad) 
      &              + .5*rr**2 + dlog(dsqrt(2*3.141593d0))
@@ -4968,9 +4968,9 @@ c$$$               write(*,*) 'drifttmp=',drifttmp
 c$$$               write(*,*) 'term en c lratio =',lratio
 *     term des freq
                lratio = lratio + 
-     &        + lTf(ipophost,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax)  
-     &        - lTf(ipophost,n,fa,drift,npopmax,nloc,nal,nalmax) 
-     &        - lTf(ipoprem,n,fa,drift,npopmax,nloc,nal,nalmax) 
+     &        lTf(ipophost,ntmp,fa,drifttmp,npopmax,nloc,nal,nalmax) -  
+     &        lTf(ipophost,n,fa,drift,npopmax,nloc,nal,nalmax) -
+     &        lTf(ipoprem,n,fa,drift,npopmax,nloc,nal,nalmax) 
 *     terme proposal d
                lratio = lratio - dlog(2*deltad)
      &              - .5*rr**2 - dlog(dsqrt(2*3.141593d0))
@@ -5073,178 +5073,20 @@ c            endif
       end function lTfd
 
 
-c$$$***********************************************************************
-c$$$      subroutine  postprocesschain2(nxdommax,nydommax,burnin,ninrub,
-c$$$     &     npopmax,nppmax,nindiv,nloc,nal,nalmax,xlim,ylim,dt,nit,
-c$$$     &     thinning,filenpop,filenpp,fileu,filec,filef,fileperm,filedom,
-c$$$     &     s,u,c,f,pivot,fpiv,dom,coorddom,indcel,distcel,
-c$$$     &     order,ordertmp,npopest)
-c$$$      implicit none
-c$$$      character*255 fileu,filec,filenpp,filenpop,filedom,filef,fileperm      
-c$$$      integer nit,thinning,npp,npop,iit,nindiv,nxdommax,
-c$$$     &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indcel,
-c$$$     &     ipop,nloc,nal,nalmax,ijunk,order,ordertmp,ipopperm,burnin,
-c$$$     &     ninrub,npopest,nnit,iloc,ial,pivot
-c$$$      double precision s,u,xlim,ylim,coorddom,dom,domperm,distcel,dt,
-c$$$     &     f,fpiv
-c$$$      integer iitsub
-c$$$*     dimensionnement 
-c$$$      dimension s(2,nindiv),u(2,nppmax),c(nppmax),
-c$$$     &     dom(nxdommax*nydommax,npopmax),xlim(2),ylim(2),
-c$$$     &     domperm(nxdommax*nydommax,npopmax),
-c$$$     &     coorddom(2,nxdommax*nydommax),indcel(nxdommax*nydommax),
-c$$$     &     distcel(nxdommax*nydommax),order(npopmax),ordertmp(npopmax),
-c$$$     &     f(npopmax,nloc,nalmax),fpiv(npopmax,nloc,nalmax),nal(nloc)
-c$$$      open(9,file=filenpop)
-c$$$      open(10,file=filenpp)
-c$$$      open(11,file=fileu)
-c$$$      open(12,file=filec)
-c$$$      open(13,file=filef)
-c$$$      open(14,file=fileperm)
-c$$$      open(15,file=filedom)
-c$$$
-c$$$c      write(6,*) 'debut postproc order=',order
-c$$$
-c$$$c      write(6,*) 'npopest=', npopest
-c$$$
-c$$$*     coordonnées de la grille 
-c$$$      call limit(nindiv,s,xlim,ylim,dt)
-c$$$      idom = 1
-c$$$      do ixdom =1,nxdommax
-c$$$c         write(6,*) 'ixdom=',ixdom
-c$$$         do iydom=1,nydommax
-c$$$c            write(6,*) 'iydom=',iydom
-c$$$            coorddom(1,idom) = xlim(1) + 
-c$$$     &           float(ixdom-1)*(xlim(2) - xlim(1))/float(nxdommax-1)
-c$$$            coorddom(2,idom) = ylim(1) +
-c$$$     &           float(iydom-1)*(ylim(2) - ylim(1))/float(nydommax-1)
-c$$$            do ipop=1,npopmax
-c$$$               dom(idom,ipop) = 0.
-c$$$               domperm(idom,ipop) = 0.
-c$$$            enddo
-c$$$            idom = idom + 1
-c$$$         enddo
-c$$$      enddo
-c$$$
-c$$$****************
-c$$$*     read frequencies for pivot state   
-c$$$c      write(6,*) 'look for pivot state'
-c$$$      do iit=1,pivot
-c$$$         do iloc=1,nloc
-c$$$c            write(6,*) 'iloc=',iloc
-c$$$            do ial=1,nalmax
-c$$$c               write(6,*) 'ial=',ial
-c$$$               read(13,*) (fpiv(ipop,iloc,ial),ipop=1,npopmax)
-c$$$            enddo
-c$$$         enddo
-c$$$      enddo
-c$$$      rewind 13
-c$$$c$$$      iit = 1
-c$$$c$$$      iitsub = 0
-c$$$c$$$      do while(iitsub .lt. pivot)
-c$$$c$$$c         write(6,*) 'iit=',iit
-c$$$c$$$         read(9,*) npop
-c$$$c$$$         do iloc=1,nloc
-c$$$c$$$c     write(6,*) 'iloc=',iloc
-c$$$c$$$            do ial=1,nalmax
-c$$$c$$$c     write(6,*) 'ial=',ial
-c$$$c$$$               read(13,*) (fpiv(ipop,iloc,ial),ipop=1,npopmax)
-c$$$c$$$            enddo
-c$$$c$$$         enddo
-c$$$c$$$         if((npop .eq. 
-c$$$c$$$            iitsub = iitsub + 1
-c$$$c$$$c            write(6,*) 'iitsub=',iitsub
-c$$$c$$$         endif  
-c$$$c$$$         iit = iit + 1
-c$$$c$$$      enddo
-c$$$c$$$c      write(*,*) 'piv = ',iitsub
-c$$$c$$$c      write(*,*) 'en fortran fpiv=',fpiv
-c$$$c$$$      rewind 9
-c$$$c$$$      rewind 13                 
-c$$$
-c$$$      
-c$$$**************
-c$$$*     relabel wrt to pivot or take pivot as estimator
-c$$$c      write(6,*) 'relabel'
-c$$$      nnit = 0
-c$$$      do iit=1,int(float(nit)/float(thinning))
-c$$$         read(9,*) npop
-c$$$         read(10,*) npp
-c$$$         do ipp=1,nppmax
-c$$$            read(11,*) u(1,ipp),u(2,ipp)
-c$$$            read(12,*) c(ipp)
-c$$$         enddo
-c$$$
-c$$$         do iloc=1,nloc
-c$$$c             write(6,*) 'iloc=',iloc
-c$$$            do ial=1,nalmax
-c$$$c                write(6,*) 'ial=',ial
-c$$$               read(13,*) (f(ipop,iloc,ial),ipop=1,npopmax)
-c$$$            enddo
-c$$$         enddo  
-c$$$         if((npop .eq. npopest) .and. (iit .gt. burnin)) then 
-c$$$c            write(6,*) 'avant relab order=',order
-c$$$            nnit = nnit + 1 
-c$$$            if(npopest .lt. 10) then 
-c$$$               call Relabel(npopmax,nloc,nalmax,nal,npopest,f,fpiv,
-c$$$     &              order,ordertmp)
-c$$$c            write(6,*) 'apre relab order=',order
-c$$$               write(14,*) (order(ipop),ipop = 1,npopmax)
-c$$$            endif
-c$$$c            write(6,*) 'iit=',iit
-c$$$c            write(6,*) 'pivot=', pivot
-c$$$            if((npopest .lt. 10) .or. (nnit .eq. pivot)) then 
-c$$$               call calccell(nxdommax*nydommax,coorddom,
-c$$$     &              npp,nppmax,u,indcel,distcel)
-c$$$               do idom=1,nxdommax*nydommax
-c$$$                  ipop = order(c(indcel(idom)))
-c$$$c                  write(*,*) 'ipop=',ipop
-c$$$                  dom(idom,ipop) = dom(idom,ipop) + 1.
-c$$$               enddo
-c$$$            endif
-c$$$         endif
-c$$$      enddo
-c$$$      if(npopest .lt. 10) then 
-c$$$         do idom=1,nxdommax*nydommax
-c$$$            do ipop=1,npopmax
-c$$$               dom(idom,ipop) = dom(idom,ipop)/float(nnit)
-c$$$            enddo
-c$$$         enddo
-c$$$      endif
-c$$$
-c$$$ 2000 format (1000(e15.5,1x))
-c$$$      do idom=1,nxdommax*nydommax
-c$$$         write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
-c$$$     &        (dom(idom,ipop), ipop=1,npopmax)
-c$$$      enddo
-c$$$c      write(*,*) coorddom
-c$$$      close(9)
-c$$$      close(10)
-c$$$      close(11)
-c$$$      close(12)
-c$$$      close(13)
-c$$$      close(14)
-c$$$      close(15)                 
-c$$$      end subroutine postprocesschain2
-
-
 ***********************************************************************
-      subroutine  postprocesschain3(nxdommax,nydommax,burnin,ninrub,
+      subroutine  postprocesschain2(nxdommax,nydommax,burnin,ninrub,
      &     npopmax,nppmax,nindiv,nloc,nal,nalmax,xlim,ylim,dt,nit,
      &     thinning,filenpop,filenpp,fileu,filec,filef,fileperm,filedom,
-     &     filemeanf,
      &     s,u,c,f,pivot,fpiv,dom,coorddom,indcel,distcel,
-     &     order,ordertmp,npopest,meanf)
+     &     order,ordertmp,npopest)
       implicit none
-      character*255 fileu,filec,filenpp,filenpop,filedom,filef,fileperm,
-     &     filemeanf
+      character*255 fileu,filec,filenpp,filenpop,filedom,filef,fileperm      
       integer nit,thinning,npp,npop,iit,nindiv,nxdommax,
      &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indcel,
      &     ipop,nloc,nal,nalmax,ijunk,order,ordertmp,ipopperm,burnin,
      &     ninrub,npopest,nnit,iloc,ial,pivot
       double precision s,u,xlim,ylim,coorddom,dom,domperm,distcel,dt,
-     &     f,fpiv,meanf
-
+     &     f,fpiv
       integer iitsub
 *     dimensionnement 
       dimension s(2,nindiv),u(2,nppmax),c(nppmax),
@@ -5252,8 +5094,7 @@ c$$$      end subroutine postprocesschain2
      &     domperm(nxdommax*nydommax,npopmax),
      &     coorddom(2,nxdommax*nydommax),indcel(nxdommax*nydommax),
      &     distcel(nxdommax*nydommax),order(npopmax),ordertmp(npopmax),
-     &     f(npopmax,nloc,nalmax),fpiv(npopmax,nloc,nalmax),nal(nloc),
-     &     meanf(npopmax,nloc,nalmax)
+     &     f(npopmax,nloc,nalmax),fpiv(npopmax,nloc,nalmax),nal(nloc)
       open(9,file=filenpop)
       open(10,file=filenpp)
       open(11,file=fileu)
@@ -5261,18 +5102,10 @@ c$$$      end subroutine postprocesschain2
       open(13,file=filef)
       open(14,file=fileperm)
       open(15,file=filedom)
-      open(16,file=filemeanf)
 
 c      write(6,*) 'debut postproc order=',order
 
 c      write(6,*) 'npopest=', npopest
-      do ipop = 1,npopmax
-         do iloc = 1,nloc
-            do ial = 1,nalmax
-               meanf(ipop,iloc,ial) = 0
-            enddo
-         enddo
-      enddo
 
 *     coordonnées de la grille 
       call limit(nindiv,s,xlim,ylim,dt)
@@ -5306,8 +5139,30 @@ c               write(6,*) 'ial=',ial
          enddo
       enddo
       rewind 13
+c$$$      iit = 1
+c$$$      iitsub = 0
+c$$$      do while(iitsub .lt. pivot)
+c$$$c         write(6,*) 'iit=',iit
+c$$$         read(9,*) npop
+c$$$         do iloc=1,nloc
+c$$$c     write(6,*) 'iloc=',iloc
+c$$$            do ial=1,nalmax
+c$$$c     write(6,*) 'ial=',ial
+c$$$               read(13,*) (fpiv(ipop,iloc,ial),ipop=1,npopmax)
+c$$$            enddo
+c$$$         enddo
+c$$$         if((npop .eq. 
+c$$$            iitsub = iitsub + 1
+c$$$c            write(6,*) 'iitsub=',iitsub
+c$$$         endif  
+c$$$         iit = iit + 1
+c$$$      enddo
+c$$$c      write(*,*) 'piv = ',iitsub
+c$$$c      write(*,*) 'en fortran fpiv=',fpiv
+c$$$      rewind 9
+c$$$      rewind 13                 
 
-
+      
 **************
 *     relabel wrt to pivot or take pivot as estimator
 c      write(6,*) 'relabel'
@@ -5320,7 +5175,9 @@ c      write(6,*) 'relabel'
             read(12,*) c(ipp)
          enddo
          do iloc=1,nloc
+c             write(6,*) 'iloc=',iloc
             do ial=1,nalmax
+c                write(6,*) 'ial=',ial
                read(13,*) (f(ipop,iloc,ial),ipop=1,npopmax)
             enddo
          enddo  
@@ -5333,7 +5190,6 @@ c            write(6,*) 'avant relab order=',order
 c            write(6,*) 'apre relab order=',order
                write(14,*) (order(ipop),ipop = 1,npopmax)
             endif
-            
 c            write(6,*) 'iit=',iit
 c            write(6,*) 'pivot=', pivot
             if((npopest .lt. 10) .or. (nnit .eq. pivot)) then 
@@ -5344,15 +5200,6 @@ c            write(6,*) 'pivot=', pivot
 c                  write(*,*) 'ipop=',ipop
                   dom(idom,ipop) = dom(idom,ipop) + 1.
                enddo
-*     increment estimated allele frequencies
-               do ipop = 1,npopmax
-                  do iloc = 1,nloc
-                     do ial = 1,nalmax
-                        meanf(ipop,iloc,ial) =  meanf(ipop,iloc,ial) +  
-     &                       f(order(ipop),iloc,ial)
-                     enddo
-                  enddo
-               enddo
             endif
          endif
       enddo
@@ -5362,14 +5209,6 @@ c                  write(*,*) 'ipop=',ipop
                dom(idom,ipop) = dom(idom,ipop)/float(nnit)
             enddo
          enddo
-         do ipop = 1,npopmax
-            do iloc = 1,nloc
-               do ial = 1,nalmax
-                  meanf(ipop,iloc,ial) = meanf(ipop,iloc,ial) / 
-     &                 float(nnit)
-               enddo
-            enddo
-         enddo
       endif
 
  2000 format (1000(e15.5,1x))
@@ -5377,25 +5216,183 @@ c                  write(*,*) 'ipop=',ipop
          write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
      &        (dom(idom,ipop), ipop=1,npopmax)
       enddo
-      
- 3000 format (300(1x,e15.8,1x))
-      do iloc=1,nloc
-         do ial=1,nalmax
-            write(16,3000) (sngl(meanf(ipop,iloc,ial)),ipop=1,npopmax)
-         enddo
-      enddo  
-      
-c     write(*,*) coorddom
+c      write(*,*) coorddom
       close(9)
       close(10)
       close(11)
       close(12)
       close(13)
       close(14)
-      close(15)
-      close(16)
-      end subroutine postprocesschain3
+      close(15)                 
+      end subroutine postprocesschain2
 
+
+c$$$***********************************************************************
+c$$$      subroutine  postprocesschain3(nxdommax,nydommax,burnin,ninrub,
+c$$$     &     npopmax,nppmax,nindiv,nloc,nal,nalmax,xlim,ylim,dt,nit,
+c$$$     &     thinning,filenpop,filenpp,fileu,filec,filef,fileperm,filedom,
+c$$$     &     filemeanf,
+c$$$     &     s,u,c,f,pivot,fpiv,dom,coorddom,indcel,distcel,
+c$$$     &     order,ordertmp,npopest,meanf)
+c$$$      implicit none
+c$$$      character*255 fileu,filec,filenpp,filenpop,filedom,filef,fileperm,
+c$$$     &     filemeanf
+c$$$      integer nit,thinning,npp,npop,iit,nindiv,nxdommax,
+c$$$     &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indcel,
+c$$$     &     ipop,nloc,nal,nalmax,ijunk,order,ordertmp,ipopperm,burnin,
+c$$$     &     ninrub,npopest,nnit,iloc,ial,pivot
+c$$$      double precision s,u,xlim,ylim,coorddom,dom,domperm,distcel,dt,
+c$$$     &     f,fpiv,meanf
+c$$$
+c$$$      integer iitsub
+c$$$*     dimensionnement 
+c$$$      dimension s(2,nindiv),u(2,nppmax),c(nppmax),
+c$$$     &     dom(nxdommax*nydommax,npopmax),xlim(2),ylim(2),
+c$$$     &     domperm(nxdommax*nydommax,npopmax),
+c$$$     &     coorddom(2,nxdommax*nydommax),indcel(nxdommax*nydommax),
+c$$$     &     distcel(nxdommax*nydommax),order(npopmax),ordertmp(npopmax),
+c$$$     &     f(npopmax,nloc,nalmax),fpiv(npopmax,nloc,nalmax),nal(nloc),
+c$$$     &     meanf(npopmax,nloc,nalmax)
+c$$$      open(9,file=filenpop)
+c$$$      open(10,file=filenpp)
+c$$$      open(11,file=fileu)
+c$$$      open(12,file=filec)
+c$$$      open(13,file=filef)
+c$$$      open(14,file=fileperm)
+c$$$      open(15,file=filedom)
+c$$$      open(16,file=filemeanf)
+c$$$
+c$$$c      write(6,*) 'debut postproc order=',order
+c$$$
+c$$$c      write(6,*) 'npopest=', npopest
+c$$$      do ipop = 1,npopmax
+c$$$         do iloc = 1,nloc
+c$$$            do ial = 1,nalmax
+c$$$               meanf(ipop,iloc,ial) = 0
+c$$$            enddo
+c$$$         enddo
+c$$$      enddo
+c$$$
+c$$$*     coordonnées de la grille 
+c$$$      call limit(nindiv,s,xlim,ylim,dt)
+c$$$      idom = 1
+c$$$      do ixdom =1,nxdommax
+c$$$c         write(6,*) 'ixdom=',ixdom
+c$$$         do iydom=1,nydommax
+c$$$c            write(6,*) 'iydom=',iydom
+c$$$            coorddom(1,idom) = xlim(1) + 
+c$$$     &           float(ixdom-1)*(xlim(2) - xlim(1))/float(nxdommax-1)
+c$$$            coorddom(2,idom) = ylim(1) +
+c$$$     &           float(iydom-1)*(ylim(2) - ylim(1))/float(nydommax-1)
+c$$$            do ipop=1,npopmax
+c$$$               dom(idom,ipop) = 0.
+c$$$               domperm(idom,ipop) = 0.
+c$$$            enddo
+c$$$            idom = idom + 1
+c$$$         enddo
+c$$$      enddo
+c$$$
+c$$$****************
+c$$$*     read frequencies for pivot state   
+c$$$c      write(6,*) 'look for pivot state'
+c$$$      do iit=1,pivot
+c$$$         do iloc=1,nloc
+c$$$c            write(6,*) 'iloc=',iloc
+c$$$            do ial=1,nalmax
+c$$$c               write(6,*) 'ial=',ial
+c$$$               read(13,*) (fpiv(ipop,iloc,ial),ipop=1,npopmax)
+c$$$            enddo
+c$$$         enddo
+c$$$      enddo
+c$$$      rewind 13
+c$$$
+c$$$
+c$$$**************
+c$$$*     relabel wrt to pivot or take pivot as estimator
+c$$$c      write(6,*) 'relabel'
+c$$$      nnit = 0
+c$$$      do iit=1,int(float(nit)/float(thinning))
+c$$$         read(9,*) npop
+c$$$         read(10,*) npp
+c$$$         do ipp=1,nppmax
+c$$$            read(11,*) u(1,ipp),u(2,ipp)
+c$$$            read(12,*) c(ipp)
+c$$$         enddo
+c$$$         do iloc=1,nloc
+c$$$            do ial=1,nalmax
+c$$$               read(13,*) (f(ipop,iloc,ial),ipop=1,npopmax)
+c$$$            enddo
+c$$$         enddo  
+c$$$         if((npop .eq. npopest) .and. (iit .gt. burnin)) then 
+c$$$c            write(6,*) 'avant relab order=',order
+c$$$            nnit = nnit + 1 
+c$$$            if(npopest .lt. 10) then 
+c$$$               call Relabel(npopmax,nloc,nalmax,nal,npopest,f,fpiv,
+c$$$     &              order,ordertmp)
+c$$$c            write(6,*) 'apre relab order=',order
+c$$$               write(14,*) (order(ipop),ipop = 1,npopmax)
+c$$$            endif
+c$$$c            write(6,*) 'iit=',iit
+c$$$c            write(6,*) 'pivot=', pivot
+c$$$            if((npopest .lt. 10) .or. (nnit .eq. pivot)) then 
+c$$$               call calccell(nxdommax*nydommax,coorddom,
+c$$$     &              npp,nppmax,u,indcel,distcel)
+c$$$               do idom=1,nxdommax*nydommax
+c$$$                  ipop = order(c(indcel(idom)))
+c$$$c                  write(*,*) 'ipop=',ipop
+c$$$                  dom(idom,ipop) = dom(idom,ipop) + 1.
+c$$$               enddo
+c$$$*     increment estimated allele frequencies
+c$$$               do ipop = 1,npopmax
+c$$$                  do iloc = 1,nloc
+c$$$                     do ial = 1,nalmax
+c$$$                        meanf(ipop,iloc,ial) =  meanf(ipop,iloc,ial) +  
+c$$$     &                       f(order(ipop),iloc,ial)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               enddo
+c$$$            endif
+c$$$         endif
+c$$$      enddo
+c$$$      if(npopest .lt. 10) then 
+c$$$         do idom=1,nxdommax*nydommax
+c$$$            do ipop=1,npopmax
+c$$$               dom(idom,ipop) = dom(idom,ipop)/float(nnit)
+c$$$            enddo
+c$$$         enddo
+c$$$         do ipop = 1,npopmax
+c$$$            do iloc = 1,nloc
+c$$$               do ial = 1,nalmax
+c$$$                  meanf(ipop,iloc,ial) = meanf(ipop,iloc,ial) / 
+c$$$     &                 float(nnit)
+c$$$               enddo
+c$$$            enddo
+c$$$         enddo
+c$$$      endif
+c$$$
+c$$$ 2000 format (1000(e15.5,1x))
+c$$$      do idom=1,nxdommax*nydommax
+c$$$         write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
+c$$$     &        (dom(idom,ipop), ipop=1,npopmax)
+c$$$      enddo
+c$$$      
+c$$$ 3000 format (300(1x,e15.8,1x))
+c$$$      do iloc=1,nloc
+c$$$         do ial=1,nalmax
+c$$$            write(16,3000) (sngl(meanf(ipop,iloc,ial)),ipop=1,npopmax)
+c$$$         enddo
+c$$$      enddo  
+c$$$      
+c$$$c     write(*,*) coorddom
+c$$$      close(9)
+c$$$      close(10)
+c$$$      close(11)
+c$$$      close(12)
+c$$$      close(13)
+c$$$      close(14)
+c$$$      close(15)
+c$$$      close(16)
+c$$$      end subroutine postprocesschain3
 
 
 ***********************************************************************

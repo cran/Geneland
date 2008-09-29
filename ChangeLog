@@ -1,26 +1,19 @@
 	---------------------------------------------
-	Changes from version 3.0.2 to version 3.1.0
+	Changes from version 3.1.1 to version 3.1.2
 	---------------------------------------------
 
 ************
 *   In R
 ************
-- function MCMC takes extra argument miss.loc for status of doubly missing genotypes
-
-- function Planarproj removed
-
-- added packages maps and mapproj to DEPENDS field in DESCRIPTION file
-
-- in functiob MCMC changed default freq. model to uncorrelated	
+- function ProstProcessChain calls now fortran function postprocesschain2
 
 	
-******************
+************
 *   In Fortran
-******************
-- Subroutine mcmcgld takes extra argument missloc for status of doubly missing genotypes
+************
+- function postprocesschain3 commented
 
-
-- Subroutine udyNA takes extra argument missloc for status of doubly missing genotypes	
 	
+		
 
 
