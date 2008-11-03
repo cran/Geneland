@@ -23,7 +23,7 @@ function (coordinates, path.mcmc, plotit = TRUE, format = "pdf",
     s[, 2] <- s[, 2] - min(s[, 2])
     map.dom <- t(apply(dom.post, 1, order))[, npopmax]
     if (plotit) {
-        get(getOption("device"))()
+        dev.new()
         frame <- max(max(coordinates[, 1]) - min(coordinates[, 
             1]), max(coordinates[, 2]) - min(coordinates[, 2]))/40
         image(seq(min(coordinates[, 1] - delta.coord/2), max(coordinates[, 

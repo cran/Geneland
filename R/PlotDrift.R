@@ -17,7 +17,7 @@ function (path.mcmc, printit = FALSE, file)
         }
         dev.off()
     }
-    get(getOption("device"))()
+    dev.new()
     par(mfrow = c(ceiling(sqrt(npopmax)), ceiling(sqrt(npopmax))))
     for (iclass in 1:npopmax) {
         plot(drift[, iclass], xlab = paste("Index of MCMC iteration", 

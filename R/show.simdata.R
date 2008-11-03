@@ -9,7 +9,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
     nloc <- length(dataset$allele.numbers)
     if (plot.coord == TRUE) {
         if (is.na(file.plot.coord)) {
-            get(getOption("device"))()
+            dev.new()
         }
         else postscript(file.plot.coord)
         plot(dataset$coord.indiv[, 1], dataset$coord.indiv[, 
@@ -29,7 +29,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
     }
     if (plot.tess == TRUE) {
         if (is.na(file.plot.tess)) {
-            get(getOption("device"))()
+            dev.new()
         }
         else postscript(file.plot.tess)
         image(seq(from = dataset$coord.lim[1], to = dataset$coord.lim[2], 
@@ -49,7 +49,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
         for (iloc in loc.grid) {
             for (iall in 1:(dataset$allele.numbers[iloc])) {
                 if (is.na(file.plot.freq.grid)) {
-                  get(getOption("device"))()
+                  dev.new()
                 }
                 else {
                   postscript(paste(substr(file.plot.freq.grid, 
@@ -85,7 +85,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
                   FF[cc == ipop] <- ff[cc == ipop]
                 }
                 if (is.na(file.plot.freq.indiv)) {
-                  get(getOption("device"))()
+                  dev.new()
                 }
                 else postscript(paste(substr(file.plot.freq.indiv, 
                   start = 1, stop = nchar(file.plot.freq.indiv) - 
@@ -105,7 +105,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
         nindiv <- ncol(dataset$coord.indiv)
         for (iloc in 1:loc.grid) {
             if (is.na(file.plot.gen)) {
-                get(getOption("device"))()
+                dev.new()
             }
             else postscript(paste(substr(file.plot.gen, start = 1, 
                 stop = nchar(file.plot.gen) - 3), iloc, ".ps", 

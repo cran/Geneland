@@ -14,7 +14,7 @@ function (coordinates, path.mcmc, printit = FALSE, path)
     dom.post <- as.matrix(read.table(filedom))[, -(1:2)]
     npopmax <- ncol(dom.post)
     for (iclass in 1:npopmax) {
-        get(getOption("device"))()
+        dev.new()
         image(seq(min(coordinates[, 1] - delta.coord/2), max(coordinates[, 
             1] + delta.coord/2), length = nxdom), seq(min(coordinates[, 
             2] - delta.coord/2), max(coordinates[, 2] + delta.coord/2), 

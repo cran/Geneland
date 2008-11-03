@@ -5,15 +5,10 @@
 ************
 *   In R
 ************
-- function ProstProcessChain calls now fortran function postprocesschain2
 
-	
-************
-*   In Fortran
-************
-- function postprocesschain3 commented
+- In function PlotTessellation, PosteriorMode, PlotDrift, PlotFreqA, show.simdata 
+	. replace  get(getOption("device"))() by dev.new()
+        
 
-	
-		
 
 
