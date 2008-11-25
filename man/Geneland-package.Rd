@@ -15,26 +15,25 @@
   making use of both genetic (and optionally geographic) information.
 }
 
-\details{
-  \tabular{ll}{
-    Package: \tab Geneland\cr
-    Type: \tab Package\cr
-    Version: \tab 3.0.0\cr
-    Date: \tab 2008-11-15\cr
-    License: \tab GPL\cr
-  }
+ \details{
+%   \tabular{ll}{
+%     Package: \tab Geneland\cr
+%     Type: \tab Package\cr
+%     Version: \tab 3.0.0\cr
+%     Date: \tab 2008-11-15\cr
+%     License: \tab GPL\cr
+%   }
   
-%   The overall population is viewed as a co-existence of sub-populations at 
-%   Hardy-Weiberg equilibrium. The sub-populations are supposed to be spatially 
-%   organised through the so-called 
-%   colored Poisson-Voronoi tessellation. 
-%   Allele frequencies are assumed to be drawn from the F-model 
-%   as described in (Falush 2003) although 
-%   the particular case of independent Uncorrelated allele frequencies, 
-%   as described by Pritchard (2000),  is also handled. 
-%   Individuals within populations are assumed to be randomly 
-%   located and  Hardy-Weinberg equilibrium 
-%   and linkage equilibrium are assumed.
+  The overall population is viewed as a co-existence of HWLE
+  sub-populations . The sub-populations are supposed to be spatially 
+  organised through the so-called 
+  colored Poisson-Voronoi tessellation.
+  The particular case of a non-spatial model is also handled.  
+  Allele frequencies are assumed to be drawn from the correlated
+  frequency model described in (Falush et al. Genetics 2003) but 
+  the particular case of uncorrelated allele frequencies, 
+   described by Pritchard et al. (Genetics 2000),  is also handled. 
+
   
   The main purpose of the program is to perform Bayesian inference of all the parameters involved 
   through Markov Chain Monte-Carlo simulation.
@@ -107,34 +106,30 @@
 }
 \author{Arnaud Estoup, Gilles Guillot, Filipe Santos
 
-  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html}
+  \url{http://folk.uio.no/gillesg/Geneland/Geneland.html}
+  }
 
-  See also
+% \references{
+
+% [1] G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+% model for landscape genetics. Genetics, 170, 1261-1280, 2005.
+
+
+% [2] G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
+% genetics. Molecular Ecology Notes, 5, 712-715, 2005.
+
+
+% [3] A. Coulon, Guillot G., Cosson J.-F., Angibault J.M.A., Aulagnier
+% S. , Cargnelutti B., Galan M., Hewison A.J.M. Genetics structure is
+% influenced by lansdcape features. Empirical evidence from a roe deer
+% population. Molecular Ecology, 15 1669-1679, 2006.
+
+% [4] G. Guillot, F. Santos and A. Estoup.
+%   Analysing georeferenced population genetics data with Geneland:
+%   a new algorithm to deal with null alleles and a friendly graphical
+%   user interface. To appear in Bioinformatics.
   
-  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/Geneland.html}
-}
-
-\references{
-
-[1] G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
-model for landscape genetics. Genetics, 170, 1261-1280, 2005.
-
-
-[2] G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
-genetics. Molecular Ecology Notes, 5, 712-715, 2005.
-
-
-[3] A. Coulon, Guillot G., Cosson J.-F., Angibault J.M.A., Aulagnier
-S. , Cargnelutti B., Galan M., Hewison A.J.M. Genetics structure is
-influenced by lansdcape features. Empirical evidence from a roe deer
-population. Molecular Ecology, 15 1669-1679, 2006.
-
-[4] G. Guillot, F. Santos and A. Estoup.
-  Analysing georeferenced population genetics data with Geneland:
-  a new algorithm to deal with null alleles and a friendly graphical
-  user interface. To appear in Bioinformatics.
-  
-}
+% }
 \keyword{ }
 
 \seealso{}

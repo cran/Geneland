@@ -222,6 +222,15 @@ c$$$      write(*,*) 'npp =', npp ,"\n"
 c$$$      write(*,*) 'nppmax =', nppmax   ,"\n"  
 c$$$      write(*,*) 'npopmin =',npopmin  ,"\n"
 c$$$      write(*,*) 'npopmax =', npopmax ,"\n" 
+c$$$      write(*,*) 'dt =',dt,"\n" 
+c$$$      write(*,*) 'shape1 =',shape1,"\n" 
+c$$$      write(*,*) 'shape2 =',shape2,"\n" 
+c$$$      write(*,*) 'filtna =',filtna,"\n" 
+c$$$      write(*,*) 'fmodel=',fmodel,"\n" 
+c$$$      write(*,*) 'kfix =',kfix,"\n" 
+c$$$      write(*,*) 'spatial =',spatial,"\n" 
+c$$$      write(*,*) 'jcf =',jcf,"\n" 
+c$$$      write(*,*) 'pudcel =',pudcel,"\n" 
 c$$$      write(*,*) 'c =', c,"\n"
 c$$$      write(*,*) 'ctmp =',ctmp ,"\n"
 c$$$      write(*,*) 'u =',u  ,"\n"
@@ -234,8 +243,8 @@ c$$$      write(*,*) 'indcell =', indcell ,"\n"
 c$$$      write(*,*) 'distcell =', distcell,"\n"
 c$$$      write(*,*) 'indcelltmp =', indcelltmp ,"\n"
 c$$$      write(*,*) 'distcelltmp =',distcelltmp ,"\n"
-c$$$      write(*,*) 'xlim=', xlim 
-c$$$      write(*,*) 'ylim=', ylim 
+      write(*,*) 'xlim=', xlim 
+      write(*,*) 'ylim=', ylim 
 ************************  
 * mise a jour iterative  
 ************************
