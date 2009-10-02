@@ -1,4 +1,4 @@
-`Plotntile` <-
+Plotntile <-
 function (path.mcmc, burnin, printit = FALSE, file) 
 {
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "/")

@@ -1,4 +1,4 @@
-`Geneland.GUI` <-
+Geneland.GUI <-
 function (lib.loc = NULL) 
 {
     require(tcltk)

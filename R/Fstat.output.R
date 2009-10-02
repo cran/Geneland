@@ -1,4 +1,4 @@
-`Fstat.output` <-
+Fstat.output <-
 function (coordinates = NULL, genotypes, ploidy = 2, burnin = NULL, 
     path.mcmc) 
 {

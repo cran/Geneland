@@ -1,4 +1,4 @@
-`Fstat` <-
+Fstat <-
 function (genotypes, npop, pop.mbrship, ploidy = 2) 
 {
     if (ploidy == 1) 

@@ -1,4 +1,4 @@
-`Plotnpop` <-
+Plotnpop <-
 function (path.mcmc, burnin, printit = FALSE, file, format = "pdf") 
 {
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "/")

@@ -1,4 +1,4 @@
-`simdata` <-
+simdata <-
 function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), rate, 
     number.nuclei, coord.nuclei, color.nuclei, allele.numbers, 
     IBD = TRUE, model = "stable", alpha = 1, beta = 1, gamma = 1.8, 

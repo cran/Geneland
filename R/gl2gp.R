@@ -1,4 +1,4 @@
-`gl2gp` <-
+gl2gp <-
 function (coordinates, genotypes, file) 
 {
     genotypes[is.na(genotypes)] <- 0

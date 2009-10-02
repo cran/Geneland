@@ -1,4 +1,4 @@
-`MCMC` <-
+MCMC <-
 function (coordinates = NULL, genotypes, ploidy = 2, dominance = "Codominant", 
     allele.numbers, path.mcmc, rate.max, delta.coord = 0, shape1 = 2, 
     shape2 = 20, npopmin = 1, npopinit, npopmax, nb.nuclei.max, 

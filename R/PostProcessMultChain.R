@@ -1,4 +1,4 @@
-`PostProcessMultChain` <-
+PostProcessMultChain <-
 function (coordinates, genotypes, path.all, nrun, nxdom, nydom, 
     burnin) 
 {

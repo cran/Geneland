@@ -1,4 +1,4 @@
-`PlotFreqA` <-
+PlotFreqA <-
 function (genotypes, path.mcmc, iloc, iall, printit = FALSE, 
     path) 
 {

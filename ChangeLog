@@ -1,11 +1,14 @@
 	-------------------------------------------
-	Changes from version 3.1.3 to version 3.1.4
+	Changes from version 3.1.4 to version 3.1.5
 	-------------------------------------------
 
 ************
 *   In R
 ************
 
-- In function Geneland.GUI: correction of a bug in the input of missing values
+- DESCRIPTION file: 
+		. update of emails and urls
+		. depends on RgoogleMaps 
+	
 
 

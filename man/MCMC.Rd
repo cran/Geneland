@@ -166,40 +166,45 @@
 Successive states of all blocks of parameters are written in files
 contained in \code{path.mcmc} and named after the type of parameters they contain.
 }
+
 \section{Storage format}{
 All parameters processed by function \code{\link{MCMC}} are
 written in the directory  specified by \file{path.mcmc} as follows:
+\itemize{
+\item File \file{population.numbers.txt} contains values of the number of
+populations (\code{nit} lines, one line per iteration of the MCMC
+algorithm).
+
 
 \item File \file{population.numbers.txt} contains values of the number of
-populations (\code{nit} lines, one line per iteration of the MCMC algorithm)
+populations (\code{nit} lines, one line per iteration of the MCMC algorithm).
 
-\item File \file{nuclei.numbers.txt} contains the number of points in the Poisson
-point process generating the Voronoi tessellation
+\item  File \file{nuclei.numbers.txt} contains the number of points in the Poisson
+point process generating the Voronoi tessellation.
 
-\item File \file{color.nuclei.txt} contains vectors of integers of
+\item  File \file{color.nuclei.txt} contains vectors of integers of
 length \code{nb.nuclei.max} coding the class membership of each Voronoi tile.
 Vectors of class membership for successive states of the chain are
 concatenated in one column. Some entries of the vector containing
 clas membership for a current state may have missing values as the
 actual number of polygon may be smaller that the maximum number allowed
-\code{nb.nuclei.max}. 
-This file has \code{nb.nuclei.max*chain/thinning} lines
+\code{nb.nuclei.max}. This file has \code{nb.nuclei.max*chain/thinning} lines.
 
-\item File \file{coord.nuclei.txt} contains coordinates of points in the Poisson
+\item  File \file{coord.nuclei.txt} contains coordinates of points in the Poisson
 point process generating the Voronoi tessellation. It has
 \code{nb.nuclei.max*chain/thinning} lines
 and two columns (hor. and vert. coordinates).
 
-\item File \file{drifts.txt} contains the drift factors for each
-population, (one column per population). 
+\item  File \file{drifts.txt} contains the drift factors for each
+population, (one column per population).
 
-\item File \file{ancestral.frequencies.txt} contains allele frequencies in ancestral
+\item  File \file{ancestral.frequencies.txt} contains allele frequencies in ancestral
 population. Each line contains all frequencies of the current state.
 The file has \code{nit} lines.
 In each line, values of allele frequencies are stored by increasing
 allele index and and locus index (allele index varying first).
 
-\item File \file{frequencies.txt} contains allele frequencies of present time
+\item  File \file{frequencies.txt}contains allele frequencies of present time
 populations. Column xx contains frequencies of population numer xx.
 In each column values of allele frequencies are stored by increasing
 allele index and and locus index (allele index varying first), and
@@ -207,34 +212,51 @@ values of successive iterations are pasted.
 The file has \code{nallmax*nloc*nit/thinning} lines where \code{nallmax} 
 is the maximum number of alleles over all loci.
 
-\item File \file{Poisson.process.rate.txt} contains rates of Poisson
-process
+\item  File \file{Poisson.process.rate.txt} contains rates of Poisson
+process.
 
-\item File \file{hidden.coord.txt} contains the coordinates of each
+\item  File \file{hidden.coord.txt} contains the coordinates of each
 individual as updated along the chain if those given as input are not
 considered as exact coordinates (which is specified by 
 \code{delta.coord} to a non zero value).
 
-\item File \file{log.likelihood.txt} contains log-likelihood of data
+\item  File \file{log.likelihood.txt} contains log-likelihood of data
 for the current state of parameters of the Markov chain.
 
-\item File \file{log.posterior.density.txt} contains log of posterior probability
+\item  File \file{log.posterior.density.txt} contains log of posterior probability
 (up to marginal density of data) of the
 current state of parameters in the Markov chain.
 
+}}
 
+\references{
+  \itemize{
+    \item G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+    model for landscape genetics. Genetics, 170, 1261-1280, 2005.
+    
+    \item  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
+    genetics. Molecular Ecology Notes, 5, 712-715, 2005.
+
+    
+    \item   Gilles Guillot, Filipe Santos  and Arnaud Estoup,
+    Analysing georeferenced population genetics data with
+    Geneland: a new algorithm to deal with null alleles and a friendly graphical user interface
+    Bioinformatics 2008 24(11):1406-1407.
+    
+    \item G. Guillot.  Inference of structure in subdivided populations at
+    low levels of genetic differentiation. The correlated allele
+    frequencies 
+    model revisited. Bioinformatics, 24:2222-2228, 2008
+  
+    \item G. Guillot and F. Santos  A computer program to simulate
+    multilocus 
+    genotype data with spatially auto-correlated allele frequencies.
+    Molecular Ecology Resources, 2009
+
+    \item G. Guillot, R. Leblois, A. Coulon, A. Frantz  Statistical
+  methods in spatial genetics, Molecular Ecology, 2009. 
+  }
 }
-
-\references{ G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
-  model for landscape genetics. Genetics, 170, 1261-1280, 2005.
-
-  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
-  genetics. Molecular Ecology Notes, 5, 712-715, 2005.
-
-   Gilles Guillot, Filipe Santos  and Arnaud Estoup,
-  Analysing georeferenced population genetics data with
-  Geneland: a new algorithm to deal with null alleles and a friendly graphical user interface
-Bioinformatics 2008 24(11):1406-1407.}
 
 
 \author{Gilles Guillot  }
@@ -243,9 +265,6 @@ Bioinformatics 2008 24(11):1406-1407.}
 
 \seealso{ \code{\link{simFmodel}}}
 
-\examples{
-
-
-}
+\examples{}
 
 \keyword{}

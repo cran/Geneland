@@ -35,7 +35,7 @@ coord.nuclei, color.nuclei,nall, npop, freq.model="Uncorrelated",drift,dominance
 \details{ \code{number.nuclei} uniform i.i.d points are randomly spread on
   the rectangular domain. These points generates the so called Voronoi
   tessellation of the domain in \code{number.nuclei} polygonal sub-domains. Each
-  polygon is given a color uniformly on {1, \code{npop}}. The union
+  polygon is given a color uniformly on \{1, \code{npop}\}. The union
   of polygons of the color k gives the domain of population k.
 Then \code{nindiv} uniform i.i.d  points are randomly spread on the
 domain and stand for the locations of individuals.

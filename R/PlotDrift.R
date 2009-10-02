@@ -1,4 +1,4 @@
-`PlotDrift` <-
+PlotDrift <-
 function (path.mcmc, printit = FALSE, file) 
 {
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "/")

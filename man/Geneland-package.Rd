@@ -109,27 +109,35 @@
   \url{http://folk.uio.no/gillesg/Geneland/Geneland.html}
   }
 
-% \references{
+\references{
+  \itemize{
+    \item G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+    model for landscape genetics. Genetics, 170, 1261-1280, 2005.
+    
+    \item  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
+    genetics. Molecular Ecology Notes, 5, 712-715, 2005.
 
-% [1] G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
-% model for landscape genetics. Genetics, 170, 1261-1280, 2005.
-
-
-% [2] G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
-% genetics. Molecular Ecology Notes, 5, 712-715, 2005.
-
-
-% [3] A. Coulon, Guillot G., Cosson J.-F., Angibault J.M.A., Aulagnier
-% S. , Cargnelutti B., Galan M., Hewison A.J.M. Genetics structure is
-% influenced by lansdcape features. Empirical evidence from a roe deer
-% population. Molecular Ecology, 15 1669-1679, 2006.
-
-% [4] G. Guillot, F. Santos and A. Estoup.
-%   Analysing georeferenced population genetics data with Geneland:
-%   a new algorithm to deal with null alleles and a friendly graphical
-%   user interface. To appear in Bioinformatics.
+    
+    \item   Gilles Guillot, Filipe Santos  and Arnaud Estoup,
+    Analysing georeferenced population genetics data with
+    Geneland: a new algorithm to deal with null alleles and a friendly graphical user interface
+    Bioinformatics 2008 24(11):1406-1407.
+    
+    \item G. Guillot.  Inference of structure in subdivided populations at
+    low levels of genetic differentiation. The correlated allele
+    frequencies 
+    model revisited. Bioinformatics, 24:2222-2228, 2008
   
-% }
+    \item G. Guillot and F. Santos  A computer program to simulate
+    multilocus 
+    genotype data with spatially auto-correlated allele frequencies.
+    Molecular Ecology Resources, 2009
+
+    \item G. Guillot, R. Leblois, A. Coulon, A. Frantz  Statistical
+  methods in spatial genetics, Molecular Ecology, 2009. 
+  }
+}
+
 \keyword{ }
 
 \seealso{}

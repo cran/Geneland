@@ -1,4 +1,4 @@
-`PlotTessellation` <-
+PlotTessellation <-
 function (coordinates, path.mcmc, printit = FALSE, path) 
 {
     coordinates <- as.matrix(coordinates)

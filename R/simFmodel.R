@@ -1,4 +1,4 @@
-`simFmodel` <-
+simFmodel <-
 function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei, 
     coord.nuclei, color.nuclei, nall, npop, freq.model = "Uncorrelated", 
     drift, dominance = "Codominant", plots = FALSE, ploth = FALSE) 

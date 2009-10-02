@@ -1,4 +1,4 @@
-`nullify` <-
+nullify <-
 function (genotypes, nall.null = 1, nloc.null) 
 {
     z <- genotypes

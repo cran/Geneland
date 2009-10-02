@@ -1,4 +1,4 @@
-`PosteriorMode` <-
+PosteriorMode <-
 function (coordinates, path.mcmc, plotit = TRUE, format = "pdf", 
     printit = FALSE, file, main.title = "") 
 {

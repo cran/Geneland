@@ -1,4 +1,4 @@
-`EstimateFreqNA` <-
+EstimateFreqNA <-
 function (genotypes, path.mcmc) 
 {
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "")

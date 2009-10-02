@@ -1,4 +1,4 @@
-`show.simdata` <-
+show.simdata <-
 function (dataset, plot.coord = FALSE, file.plot.coord = NA, 
     plot.tess = FALSE, file.plot.tess = NA, plot.freq.grid = FALSE, 
     file.plot.freq.grid = NA, loc.grid = 1, plot.freq.indiv = FALSE, 
