@@ -3,7 +3,7 @@ function (genotypes, npop, pop.mbrship, ploidy = 2)
 {
     if (ploidy == 1) 
         stop("Fstat not implemented for haploid data")
-    format <- FormatGenotypes(genotypes)
+    format <- FormatGenotypes(genotypes, ploidy = ploidy)
     genotypes <- format$genotypes
     allele.numbers <- format$allele.numbers
     if (sum(is.na(genotypes)) != 0) {

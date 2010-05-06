@@ -7,20 +7,23 @@
  of the spatial domain. 
 }
 \usage{
-PostProcessChain(coordinates,genotypes,
+PostProcessChain(coordinates,
 path.mcmc,nxdom, nydom,burnin)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+
   \item{coordinates}{Spatial coordinates of individuals. A matrix with 2
     columns and one line per individual.}
-  \item{genotypes}{Genotypes of individuals. A matrix with one line per
-    individual and 2 columns per locus}
+
   \item{path.mcmc}{ Path to output files directory }
+
   \item{nxdom}{Number of pixel for discretization of the spatial domain
     in the horizontal direction}
+
   \item{nydom}{Number of pixel for discretization of the spatial domain
     in the vertical direction}
+
   \item{burnin}{Number of iterations of the chain to throw away.
     WARNING : this argument should be given the number of stored
     iterations (and not the number of computed iterations which differ
@@ -31,6 +34,7 @@ path.mcmc,nxdom, nydom,burnin)
 }
 
 \value{
+
   \item{Posterior probability of population membership for each pixel:}{
     They  are
     written in an ascii file called \file{proba.pop.membership.txt}.
@@ -44,6 +48,7 @@ path.mcmc,nxdom, nydom,burnin)
     the previous pixel, etc...}
   
   
+
   \item{Posterior probability of population membership for each
     individual:}{ They are written in a file named
     \file{proba.pop.membership.indiv.txt}. One line per individuals and
@@ -52,6 +57,7 @@ path.mcmc,nxdom, nydom,burnin)
   }
   
   
+
   \item{Label of modal population for pixels and individuals:}{
     They are written in files named \file{modal.pop.txt} and
     \file{modal.pop.indiv.txt}

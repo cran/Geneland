@@ -37,7 +37,7 @@ function (coordinates, path.mcmc, plotit = TRUE, format = "pdf",
                 2] - delta.coord/2 - frame), max(coordinates[, 
                 2] + delta.coord/2 + frame)), asp = 1)
         points(coordinates, pch = 16, cex = 0.2)
-        title(sub = "Posterior mode of population membership")
+        title(sub = "Estimated cluster membership")
         title(main = main.title, pch = 16)
     }
     if (printit) {
@@ -60,7 +60,7 @@ function (coordinates, path.mcmc, plotit = TRUE, format = "pdf",
                 2] - delta.coord/2 - frame), max(coordinates[, 
                 2] + delta.coord/2 + frame)), asp = 1)
         points(coordinates, pch = 16, cex = 0.2)
-        title(main = main.title, sub = "Posterior mode of population membership")
+        title(main = main.title, sub = "Estimated cluster membership")
         dev.off()
     }
 }

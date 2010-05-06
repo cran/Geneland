@@ -12,27 +12,18 @@
   The main function \code{\link{MCMC}} 
   takes multilocus genetic data and tries to detect
   population structure (i.e sub-populations),
-  making use of both genetic (and optionally geographic) information.
+  making use of genetic (and optionally geographic) information.
 }
 
- \details{
-%   \tabular{ll}{
-%     Package: \tab Geneland\cr
-%     Type: \tab Package\cr
-%     Version: \tab 3.0.0\cr
-%     Date: \tab 2008-11-15\cr
-%     License: \tab GPL\cr
-%   }
+\details{
+  \tabular{ll}{
+    Package: \tab Geneland\cr
+    Type: \tab Package\cr
+    Version: \tab 3.0.0\cr
+    Date: \tab 2008-11-15\cr
+    License: \tab GPL\cr
+  }
   
-  The overall population is viewed as a co-existence of HWLE
-  sub-populations . The sub-populations are supposed to be spatially 
-  organised through the so-called 
-  colored Poisson-Voronoi tessellation.
-  The particular case of a non-spatial model is also handled.  
-  Allele frequencies are assumed to be drawn from the correlated
-  frequency model described in (Falush et al. Genetics 2003) but 
-  the particular case of uncorrelated allele frequencies, 
-   described by Pritchard et al. (Genetics 2000),  is also handled. 
 
   
   The main purpose of the program is to perform Bayesian inference of all the parameters involved 
@@ -82,36 +73,40 @@
    \code{\link{Plotnpop}}: Graphical display of number of populations
    along MCMC run
    
-   \code{\link{Plotntile}}: Graphical display of number of tiles along
-   MCMC run
+%    \code{\link{Plotntile}}: Graphical display of number of tiles along
+%    MCMC run
    
-   \code{\link{PosteriorMode}}: Computation and/or graphical display of
-   mode in the posterior distribution of class membership at each pixel
+%    \code{\link{PosteriorMode}}: Computation and/or graphical display of
+%    mode in the posterior distribution of class membership at each pixel
    
-   \code{\link{Fstat}}: Computations of pairwise F statistics between
-   known subpopulations of a dataset
+%    \code{\link{Fstat}}: Computations of pairwise F statistics between
+%    known subpopulations of a dataset
 
-    \code{\link{Fstat.output}}: Computations of pairwise F statistics between
-   inferred subpopulations 
+%     \code{\link{Fstat.output}}: Computations of pairwise F statistics between
+%    inferred subpopulations 
 
-    \code{\link{nullify}}: Alter genotpyes of a dataset by simulating
-    null alleles.
+%     \code{\link{nullify}}: Alter genotpyes of a dataset by simulating
+%     null alleles.
     
-   \code{\link{FormatGenotypes}}: Internal function. 
-   Transform a file of genotypes into
-   a format suitable for function \code{\link{MCMC}}
+%    \code{\link{FormatGenotypes}}: Internal function. 
+%    Transform a file of genotypes into
+%    a format suitable for function \code{\link{MCMC}}
 
 
    
 }
 \author{Arnaud Estoup, Gilles Guillot, Filipe Santos
 
-  \url{http://folk.uio.no/gillesg/Geneland/Geneland.html}
-  }
+  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html}
+
+  See also
+  
+  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/Geneland.html}
+}
 
 \references{
-  \itemize{
-    \item G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+ \itemize{
+  \item G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
     model for landscape genetics. Genetics, 170, 1261-1280, 2005.
     
     \item  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
@@ -134,10 +129,10 @@
     Molecular Ecology Resources, 2009
 
     \item G. Guillot, R. Leblois, A. Coulon, A. Frantz  Statistical
-  methods in spatial genetics, Molecular Ecology, 2009. 
-  }
+    methods in spatial genetics, Molecular Ecology, 2009.
+    }
+  
 }
-
 \keyword{ }
 
 \seealso{}

@@ -12,24 +12,38 @@ coord.nuclei, color.nuclei,nall, npop, freq.model="Uncorrelated",drift,dominance
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+
   \item{nindiv}{Integer:  Number of individuals}
+
   \item{coordinates}{ Matrix (2 rows, \code{nindiv} columns) of spatial
     coordinates of individuals}
+
   \item{coord.lim}{ Vector of limits of spatial domain to be considered
     (x min, x max, y min, y max) }
+
   \item{number.nuclei}{ Integer: number of nuclei in the Voronoi tessellation}
+
   \item{coord.nuclei}{Coordinates of nuclei of Voronoi tessellation}
+
   \item{color.nuclei}{Population labels of the nuclei (vector of integers of size \code{number.nuclei})}
+
   \item{nall}{ Vector of integers giving number of alleles at each locus}
+
   \item{npop}{Number of populations }
+
   \item{freq.model}{model for frequencies:"Correlated" or "Uncorrelated" }
+
   \item{drift}{Vector (of size \code{npop}) of drift factors between 0
     and 1 (only for the Correlated model)}
+
   \item{dominance}{A character string "Codominant" or "Dominant". If
-    "Dominant" is chosen, the first allele (labelled 1) is treated as a recessive
+    "Dominant" is chosen, the first allele is treated as a recessive
     allele and all heterozigous are converted into homozigous for the
-    dominant allele (labelled 2).}
+    dominant allele. The presence of the "dominant" allele is coded as 1,
+    the absence of the "dominant" allele is coded as 0.}
+
   \item{plots}{Logical: if TRUE, spatial coordinates are ploted}
+
   \item{ploth}{Logical: if TRUE, barplots for allele frequencies are ploted}
 }
 \details{ \code{number.nuclei} uniform i.i.d points are randomly spread on
@@ -53,16 +67,6 @@ equilibrium and linkage equilibrium.}
 coordinates, genotypes, allele.numbers, number.nuclei, coord.nuclei, color.nuclei, 
 frequencies,  ancestral.frequencies, drifts, index.nearest.nucleus}
 
-\references{Correlated D., M. Stephens, J.K. Pritchard, 
-  Inference of population structure using multilocus genotype data:
-  Linked loci and correlated allele frequencies, Genetics, pp 1567-1587,
-  vol 164, 2003
-
- G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
-  model for landscape genetics. Genetics, 170, 1261-1280, 2005.
-
-  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
-  genetics. Molecular Ecology Notes, 5, 712-715, 2005.}
 
 \author{Gilles Guillot  }
 

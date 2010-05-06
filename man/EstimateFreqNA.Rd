@@ -6,12 +6,10 @@
 
 
 \usage{
-EstimateFreqNA(genotypes,path.mcmc)
+EstimateFreqNA(path.mcmc)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-   \item{genotypes}{Genotypes of individuals. A matrix with one line per
-    individual and 2 columns per locus}
   \item{path.mcmc}{path to directory containing stored MCMC computations}
 }
 

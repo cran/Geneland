@@ -5,6 +5,7 @@
 /* random numbers */
 /******************/
 
+/* simulation */
 void F77_SUB(rndstart)(void) 
 { GetRNGstate(); }
 
@@ -36,6 +37,14 @@ double F77_SUB(ggrpois)(double *lambda)
 {return rpois(*lambda);}
 
 
+/* density */
+/* normal df */
+double F77_SUB(ggdnorm)(double *x, double *mu, double *sigma, int *give_log)
+{return dnorm( *x, *mu, *sigma, *give_log) ; }
+
+/* gamma df */
+double F77_SUB(ggdgamma)(double *x, double *shape, double *scale, int *give_log)
+{return dgamma( *x, *shape, *scale, *give_log) ; }
 
 
 
@@ -61,9 +70,6 @@ double F77_SUB(ggpnorm)(double *x, double *mu, double *sigma,
 			int *lower_tail, int *give_log)
 {return pnorm( *x, *mu, *sigma, *lower_tail, *give_log); }
 
-/* normal df */
-double F77_SUB(ggdnorm)(double *x, double *mu, double *sigma, int *give_log)
-{return dnorm( *x, *mu, *sigma, *give_log); }
 
 /* log(1+x) for |x| << 1  */
 double F77_SUB(gglog1p)(double *x) 

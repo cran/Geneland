@@ -10,88 +10,137 @@
   and different populations are supposed to be separated by impermeable
   barriers. The barriers are given by a Poisson-Voronoi tessellation.}
 \usage{
-simdata(nindiv,
-coord.indiv ,
-coord.lim,
-rate ,
-number.nuclei ,
-coord.nuclei ,
-color.nuclei ,
-allele.numbers,
-IBD,
-model,
-alpha,
-beta,
-gamma,
-npop,
-seed.coord ,
-seed.tess ,
-seed.freq ,
-give.tess.grid=FALSE,
-give.freq.grid = FALSE,
-npix ,
-comp.Fst = FALSE,
-comp.Dsigma2=FALSE,
-comp.diff=FALSE,
-width,
-plot.pairs.borders=FALSE)
+            simdata(nindiv,
+                    coord.indiv,
+                    coord.lim=c(0,1,0,1),
+                    npop,
+                    rate,                        
+                    number.nuclei,
+                    coord.nuclei,
+                    color.nuclei,
+                    allele.numbers,
+                    sim.gen=FALSE,
+                    IBD=TRUE,
+                    model="stable",
+                    alpha=1,
+                    beta=1,
+                    gamma=1.8,
+                    sim.quanti=FALSE,
+                    nquanti.var,
+                    mean.quanti,
+                    sd.quanti,
+                    seed.coord,
+                    seed.tess,
+                    seed.freq,
+                    give.tess.grid=FALSE,
+                    give.freq.grid=FALSE,
+                    npix,
+                    comp.Fst=FALSE,
+                    comp.Dsigma2=FALSE,
+                    comp.diff=FALSE,
+                    width,
+                    plot.pairs.borders=FALSE)
+
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+
   \item{nindiv}{Number of indivuals}
+
+
   \item{coord.indiv}{Coordinates of the individuals}
+
   \item{coord.lim}{Limits of the geographical domain. The domain is
     supposed to be rectangular and the limits are given as  (abs min, abs
     max, ord min, ord max)}
+
+  \item{npop}{Number of Populations}
+
   \item{rate}{Rate of the Poisson process governing the hidden tessellation}
+
   \item{number.nuclei}{Number of nuclei in the tessellation (if given, 
     then \code{rate} is ignored)}
+
   \item{coord.nuclei}{Coordinates of the nuclei (the number of
     coordinates of the nuclei
     given here as a matrix has to comply with \code{number.nuclei} )}
+
   \item{color.nuclei}{Population membeship of the nuclei: a vector of
     integer of length \code{number of nuclei} whose values are between 1
-  and \code{npop}}
-  \item{allele.numbers}{A vector giving the number of alleles observed at
+    and \code{npop}}
+
+  \item{sim.gen}{Logical to say whether genetic data should be simulated }
+
+ \item{allele.numbers}{A vector giving the number of alleles observed at
     each locus}
+
   \item{IBD}{Logical. If TRUE, then the allele frequencies are simulated
   according to an IBD model. If FALSE, panmixia is assumed.}
-  \item{model}{Model of spatial covariance function used for the
+
+\item{model}{Model of spatial covariance function used for the
     underlying Gaussian fields (see documentation of package
     \code{RandomFields}
     for details)}
+
   \item{alpha}{Parameter of the spatial Dirichlet vector field
     of frequencies (a positive real) }
+
   \item{beta}{Scale parameter of the spatial covariance function used for the
     underlying Gaussian fields. A positive real number (see documentation of package
     \code{RandomFields}
     for details)}
+
   \item{gamma}{Smoothing parameter of spatial covariance function used for the
     underlying Gaussian fields. (see documentation of package
     \code{RandomFields}
-  for details)}
-  \item{npop}{Number of Populations}
-  \item{seed.coord}{Random seed to initialise the simulation of the
+    for details)}
+
+  \item{sim.quanti}{Logical to say whether quantitative data should be
+    simulated }
+
+   \item{nquanti.var}{Number of quantitative variables to be simulated}
+  
+
+  \item{mean.quanti}{Mean of the quantitative variables in the various
+  groups. A matrix with \code{npop} lines and \code{nvar.quant} columns }
+
+\item{sd.quanti}{Standard deviation  of the quantitative variables in
+  the various groups.
+  A matrix with \code{npop} lines and \code{nvar.quant} columns}
+
+
+
+\item{seed.coord}{Random seed to initialise the simulation of the
     coordinates
   (mostly for debugging)}
-  \item{seed.tess}{Random seed to initialise the simulation of the
+
+\item{seed.tess}{Random seed to initialise the simulation of the
     tessellation  (mostly for debugging)}
+
   \item{seed.freq}{ Random seed to initialise the simulation of the
     frequencies  (mostly for debugging)}
+
   \item{give.freq.grid}{Logical to tell whether frequencies  on a grid are
     also returned}
+
   \item{give.tess.grid}{Logical to tell whether population memberships of pixels  on a grid are also returned}
+
   \item{npix}{A vector of two integers telling how many horizontal and
     vertical pixel should contain the grid for the graphical
     representations}
+
   \item{comp.Fst}{Logical to tell whether Fst, Fis and Fit should be
     computed}
+
   \item{comp.Dsigma2}{Logical to tell whether IBD index Dsgma2 should be
     computed}
+
   \item{comp.diff}{Logical to tell whether the local differentiation across the barriers
     should be computed}
+
   \item{width}{Real number specifying the width around the barrier in
     the computation of its local differentiation}
+
   \item{plot.pairs.borders}{Logical to tell whether the pairs of
       individuals coming into the computation of the differentiation of the barriers
       should be plotted}

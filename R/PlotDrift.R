@@ -22,6 +22,6 @@ function (path.mcmc, printit = FALSE, file)
     for (iclass in 1:npopmax) {
         plot(drift[, iclass], xlab = paste("Index of MCMC iteration", 
             " (x ", thinning, ")", sep = ""), ylab = paste("Drift of population", 
-            iclass), type = "l")
+            iclass), type = "l", ylim = c(0, max(drift)))
     }
 }

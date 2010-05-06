@@ -5,25 +5,37 @@
 \description{ Markov Chain Monte-Carlo inference under various models}
 \usage{
           MCMC(
-                coordinates=NULL,
-                 genotypes,## 
-                 ploidy=2,
-                 dominance="Codominant",
-                 allele.numbers,
-                                        # path to output directory
+ ## input data
+                 coordinates=NULL, # spatial coordinates
+                 geno.dip.codom=NULL, # diploid codominant markers
+                                      # one line per indiv.
+                                      # two column per marker
+                 geno.dip.dom=NULL, # diploid dominant markers
+                                    # one line per indiv.
+                                    # one column per marker
+                 geno.hap=NULL, # haploid
+                                # one line per indiv.
+                                # one column per marker
+                 qtc, # quantitative continuous variables
+                 qtd, # quantitative discrete variables
+                 ql, # qualitative variables
+                 ## path to output directory
                  path.mcmc,
-                                        # hyper-prior parameters
+                 ## hyper-prior parameters
                  rate.max,delta.coord=0,shape1=2,shape2=20,
                  npopmin=1,npopinit,npopmax,
-                                        # dimensions
+                 ## dimensions
                  nb.nuclei.max,
-                                        # options in mcmc computations
-                 nit,thinning=1,freq.model="Uncorrelated",
+                 ## mcmc computations options
+                 nit,
+                 thinning=1,
+                 freq.model="Uncorrelated",
                  varnpop=TRUE,
                  spatial=TRUE,
                  jcf=TRUE,
                  filter.null.alleles=TRUE,
                  prop.update.cell=0.1,
+                 ## writing mcmc output files options 
                  write.rate.Poisson.process=FALSE,
                  write.number.nuclei=TRUE,
                  write.number.pop=TRUE,
@@ -36,63 +48,80 @@
                  write.loglikelihood=TRUE,
                  write.true.coord=TRUE,
                  write.size.pop=FALSE,
-                 miss.loc)
+                 write.mean.quanti=TRUE,
+                 write.sd.quanti=TRUE,
+                 miss.loc=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
+
   \item{coordinates}{Spatial coordinates of individuals. A matrix with 2
-    columns and one line per individual.}
-  \item{genotypes}{Genotypes of individuals. A matrix with dimension as
-    described below.
+    columns and one line per individual.
+    }
 
-
-    For diploid organisms at codominant markers: a matrix with one line per
-    individual and two  columns per locus.
-
+  \item{geno.dip.codom}{Genotypes  for diploid data with codominant markers.
+    A matrix with one line per individual and two  columns per locus.}
     
-    For diploid organisms at dominant markers: a matrix with one line per
-    individual and one column per locus. Presence/absence of a band should be
-    coded as 0/1 (0 for absence / 1 for presence).
+ \item{geno.dip.dom}{Genotypes for diploid data with dominant
+   markers. A matrix with one line per individual and one  column per
+   locus. Presence/absence of a band should be
+    coded as 0/1 (0 for absence / 1 for presence). Dominant and
+   codominant markers can be analyzed jointly by passing variables to arguments 
+   geno.dip.codom and geno.dip.dom.
+ Haploid data and diploid dominant data can not be analyzed jointly in
+   the current version.}
 
-
-    For haploid organisms: a matrix with one line per
-    individual and one  column per locus.}
+ \item{geno.hap}{Genotypes of haploid data.
+   A matrix with one line per individual and one  column per
+   locus.     Dominant diploid data and haploid data 
+   can be analyzed jointly (e.g. to analyse microsatelite data or SNP
+   data together with mtDNA.
+ Haploid data and diploid dominant data can not be analyzed jointly in
+   the current version.}
     
 
-  \item{ploidy}{An integer equal to 1 for haploid data and 2 for diploid
-    data. }
-  \item{dominance}{A character string that should be either "Codominant"
-    (default) for codominant markers such as microsatellites and SNPs
-    or "Dominant" for AFLPs.}
-  \item{allele.numbers}{Vector of integers giving the number of observed
-  alleles at each locus. Only for debugging. Should be left unspecified.}
-  \item{path.mcmc}{ Path to output files directory. It seems that the
+  \item{qtc}{TODO}
+
+  \item{qtd}{TODO}
+
+   \item{ql}{TODO}
+
+ 
+\item{path.mcmc}{ Path to output files directory. It seems that the
     path should be given in the Unix style even under Windows (use \/
     instead of \\).
     This path *has to*  end with a slash (\/)
     (e.g. path.mcmc="/home/me/Geneland-stuffs/")
   }
+
   \item{rate.max}{Maximum rate of Poisson process  (real number >0).
   Setting \code{rate.max} equal to the number of individuals in the
   dataset has proved to be efficient in many cases.}
-  \item{delta.coord}{ Parameter prescribing the amount of unctertainty attached
+
+\item{delta.coord}{ Parameter prescribing the amount of uncertainty attached
     to spatial coordinates. If \code{delta.coord}=0 spatial coordinates are
-    consiered as true coordinates, if \code{delta.coord}>0 it is assumed that observed
+    considered as true coordinates, if \code{delta.coord}>0 it is assumed that observed
   coordinates are true coordinates blurred by an additive noise uniform
   on a square of side \code{delta.coord} centered on 0.}
+
 \item{shape1}{First parameter in the Beta(shape1,shape2) prior
   distribution of the drift parameters in the Correlated model.}
+
 \item{shape2}{Second parameter in the Beta(shape1,shape2) prior
   distribution of the drift parameters in the Correlated model.}
-  \item{npopmin}{Minimum number of populations (integer >=1) }
-  \item{npopinit}{Initial number of populations
+
+\item{npopmin}{Minimum number of populations (integer >=1) }
+
+\item{npopinit}{Initial number of populations
     ( integer sucht that
     \code{npopmin} =< \code{npopinit} =< \code{npopmax})}
+
   \item{npopmax}{Maximum number of populations (integer >=
     \code{npopinit}).
     There is no obvious rule to select \code{npopmax},
     it should be set to a value larger than any value that
     you can reasonably expect for your data.}
+
   \item{nb.nuclei.max}{Integer: Maximum number of nuclei in the
     Poisson-Voronoi tessellation. A good guess consists in setting this
     value equal to \code{3*rate.max}. Lower values
@@ -103,13 +132,17 @@
     chain  with a larger value for \code{nb.nuclei.max}. In case of use
     of the option \code{SPATIAL=FALSE}, \code{nb.nuclei.max} should be
     set equal to the number of individuals.}
+
   \item{nit}{Number of MCMC iterations}
+
   \item{thinning}{Number of MCMC iterations between two writing steps (if \code{thinning}=1, all
     states are saved whereas if e.g. \code{thinning}=10 only each 10 iteration is saved)}
+
   \item{freq.model}{Character: "Correlated" or "Uncorrelated" (model for
     frequencies). 
   See also details in detail section of \code{\link{Geneland}} help page.}
-  \item{varnpop}{Logical: if TRUE the number of class is treated as
+
+\item{varnpop}{Logical: if TRUE the number of class is treated as
     unknown and will vary along the MCMC inference, if FALSE it will be
     fixed to the initial value \code{npopinit}. 
     \code{varnpop = TRUE} *should not* be used in conjunction with
@@ -117,42 +150,65 @@
     of populations are not penalized enough and there is a serious risk
     of inferring spurious sub-populations.}
     
+
   \item{spatial}{Logical: if TRUE the colored Poisson-Voronoi
     tessellation is used as a prior for the spatial organisation of
     populations. If FALSE, all clustering receive equal prior
     probability. In this case spatial information (i.e coordinates)
     are not used  and the locations of  the nuclei are initialized and
     kept fixed at the locations of individuals.}
+
   \item{jcf}{Logical: if true update of c and f are performed jointly}
+
   \item{filter.null.alleles}{Logical: if TRUE, tries to filter out null
     alleles. An extra fictive null allele is created at each locus coding
   for all putative null allele. Its frequency  is estimated and can be
   viewed with function \code{PlotFreq}. This option is available only
   with \code{freq.model="Uncorrelated"}.}
+
 \item{prop.update.cell}{Integer between 0 and 1. Proportion of cell updated. For
   debugging only.}
+
 \item{write.rate.Poisson.process}{Logical: if TRUE (default) write rate
   of Poisson process simulated by MCMC}
+
 \item{write.number.nuclei}{Logical: if TRUE (default) write number of nuclei simulated by MCMC }
+
 \item{write.number.pop}{Logical: if TRUE (default) write number of
   populations simulated by MCMC }
+
 \item{write.coord.nuclei}{Logical: if TRUE (default) write coordinates
   of nuclei simulated by MCMC  }
+
 \item{write.color.nuclei}{Logical: if TRUE (default) write color of
   nuclei simulated by MCMC  }
+
 \item{write.freq}{Logical: if TRUE (default is FALSE) write allele
   frequencies simulated by MCMC  }
+
 \item{write.ancestral.freq}{Logical: if TRUE (default is FALSE) write
   ancestral allele frequencies simulated by MCMC }
+
 \item{write.drifts}{Logical: if TRUE (default is FALSE) write drifts simulated by MCMC }
+
 \item{write.logposterior}{Logical: if TRUE (default is FALSE) write
   logposterior simulated by MCMC }
+
 \item{write.loglikelihood}{Logical: if TRUE (default is FALSE) write
   loglikelihood simulated by MCMC }
+
 \item{write.true.coord}{Logical: if TRUE (default is FALSE) write true
   spatial coordinates simulated by MCMC }
+
 \item{write.size.pop}{Logical: if TRUE (default is FALSE) write size of
   populations simulated by MCMC }
+
+\item{write.mean.quanti}{Logical: if TRUE (default is FALSE) write
+    means of quantitatives variables in the various groups simulated by MCMC}
+
+\item{write.sd.quanti}{Logical: if TRUE (default is FALSE) write
+    standard deviations of quantitatives variables in the various groups simulated by MCMC}
+
 \item{miss.loc}{A matrix with \code{nindiv} lines and \code{nloc}
   columns of 0 or 1. For each individual, at each locus it says if the
   locus is genuinely missing (no attempt to measure it). This info is
@@ -160,6 +216,7 @@
     missing value should be treated (genuine missing data
     or double null allele).}
 }
+
 
 
 \value{
@@ -255,8 +312,7 @@ current state of parameters in the Markov chain.
 
     \item G. Guillot, R. Leblois, A. Coulon, A. Frantz  Statistical
   methods in spatial genetics, Molecular Ecology, 2009. 
-  }
-}
+}}
 
 
 \author{Gilles Guillot  }
@@ -266,5 +322,8 @@ current state of parameters in the Markov chain.
 \seealso{ \code{\link{simFmodel}}}
 
 \examples{}
+
+
+
 
 \keyword{}

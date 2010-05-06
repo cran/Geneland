@@ -1,20 +1,45 @@
 MCMC <-
-function (coordinates = NULL, genotypes, ploidy = 2, dominance = "Codominant", 
-    allele.numbers, path.mcmc, rate.max, delta.coord = 0, shape1 = 2, 
-    shape2 = 20, npopmin = 1, npopinit, npopmax, nb.nuclei.max, 
-    nit, thinning = 1, freq.model = "Uncorrelated", varnpop = TRUE, 
-    spatial = TRUE, jcf = TRUE, filter.null.alleles = TRUE, prop.update.cell = 0.1, 
-    write.rate.Poisson.process = FALSE, write.number.nuclei = TRUE, 
-    write.number.pop = TRUE, write.coord.nuclei = TRUE, write.color.nuclei = TRUE, 
-    write.freq = TRUE, write.ancestral.freq = TRUE, write.drifts = TRUE, 
-    write.logposterior = TRUE, write.loglikelihood = TRUE, write.true.coord = TRUE, 
-    write.size.pop = FALSE, miss.loc = NULL) 
+function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL, 
+    geno.hap = NULL, qtc = NULL, qtd = NULL, ql = NULL, path.mcmc, 
+    rate.max, delta.coord = 0, shape1 = 2, shape2 = 20, npopmin = 1, 
+    npopinit, npopmax, nb.nuclei.max, nit, thinning = 1, freq.model = "Uncorrelated", 
+    varnpop = TRUE, spatial = TRUE, jcf = TRUE, filter.null.alleles = TRUE, 
+    prop.update.cell = 0.1, write.rate.Poisson.process = FALSE, 
+    write.number.nuclei = TRUE, write.number.pop = TRUE, write.coord.nuclei = TRUE, 
+    write.color.nuclei = TRUE, write.freq = TRUE, write.ancestral.freq = TRUE, 
+    write.drifts = TRUE, write.logposterior = TRUE, write.loglikelihood = TRUE, 
+    write.true.coord = TRUE, write.size.pop = FALSE, write.mean.quanti = TRUE, 
+    write.sd.quanti = TRUE, miss.loc = NULL) 
 {
+    ploidy <- 2
+    if (!is.null(geno.dip.dom) & !is.null(geno.hap)) {
+        stop("It is currently not possible to analyze jointly diploid dominant genotypes and haploid genotypes")
+    }
+    if (is.null(geno.dip.dom) & is.null(geno.hap)) 
+        ploidy <- 2
+    if (!is.null(geno.dip.dom)) 
+        ploidy <- 2
+    if (!is.null(geno.hap)) 
+        ploidy <- 1
+    geno2 <- geno.dip.codom
+    if (ploidy == 2) {
+        geno1 <- geno.dip.dom
+    }
+    if (ploidy == 1) {
+        geno1 <- geno.hap
+    }
     if (substring(path.mcmc, first = nchar(path.mcmc), last = nchar(path.mcmc)) != 
-        "/") 
-        stop(" path.mcmc has to end with /")
+        "/") {
+        path.mcmc <- paste(path.mcmc, "/", sep = "")
+    }
+    short.path <- substring(path.mcmc, first = 1, last = nchar(path.mcmc) - 
+        1)
+    if (!file_test("-d", short.path)) 
+        stop(paste("Directory ", path.mcmc, "does not exist."))
     if ((nit%%thinning) != 0) 
         stop("nit/thinning is not an integer")
+    if (missing(npopmax)) 
+        stop("Argument npopmax is missing with no default")
     if (missing(npopinit)) 
         npopinit <- npopmax
     if (npopinit > npopmax) 
@@ -24,12 +49,107 @@ function (coordinates = NULL, genotypes, ploidy = 2, dominance = "Codominant",
     if ((freq.model != "Correlated") & (freq.model != "Uncorrelated")) {
         stop(paste("Error:", freq.model, "is not a frequency model. Check spelling (case sensitive) "))
     }
+    if ((ploidy != 1) & (ploidy != 2)) {
+        print(paste("ploidy = ", ploidy, " is not a valid value."))
+        stop()
+    }
+    if (!is.null(geno1) & is.null(geno2)) {
+        if (filter.null.alleles) {
+            if (ploidy == 1) {
+                stop("Algorithm for filtering null alleles not compatible with haploid data")
+            }
+            if (ploidy == 2) {
+                stop("Algorithm for filtering null alleles not compatible with dominant markers")
+            }
+        }
+    }
+    if (!is.null(geno1) & (ploidy == 2)) {
+        geno1 <- geno1 + 1
+    }
+    if (is.null(geno1)) {
+        nloc.geno1 <- 1
+        nindiv.geno1 <- 0
+    }
+    else {
+        nloc.geno1 <- ncol(geno1)
+        nindiv.geno1 <- nrow(geno1)
+        print(c("in MCMC.R nindiv.geno1=", nindiv.geno1))
+    }
+    if (is.null(geno2)) {
+        nloc.geno2 <- 1
+        nindiv.geno2 <- 0
+    }
+    else {
+        nloc.geno2 <- ncol(geno2)/2
+        nindiv.geno2 <- nrow(geno2)
+    }
+    if (is.null(qtc)) {
+        nqtc <- 1
+        nindivqtc <- 0
+    }
+    else {
+        nqtc <- ncol(qtc)
+        nindivqtc <- nrow(qtc)
+    }
+    if (is.null(qtd)) {
+        nqtd <- 1
+        nindivqtd <- 0
+    }
+    else {
+        nqtd <- ncol(qtd)
+        nindivqtd <- nrow(qtd)
+    }
+    if (is.null(ql)) {
+        nql <- 1
+        nindivql <- 0
+    }
+    else {
+        nql <- ncol(ql)
+        nindivql <- nrow(ql)
+    }
+    nnn <- c(nindiv.geno1, nindiv.geno2, nindivqtc, nindivqtd, 
+        nindivql)
+    sub <- nnn > 0
+    if (length(unique(nnn[sub])) > 1) {
+        print("The various variables should be given for the same individuals")
+        print("Data dimensions do not comply with this requirement:")
+        print(paste("nindiv.geno1 = ", nindiv.geno1))
+        print(paste("nindiv.geno2 = ", nindiv.geno2))
+        print(paste("nindivqtc = ", nindivqtc))
+        print(paste("nindivqtd = ", nindivqtd))
+        print(paste("nindivql = ", nindivql))
+        stop("")
+    }
+    else {
+        nindiv <- nnn[sub][1]
+    }
+    use.geno1 <- nindiv.geno1 > 0
+    use.geno2 <- nindiv.geno2 > 0
+    use.qtc <- nindivqtc > 0
+    use.qtd <- nindivqtd > 0
+    use.ql <- nindivql > 0
+    print("defining dummy data arrays")
+    if (nindiv.geno1 == 0) {
+        geno1 <- matrix(nr = nindiv, nc = 1, data = NA)
+    }
+    if (nindiv.geno2 == 0) {
+        geno2 <- matrix(nr = nindiv, nc = 2, data = NA)
+    }
+    if (nindivqtc == 0) {
+        qtc <- matrix(nc = nindiv, nr = nqtc, data = NA)
+    }
+    if (nindivqtd == 0) {
+        qtd <- matrix(nc = nindiv, nr = nqtd, data = NA)
+    }
+    if (nindivql == 0) {
+        ql <- matrix(nc = nindiv, nr = nql, data = NA)
+    }
+    print("defining dummy coordinates if coord are missing")
     if (is.null(coordinates)) {
         if (spatial) {
             stop("Please give spatial coordinates of individuals or set argument spatial to FALSE")
         }
         else {
-            nindiv <- nrow(genotypes)
             n.int <- ceiling(sqrt(nindiv))
             x <- rep(seq(from = 0, to = 1, length = n.int), n.int)
             y <- rep(seq(from = 0, to = 1, length = n.int), n.int)
@@ -41,134 +161,205 @@ function (coordinates = NULL, genotypes, ploidy = 2, dominance = "Codominant",
     else {
         if (ncol(coordinates) != 2) 
             stop("matrix of coordinates does not have 2 columns")
-    }
-    if (ploidy == 1 & filter.null.alleles) 
-        stop("Null alleles can not be filtered with haploid data")
-    if (ploidy == 1 & dominance == "Dominant") 
-        stop("Option ploidy=1 (haploid) and dominance='Dominant' not compatible")
-    if (dominance != "Codominant") {
-        if (dominance != "Dominant") {
-            print(paste(dominance, " is not a valid argument."))
-            print("See on-line help for details and check spelling (case sensitive)")
-            stop()
+        if (nrow(coordinates) != nindiv) {
+            print(paste("number of individuals in data matrix =", 
+                nindiv))
+            print(paste("number of individuals in coordinate matrix =", 
+                nrow(coordinates)))
+            stop("Try again!")
         }
     }
-    nindiv <- nrow(genotypes)
-    if (is.null(miss.loc)) 
-        miss.loc <- matrix(nr = nindiv, nc = ifelse(ploidy == 
-            2, ncol(genotypes)/2, ncol(genotypes)), data = 0)
-    if (missing(rate.max)) 
-        rate.max <- nrow(genotypes)
-    if (missing(nb.nuclei.max)) {
-        nb.nuclei.max <- ifelse(spatial, 2 * nrow(genotypes), 
-            nrow(genotypes))
+    if (!is.matrix(coordinates)) 
+        coordinates <- as.matrix(coordinates)
+    print("defining dummy matrix indicating genuinely missing data in geno2")
+    if (is.null(miss.loc)) {
+        miss.loc <- matrix(nr = nindiv, nc = ncol(geno2)/2, data = 0)
     }
-    if (!spatial & (nb.nuclei.max < nrow(genotypes))) {
-        stop("With the option spatial=FALSE, nb.nuclei.max should be at least equal to the number of individuals")
+    if (missing(rate.max)) 
+        rate.max <- nindiv
+    if (missing(nb.nuclei.max)) {
+        nb.nuclei.max <- ifelse(spatial, 2 * nindiv, nindiv)
+    }
+    if (!spatial & (nb.nuclei.max < nindiv)) {
+        stop("With option spatial=FALSE, nb.nuclei.max should be at least equal to the number of individuals")
     }
     if (spatial & (nb.nuclei.max < 2 * rate.max)) {
         stop("nb.nuclei.max is too small as compared to rate.max")
     }
-    output.files <- c(write.rate.Poisson.process, write.number.nuclei, 
-        write.number.pop, write.coord.nuclei, write.color.nuclei, 
-        write.freq, write.ancestral.freq, write.drifts, write.logposterior, 
-        write.loglikelihood, write.true.coord, write.size.pop)
-    if (!is.matrix(coordinates)) 
-        coordinates <- as.matrix(coordinates)
-    if (!is.matrix(genotypes)) 
-        genotypes <- as.matrix(genotypes)
-    if (ploidy == 1 | dominance == "Dominant") {
-        data.tmp <- matrix(nrow = nrow(genotypes), ncol = ncol(genotypes) * 
-            2)
-        data.tmp[, seq(1, ncol(genotypes) * 2 - 1, 2)] <- genotypes
-        data.tmp[, seq(2, ncol(genotypes) * 2, 2)] <- genotypes
-        genotypes <- data.tmp
+    if (nindiv.geno1 > 0) {
+        res <- FormatGenotypes(as.matrix(geno1), ploidy = 1)
+        geno1 <- res$genotypes
+        allele.numbers.geno1 <- res$allele.numbers
+        print(c("In R function MCMC, allele.numbers.geno1=", 
+            allele.numbers.geno1))
+        if (sum(allele.numbers.geno1 == 1) > 0) {
+            stop("Some of the markers do not display any polymorphism")
+        }
+        print(paste("Number of missing data in matrix geno1: ", 
+            sum(is.na(geno1))))
     }
-    data.tmp <- FormatGenotypes(as.matrix(genotypes))
-    genotypes <- data.tmp$genotypes
-    if (missing(allele.numbers)) {
-        allele.numbers <- data.tmp$allele.numbers
+    else {
+        allele.numbers.geno1 <- -999
     }
-    print("In R function MCMC, the number of observed alleles are:")
-    print(allele.numbers)
-    if (sum(allele.numbers == 1) > 0) {
-        stop("Some of the markers do not display any polymorphism")
+    if (nindiv.geno2 > 0) {
+        res <- FormatGenotypes(as.matrix(geno2), ploidy = 2)
+        geno2 <- res$genotypes
+        allele.numbers.geno2 <- res$allele.numbers
+        print(c("In R function MCMC, allele.numbers.geno2=", 
+            allele.numbers.geno2))
+        if (sum(allele.numbers.geno2 == 1) > 0) {
+            stop("Some of the markers do not display any polymorphism")
+        }
+        print(paste("Number of missing data in matrix geno2: ", 
+            sum(is.na(geno2))))
     }
-    print(paste("There are ", sum(is.na(genotypes)), "missing values"))
+    else {
+        allele.numbers.geno2 <- -999
+    }
+    if (nindivql > 0) {
+        res <- FormatGenotypes(as.matrix(ql), ploidy = 1)
+        ql <- res$genotypes
+        allele.numbers.ql <- res$allele.numbers
+        print(paste("Number of missing obs. for qualitative variables: ", 
+            sum(is.na(ql))))
+    }
+    else {
+        allele.numbers.ql <- -999
+    }
+    if (nindivqtc > 0) {
+        print(paste("Number of missing obs. for quantitative continuous variables: ", 
+            sum(is.na(qtc))))
+    }
+    if (nindivqtd > 0) {
+        print(paste("Number of missing obs. for quantitative discrete variables: ", 
+            sum(is.na(qtd))))
+    }
     nchar.path <- nchar(path.mcmc)
-    nindiv <- nrow(genotypes)
-    nloc <- length(allele.numbers)
-    if (filter.null.alleles & dominance == "Dominant") {
-        filter.null.alleles <- FALSE
-        print("Dominant markers -> Option regarding null allele set to FALSE")
+    if (filter.null.alleles) {
+        allele.numbers.geno2 <- allele.numbers.geno2 + 1
     }
-    if (filter.null.alleles & dominance == "Codominant") {
-        allele.numbers <- allele.numbers + 1
-    }
-    if (dominance == "Dominant") 
-        dom <- 1
-    if (dominance == "Codominant") 
-        dom <- 0
-    nalmax <- max(allele.numbers)
-    npp <- -999
+    nalt <- c(allele.numbers.geno2, allele.numbers.geno1, allele.numbers.ql)
+    nalmax <- max(1, max(nalt))
+    print("Defining working arrays for parameters of spatial model...")
     u <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
     utemp <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
     c <- rep(times = nb.nuclei.max, -999)
     ctemp <- rep(times = nb.nuclei.max, -999)
     t <- matrix(nr = 2, nc = nindiv, data = -999)
     ttemp <- matrix(nr = 2, nc = nindiv, data = -999)
-    f <- array(dim = c(npopmax, nloc, nalmax), data = -999)
-    ftemp <- array(dim = c(npopmax, nloc, nalmax), data = -999)
-    fa <- array(dim = c(nloc, nalmax), data = -999)
-    drift <- rep(-999, npopmax)
-    drifttemp <- rep(-999, npopmax)
     indcell <- rep(times = nindiv, -999)
     indcelltemp <- rep(times = nindiv, -999)
     distcell <- rep(times = nindiv, -999)
     distcelltemp <- rep(times = nindiv, -999)
     xlim <- ylim <- rep(-999, times = 2)
-    n <- array(dim = c(npopmax, nloc, nalmax), data = -999)
-    ntemp <- array(dim = c(npopmax, nloc, nalmax), data = -999)
+    print("Defining working arrays for parameters of genetic model...")
+    ncolt <- nloc.geno2 + nloc.geno1 + nql
+    f <- array(dim = c(npopmax, ncolt, nalmax), data = -999)
+    ftemp <- array(dim = c(npopmax, ncolt, nalmax), data = -999)
+    fa <- array(dim = c(ncolt, nalmax), data = -999)
+    drift <- rep(-999, npopmax)
+    drifttemp <- rep(-999, npopmax)
+    n <- array(dim = c(npopmax, ncolt, nalmax), data = -999)
+    ntemp <- array(dim = c(npopmax, ncolt, nalmax), data = -999)
     a <- rep(times = nalmax, -999)
     ptemp <- rep(times = nalmax, -999)
-    effcl <- rep(times = npopmax, -999)
-    iclv <- rep(times = npopmax, -999)
     cellclass <- rep(times = nb.nuclei.max, -999)
     listcell <- rep(times = nb.nuclei.max, -999)
     fmodel <- ifelse(freq.model == "Correlated", 1, 0)
     kfix <- 1 - as.integer(varnpop)
     full.cond.y <- matrix(nr = nalmax, nc = 2, 0)
-    geno.999 <- genotypes
-    geno.999[is.na(genotypes)] <- -999
-    true.genotypes <- geno.999
+    print("Defining working arrays for parameters of quantitative variables...")
+    meanqtc <- sdqtc <- meanqtctmp <- sdqtctmp <- matrix(nr = npopmax, 
+        nc = nqtc, data = -999)
+    nnqtc <- sqtc <- ssqtc <- matrix(nr = npopmax, nc = nqtc, 
+        data = -999)
+    geno2.999 <- geno2
+    geno2.999[is.na(geno2)] <- -999
+    geno1.999 <- geno1
+    geno1.999[is.na(geno1.999)] <- -999
+    qtc.999 <- qtc
+    qtc.999[is.na(qtc.999)] <- -999
+    qtd.999 <- qtd
+    qtd.999[is.na(qtd.999)] <- -999
+    ql.999 <- ql
+    ql.999[is.na(ql.999)] <- -999
+    true.geno <- cbind(geno2.999, matrix(nr = nindiv, nc = nloc.geno1 * 
+        2, data = -999))
+    sub <- seq(nloc.geno2 * 2 + 1, nloc.geno2 * 2 + nloc.geno1 * 
+        2 - 1, 2)
+    true.geno[, sub] <- geno1.999
+    sub <- seq(nloc.geno2 * 2 + 2, nloc.geno2 * 2 + nloc.geno1 * 
+        2, 2)
+    true.geno[, sub] <- geno1.999
+    integer.par <- c(write.rate.Poisson.process, write.number.nuclei, 
+        write.number.pop, write.coord.nuclei, write.color.nuclei, 
+        write.freq, write.ancestral.freq, write.drifts, write.logposterior, 
+        write.loglikelihood, write.true.coord, write.size.pop, 
+        write.mean.quanti, write.sd.quanti, fmodel, kfix, spatial, 
+        jcf, filter.null.alleles, ploidy, nchar.path, nit, thinning, 
+        use.geno1, use.geno2, use.qtc, use.qtd, use.ql)
+    integer.par <- c(integer.par, rep(-999, 100 - length(integer.par)))
+    double.par <- c(rate.max, delta.coord, shape1, shape2, prop.update.cell)
+    double.par <- c(double.par, rep(-999, 100 - length(double.par)))
+    print(c("in MCMC.R nalt=", nalt))
     out.res <- .Fortran(name = "mcmcgld", PACKAGE = "Geneland", 
-        as.double(t(coordinates)), as.integer(geno.999), as.integer(allele.numbers), 
-        as.integer(ploidy), as.integer(dom), as.character(path.mcmc), 
-        as.integer(nchar.path), as.double(rate.max), as.double(delta.coord), 
-        as.double(shape1), as.double(shape2), as.integer(nit), 
-        as.integer(thinning), as.integer(filter.null.alleles), 
-        as.integer(nindiv), as.integer(nloc), as.integer(nloc * 
-            2), as.integer(nalmax), as.integer(npp), as.integer(nb.nuclei.max), 
+        as.double(t(coordinates)), as.integer(geno2.999), as.integer(miss.loc), 
+        as.integer(geno1.999), as.integer(ql.999), as.integer(nql), 
+        as.double(qtc.999), as.integer(nqtc), as.character(path.mcmc), 
+        as.integer(integer.par), as.double(double.par), as.integer(nindiv), 
+        as.integer(nloc.geno2), as.integer(nloc.geno1), as.integer(ncolt), 
+        as.integer(nalt), as.integer(nalmax), as.integer(nb.nuclei.max), 
         as.integer(npopinit), as.integer(npopmin), as.integer(npopmax), 
+        as.double(xlim), as.double(ylim), as.integer(indcell), 
+        as.integer(indcelltemp), as.double(distcell), as.double(distcelltemp), 
         as.double(t), as.double(ttemp), as.double(u), as.double(utemp), 
         as.integer(c), as.integer(ctemp), as.double(f), as.double(ftemp), 
         as.double(fa), as.double(drift), as.double(drifttemp), 
-        as.integer(indcell), as.integer(indcelltemp), as.double(distcell), 
-        as.double(distcelltemp), as.double(xlim), as.double(ylim), 
         as.integer(n), as.integer(ntemp), as.double(a), as.double(ptemp), 
-        as.integer(cellclass), as.integer(listcell), as.integer(fmodel), 
-        as.integer(kfix), as.integer(spatial), as.integer(jcf), 
-        as.integer(true.genotypes), as.double(full.cond.y), as.integer(output.files), 
-        as.double(prop.update.cell), as.integer(miss.loc))
-    param <- c(paste("ploidy :", ploidy), paste("dominance :", 
-        dominance), paste("rate.max :", rate.max), paste("delta.coord :", 
-        delta.coord), paste("npopmin :", npopmin), paste("npopinit :", 
-        npopinit), paste("npopmax :", npopmax), paste("nindiv :", 
-        nindiv), paste("nloc :", nloc), paste("nb.nuclei.max :", 
-        nb.nuclei.max), paste("nit :", nit), paste("thinning :", 
-        thinning), paste("freq.model :", freq.model), paste("varnpop :", 
-        varnpop), paste("filter.null.alleles :", filter.null.alleles), 
-        paste("spatial :", spatial))
+        as.double(meanqtc), as.double(sdqtc), as.double(meanqtctmp), 
+        as.double(sdqtctmp), as.integer(nnqtc), as.double(sqtc), 
+        as.double(ssqtc), as.integer(cellclass), as.integer(listcell), 
+        as.integer(true.geno), as.double(full.cond.y))
+    param <- c(paste("nindiv :", nindiv), paste("rate.max :", 
+        rate.max), paste("nb.nuclei.max :", nb.nuclei.max), paste("nit :", 
+        nit), paste("thinning :", thinning), paste("varnpop :", 
+        varnpop), paste("npopmin :", npopmin), paste("npopinit :", 
+        npopinit), paste("npopmax :", npopmax), paste("spatial :", 
+        spatial), paste("delta.coord :", delta.coord), paste("use.geno1 :", 
+        use.geno1), paste("use.geno2 :", use.geno2), paste("use.qtc :", 
+        use.qtc), paste("use.qtd :", use.qtd), paste("use.ql :", 
+        use.ql))
+    if (use.geno1) {
+        param <- c(param, paste("nloc.geno1 :", nloc.geno1))
+    }
+    if (use.geno2) {
+        param <- c(param, paste("nloc.geno2 :", nloc.geno2), 
+            paste("filter.null.alleles :", filter.null.alleles))
+    }
+    if ((use.geno1 | use.geno2) | use.ql) {
+        param <- c(param, paste("nalmax :", nalmax), paste("freq.model :", 
+            freq.model))
+    }
+    if (use.geno1) {
+        param <- c(param, paste("ploidy :", ploidy))
+    }
+    if (use.qtc) {
+        param <- c(param, paste("nqtc :", nqtc))
+    }
+    if (use.qtd) {
+        param <- c(param, paste("nqtd :", nqtd))
+    }
+    if (use.ql) {
+        param <- c(param, paste("nql :", nql))
+    }
     write.table(param, file = paste(path.mcmc, "parameters.txt", 
+        sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
+    write.table(allele.numbers.geno1, file = paste(path.mcmc, 
+        "allele.numbers.geno1.txt", sep = ""), quote = FALSE, 
+        row.name = FALSE, col.name = FALSE)
+    write.table(allele.numbers.geno2, file = paste(path.mcmc, 
+        "allele.numbers.geno2.txt", sep = ""), quote = FALSE, 
+        row.name = FALSE, col.name = FALSE)
+    write.table(allele.numbers.ql, file = paste(path.mcmc, "number.levels.ql.txt", 
         sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
 }

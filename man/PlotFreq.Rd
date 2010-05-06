@@ -9,11 +9,10 @@
   for allele \code{iall}  of locus \code{iloc}}
 
 \usage{
-PlotFreq(genotypes, path.mcmc,ipop,iloc,iall,printit=FALSE,path)
+PlotFreq(path.mcmc,ipop,iloc,iall,printit=FALSE,path)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-  \item{genotypes}{the matrix of genotypes}
    \item{path.mcmc}{ Path to output files directory }
    \item{ipop}{Integer number : index of population}
    \item{iloc}{Integer number : index of locus}
@@ -24,7 +23,8 @@ PlotFreq(genotypes, path.mcmc,ipop,iloc,iall,printit=FALSE,path)
    at a locus, the estimated frequency of null alleles can be seen
    invoking \code{PlotFreq} with \code{iall=6}.}
    \item{printit}{Logical : if TRUE, figures are also printed}
-   \item{path}{Character : Path to directory where figures should be printed}
+   \item{path}{Character : Path to directory where figures
+     should be printed}
   }
 
 

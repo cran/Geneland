@@ -18,7 +18,7 @@ Fstat(genotypes,npop,pop.mbrship,ploidy)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
-   \item{genotypes}{Genotypes of individuals. A matrix with one line per
+   \item{genotypes}{Diploid codominant genotype data. A matrix with one line per
     individual and 2 columns per locus}
   \item{npop}{total number of popluation present in the dataset}
   \item{pop.mbrship}{Vector of integers giving the population membership
@@ -34,7 +34,6 @@ Fstat(genotypes,npop,pop.mbrship,ploidy)
 }
 
 \author{Arnaud Estoup for original code in Turbo Pascal.
-
   Translation in Fortran and interface with R by Gilles Guillot}
 
 \references{ Weir, B.S. and C.C. Cockerham, 

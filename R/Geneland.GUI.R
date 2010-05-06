@@ -15,10 +15,16 @@ function (lib.loc = NULL)
     require(Geneland)
     idb.dataset <- 0
     globalcoordinates <- NULL
-    globalgenotypes <- 0
+    globaldominantgenotypes <- NULL
+    globalcodominantgenotypes <- NULL
+    globalhaploidgenotypes <- NULL
+    globalqtc <- NULL
+    globalqtd <- NULL
+    globalql <- NULL
     globallabels <- NA
     burnin <- tclVar(0)
     falush <- 0
+    ploidy <- tclVar(2)
     LogState <- tclVar(0)
     labelcoordtext <- tclVar("")
     labelgenotext <- tclVar("")
@@ -63,12 +69,15 @@ function (lib.loc = NULL)
         package = "Geneland", lib.loc = lib.loc))
     tkwait.window(tt)
     coordinatesfile <- tclVar("")
-    genotypefile <- tclVar("")
+    codominantgenotypefile <- tclVar("")
+    dominantgenotypefile <- tclVar("")
+    haploidgenotypefile <- tclVar("")
     outputdir <- tclVar("")
     labelsfile <- tclVar("")
     advanced <- tclVar(0)
     sep1 <- tclVar("White space")
     sep2 <- tclVar("White space")
+    sep3 <- tclVar("White space")
     md <- tclVar("NA")
     processors <- tclVar(1)
     cluster <- 0
@@ -140,7 +149,7 @@ function (lib.loc = NULL)
         label1.widget <- tklabel(ttcredits, text = "Authors:")
         label2.widget <- tklabel(ttcredits, text = " ")
         label3.widget <- tklabel(ttcredits, text = "Gilles Guillot:")
-        label4.widget <- tklabel(ttcredits, text = " MCMC algorithm")
+        label4.widget <- tklabel(ttcredits, text = "Statistical Fortran and R code")
         label5.widget <- tklabel(ttcredits, text = "")
         label6.widget <- tklabel(ttcredits, text = "Filipe Santos:")
         label7.widget <- tklabel(ttcredits, text = " Graphical interface (code and design)")
@@ -159,8 +168,55 @@ function (lib.loc = NULL)
         tkgrid(label10.widget, row = 7, column = 2, sticky = "w")
     }
     configure <- function() {
+        combinations <- function() {
+            ttcredits <- tktoplevel(parent = .TkRoot)
+            tkwm.title(ttcredits, "Possible combinations")
+            label1.widget <- tklabel(ttcredits, text = "Genotypes files can be combined as follows (see manual for details):")
+            label2.widget <- tklabel(ttcredits, text = " ")
+            label3.widget <- tklabel(ttcredits, text = "Haploid", 
+                font = "*-Times-bold-normal--12-*")
+            label4.widget <- tklabel(ttcredits, text = "")
+            label5.widget <- tklabel(ttcredits, text = "or")
+            label6.widget <- tklabel(ttcredits, text = "")
+            label7.widget <- tklabel(ttcredits, text = "Diploid codominant", 
+                font = "*-Times-bold-normal--12-*")
+            label8.widget <- tklabel(ttcredits, text = "")
+            label9.widget <- tklabel(ttcredits, text = "or")
+            label10.widget <- tklabel(ttcredits, text = "")
+            label11.widget <- tklabel(ttcredits, text = "Diploid dominant", 
+                font = "*-Times-bold-normal--12-*")
+            label12.widget <- tklabel(ttcredits, text = "")
+            label13.widget <- tklabel(ttcredits, text = "or")
+            label14.widget <- tklabel(ttcredits, text = "")
+            label15.widget <- tklabel(ttcredits, text = "Haploid + Diploid codominant", 
+                font = "*-Times-bold-normal--12-*")
+            label16.widget <- tklabel(ttcredits, text = "")
+            label17.widget <- tklabel(ttcredits, text = "or")
+            label18.widget <- tklabel(ttcredits, text = "")
+            label19.widget <- tklabel(ttcredits, text = "Diploid codominant + Diploid dominant", 
+                font = "*-Times-bold-normal--12-*")
+            tkgrid(label1.widget, row = 1, column = 1, sticky = "w")
+            tkgrid(label2.widget, row = 2, column = 1, sticky = "w")
+            tkgrid(label3.widget, row = 3, column = 1, sticky = "w")
+            tkgrid(label4.widget, row = 4, column = 1, sticky = "w")
+            tkgrid(label5.widget, row = 5, column = 1, sticky = "w")
+            tkgrid(label6.widget, row = 6, column = 1, sticky = "w")
+            tkgrid(label7.widget, row = 7, column = 1, sticky = "w")
+            tkgrid(label8.widget, row = 8, column = 1, sticky = "w")
+            tkgrid(label9.widget, row = 9, column = 1, sticky = "w")
+            tkgrid(label10.widget, row = 10, column = 1, sticky = "w")
+            tkgrid(label11.widget, row = 11, column = 1, sticky = "w")
+            tkgrid(label12.widget, row = 12, column = 1, sticky = "w")
+            tkgrid(label13.widget, row = 13, column = 1, sticky = "w")
+            tkgrid(label14.widget, row = 14, column = 1, sticky = "w")
+            tkgrid(label15.widget, row = 15, column = 1, sticky = "w")
+            tkgrid(label16.widget, row = 16, column = 1, sticky = "w")
+            tkgrid(label17.widget, row = 17, column = 1, sticky = "w")
+            tkgrid(label18.widget, row = 18, column = 1, sticky = "w")
+            tkgrid(label19.widget, row = 19, column = 1, sticky = "w")
+        }
         label1.widget <- tklabel(ttconf, text = tclvalue(coordinatesfile), 
-            width = 40, justify = "left")
+            width = 45, justify = "left")
         tkconfigure(label1.widget, textvariable = coordinatesfile)
         getcoordinatesfile <- function() {
             tclvalue(coordinatesfile) <- tclvalue(tkgetOpenFile(filetypes = "{{All files} *}", 
@@ -168,8 +224,8 @@ function (lib.loc = NULL)
             if (tclvalue(coordinatesfile) != "") {
                 if (tclvalue(sep1) == "White space") 
                   tclvalue(sep1) <- ""
-                globalcoordinates <<- as.matrix(read.table(tclvalue(coordinatesfile), 
-                  sep = tclvalue(sep1)))
+                globalcoordinates <<- read.table(tclvalue(coordinatesfile), 
+                  sep = tclvalue(sep1))
                 Log(paste("as.matrix(read.table(", tclvalue(coordinatesfile), 
                   "),sep=\"", tclvalue(sep1), "\")", sep = ""), 
                   "[SUCCESS] ")
@@ -186,37 +242,107 @@ function (lib.loc = NULL)
         button1.widget <- tkbutton(ttconf, text = "Coordinate file", 
             command = getcoordinatesfile, width = 15, justify = "left")
         tkgrid(button1.widget, row = 2, column = 1, sticky = "we")
-        tkgrid(label1.widget, row = 2, column = 2, sticky = "we")
-        label2.widget <- tklabel(ttconf, text = tclvalue(genotypefile), 
-            width = 40, justify = "left")
-        tkconfigure(label2.widget, textvariable = genotypefile)
-        getgenotypefile <- function() {
-            tclvalue(genotypefile) <- tclvalue(tkgetOpenFile(filetypes = "{{All files} *}", 
-                title = "Choose genotype file"))
-            if (tclvalue(genotypefile) != "") {
+        tkgrid(label1.widget, row = 2, column = 2, columnspan = 4, 
+            sticky = "we")
+        label2sep.widget <- tklabel(ttconf, font = "*-Courier--i-normal--12-*", 
+            foreground = "blue", text = "----------Genotype files----------", 
+            width = 45, justify = "left")
+        helpb.widget <- tkbutton(ttconf, width = 2, text = "?", 
+            font = "*-Times-bold-normal--12-*", command = combinations, 
+            justify = "left")
+        tkgrid(label2sep.widget, row = 3, column = 1, columnspan = 4, 
+            sticky = "we")
+        tkgrid(helpb.widget, row = 3, column = 5, sticky = "we")
+        label2haploid.widget <- tklabel(ttconf, text = tclvalue(haploidgenotypefile), 
+            width = 45, justify = "left")
+        tkconfigure(label2haploid.widget, textvariable = haploidgenotypefile)
+        gethaploidgenotypefile <- function() {
+            tclvalue(haploidgenotypefile) <- tclvalue(tkgetOpenFile(filetypes = "{{All files} *}", 
+                title = "Choose haploid genotype file"))
+            if (tclvalue(haploidgenotypefile) != "") {
                 if (tclvalue(sep2) == "White space") 
                   tclvalue(sep2) <- ""
-                globalgenotypes <<- as.matrix(read.table(tclvalue(genotypefile), 
-                  sep = tclvalue(sep2), na.strings = tclvalue(md)))
-                Log(paste("as.matrix(read.table(", tclvalue(genotypefile), 
+                globalhaploidgenotypes <<- read.table(tclvalue(haploidgenotypefile), 
+                  sep = tclvalue(sep2), na.strings = tclvalue(md))
+                Log(paste("as.matrix(read.table(", tclvalue(haploidgenotypefile), 
                   "),sep=\"", tclvalue(sep2), "\",na.strings=", 
                   tclvalue(md), "\")", sep = ""), "[SUCCESS] ")
                 if (tclvalue(sep2) == "") 
                   tclvalue(sep2) <- "White space"
-                tclvalue(labelgenotext) = "Genotype:  File loaded"
+                tclvalue(labelgenotext) = "Genotype:  Haploid file loaded"
             }
             else {
-                globalgenotypes <<- 0
-                tclvalue(labelgenotext) = "Genotype:  Data unloaded"
+                globalhaploidgenotypes <<- NULL
+                tclvalue(labelgenotext) = "Genotype:  Haploid data unloaded"
             }
             tkfocus(tt)
         }
-        button2.widget <- tkbutton(ttconf, text = "Genotype file", 
-            command = getgenotypefile, width = 15, justify = "left")
-        tkgrid(button2.widget, row = 3, column = 1, sticky = "we")
-        tkgrid(label2.widget, row = 3, column = 2, sticky = "we")
+        button2haploid.widget <- tkbutton(ttconf, text = "Haploid markers file", 
+            command = gethaploidgenotypefile, width = 15, justify = "left")
+        tkgrid(button2haploid.widget, row = 4, column = 1, sticky = "we")
+        tkgrid(label2haploid.widget, row = 4, columnspan = 4, 
+            column = 2, sticky = "we")
+        label2codom.widget <- tklabel(ttconf, text = tclvalue(codominantgenotypefile), 
+            width = 45, justify = "left")
+        tkconfigure(label2codom.widget, textvariable = codominantgenotypefile)
+        getcodominantgenotypefile <- function() {
+            tclvalue(codominantgenotypefile) <- tclvalue(tkgetOpenFile(filetypes = "{{All files} *}", 
+                title = "Choose codominant genotype file"))
+            if (tclvalue(codominantgenotypefile) != "") {
+                if (tclvalue(sep2) == "White space") 
+                  tclvalue(sep2) <- ""
+                globalcodominantgenotypes <<- read.table(tclvalue(codominantgenotypefile), 
+                  sep = tclvalue(sep2), na.strings = tclvalue(md))
+                Log(paste("as.matrix(read.table(", tclvalue(codominantgenotypefile), 
+                  "),sep=\"", tclvalue(sep2), "\",na.strings=", 
+                  tclvalue(md), "\")", sep = ""), "[SUCCESS] ")
+                if (tclvalue(sep2) == "") 
+                  tclvalue(sep2) <- "White space"
+                tclvalue(labelgenotext) = "Genotype: Codominant file loaded"
+            }
+            else {
+                globalcodominantgenotypes <<- NULL
+                tclvalue(labelgenotext) = "Genotype: Dodominant data unloaded"
+            }
+            tkfocus(tt)
+        }
+        button2codom.widget <- tkbutton(ttconf, text = "Codominant markers file", 
+            command = getcodominantgenotypefile, width = 16, 
+            justify = "left")
+        tkgrid(button2codom.widget, row = 5, column = 1, sticky = "we")
+        tkgrid(label2codom.widget, row = 5, column = 2, columnspan = 4, 
+            sticky = "we")
+        label2dom.widget <- tklabel(ttconf, text = tclvalue(dominantgenotypefile), 
+            width = 45, justify = "left")
+        tkconfigure(label2dom.widget, textvariable = dominantgenotypefile)
+        getdominantgenotypefile <- function() {
+            tclvalue(dominantgenotypefile) <- tclvalue(tkgetOpenFile(filetypes = "{{All files} *}", 
+                title = "Choose dominant genotype file"))
+            if (tclvalue(dominantgenotypefile) != "") {
+                if (tclvalue(sep2) == "White space") 
+                  tclvalue(sep2) <- ""
+                globaldominantgenotypes <<- read.table(tclvalue(dominantgenotypefile), 
+                  sep = tclvalue(sep2), na.strings = tclvalue(md))
+                Log(paste("as.matrix(read.table(", tclvalue(codominantgenotypefile), 
+                  "),sep=\"", tclvalue(sep2), "\",na.strings=", 
+                  tclvalue(md), "\")", sep = ""), "[SUCCESS] ")
+                if (tclvalue(sep2) == "") 
+                  tclvalue(sep2) <- "White space"
+                tclvalue(labelgenotext) = "Genotype: Dominant file loaded"
+            }
+            else {
+                globaldominantgenotypes <<- NULL
+                tclvalue(labelgenotext) = "Genotype: Dominant data unloaded"
+            }
+            tkfocus(tt)
+        }
+        button2dom.widget <- tkbutton(ttconf, text = "Dominant markers file", 
+            command = getdominantgenotypefile, width = 16, justify = "left")
+        tkgrid(button2dom.widget, row = 6, column = 1, sticky = "we")
+        tkgrid(label2dom.widget, row = 6, column = 2, columnspan = 4, 
+            sticky = "we")
         label3.widget <- tklabel(ttconf, text = tclvalue(outputdir), 
-            width = 40, justify = "left")
+            width = 45, justify = "left")
         tkconfigure(label3.widget, textvariable = outputdir)
         getoutputdir <- function() {
             tclvalue(outputdir) <- tclvalue(tkchooseDirectory(parent = tt, 
@@ -233,15 +359,16 @@ function (lib.loc = NULL)
         }
         button3.widget <- tkbutton(ttconf, text = "Output directory", 
             command = getoutputdir, width = 15, justify = "left")
-        tkgrid(button3.widget, row = 4, column = 1, sticky = "we")
-        tkgrid(label3.widget, row = 4, column = 2, sticky = "we")
+        tkgrid(button3.widget, row = 1, column = 1, sticky = "we")
+        tkgrid(label3.widget, row = 1, column = 2, columnspan = 4, 
+            sticky = "we")
         label5.widget <- tklabel(ttconf, font = "*-Courier--i-normal--12-*", 
             foreground = "blue", text = "-------------Optional-------------", 
-            width = 40, justify = "left")
-        tkgrid(label5.widget, row = 5, column = 1, columnspan = 2, 
+            width = 45, justify = "left")
+        tkgrid(label5.widget, row = 12, column = 1, columnspan = 4, 
             sticky = "we")
         label4.widget <- tklabel(ttconf, text = tclvalue(labelsfile), 
-            width = 40, justify = "left")
+            width = 45, justify = "left")
         tkconfigure(label4.widget, textvariable = labelsfile)
         getlabelsfile <- function() {
             tclvalue(labelsfile) <- tclvalue(tkgetOpenFile(filetypes = "{{All files} *}", 
@@ -251,16 +378,14 @@ function (lib.loc = NULL)
         }
         button4.widget <- tkbutton(ttconf, text = "Individual label file", 
             command = getlabelsfile, width = 15, justify = "left")
-        tkgrid(button4.widget, row = 6, column = 1, sticky = "we")
-        tkgrid(label4.widget, row = 6, column = 2, sticky = "we")
+        tkgrid(button4.widget, row = 13, column = 1, sticky = "we")
+        tkgrid(label4.widget, row = 13, column = 2, columnspan = 4, 
+            sticky = "we")
     }
     run <- function() {
         tclvalue(burnin) <<- 0
         testnumberpop <- tclVar(0)
         RunmcmcFmodel <- function() {
-            if (tclvalue(ploidy) == "Haploid") 
-                dploidy <- 1
-            else dploidy <- 2
             if (tclvalue(advanced) != 1) 
                 tclvalue(npopinit) <- tclvalue(npopmax)
             varnpop <- TRUE
@@ -279,14 +404,14 @@ function (lib.loc = NULL)
                 Sys.sleep(0.5)
                 tcl("update")
                 err <- try(MCMC(coordinates = globalcoordinates, 
-                  genotypes = globalgenotypes, ploidy = dploidy, 
-                  path.mcmc = tclvalue(outputdir), rate.max = as.numeric(tclvalue(rate)), 
-                  delta.coord = as.numeric(tclvalue(delta)), 
+                  geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
+                  geno.hap = globalhaploidgenotypes, qtc = globalqtc, 
+                  qtd = globalqtd, ql = globalql, path.mcmc = tclvalue(outputdir), 
+                  rate.max = as.numeric(tclvalue(rate)), delta.coord = as.numeric(tclvalue(delta)), 
                   npopmin = as.numeric(tclvalue(npopmin)), npopinit = as.numeric(tclvalue(npopinit)), 
                   npopmax = as.numeric(tclvalue(npopmax)), nb.nuclei.max = as.numeric(tclvalue(nuclei)), 
                   nit = as.numeric(tclvalue(nit)), thinning = as.numeric(tclvalue(thinning)), 
-                  freq.model = tclvalue(freq), shape1 = as.numeric(tclvalue(gshape1)), 
-                  shape2 = as.numeric(tclvalue(gshape2)), varnpop = varnpop, 
+                  freq.model = tclvalue(freq), varnpop = varnpop, 
                   spatial = as.logical(tclvalue(spatial)), jcf = as.logical(tclvalue(jcf)), 
                   filter.null.alleles = as.logical(tclvalue(null))), 
                   silent = TRUE)
@@ -294,19 +419,21 @@ function (lib.loc = NULL)
                 print("Done.")
                 if (class(err) == "try-error") {
                   Log(paste("MCMC(coordinates=", matrix2str(globalcoordinates), 
-                    ",genotypes=", matrix2str(globalgenotypes), 
-                    ",ploidy=", dploidy, ",path.mcmc=\"", tclvalue(outputdir), 
-                    "\",rate.max=", as.numeric(tclvalue(rate)), 
-                    ",delta.coord=", as.numeric(tclvalue(delta)), 
-                    ",npopmin=", as.numeric(tclvalue(npopmin)), 
-                    ",npopinit=", as.numeric(tclvalue(npopinit)), 
-                    ",npopmax=", as.numeric(tclvalue(npopmax)), 
-                    ",nb.nuclei.max=", as.numeric(tclvalue(nuclei)), 
-                    ",nit=", as.numeric(tclvalue(nit)), ",thinning=", 
-                    as.numeric(tclvalue(thinning)), ",freq.model=\"", 
-                    tclvalue(freq), "\",shape1=", shape1 = as.numeric(tclvalue(gshape1)), 
-                    ",shape2=", shape2 = as.numeric(tclvalue(gshape2)), 
-                    ",varnpop=", varnpop, ",spatial=", as.logical(tclvalue(spatial)), 
+                    ",geno.dip.dom =", matrix2str(globaldominantgenotypes), 
+                    ",geno.dip.codom =", matrix2str(globalcodominantgenotypes), 
+                    ",geno.hap =", matrix2str(globalhaploidgenotypes), 
+                    ",qtc=", matrix2str(globalqtc), ",qtd=", 
+                    matrix2str(globalqtd), ",ql=", matrix2str(globalql), 
+                    ",path.mcmc=\"", tclvalue(outputdir), "\",rate.max=", 
+                    as.numeric(tclvalue(rate)), ",delta.coord=", 
+                    as.numeric(tclvalue(delta)), ",npopmin=", 
+                    as.numeric(tclvalue(npopmin)), ",npopinit=", 
+                    as.numeric(tclvalue(npopinit)), ",npopmax=", 
+                    as.numeric(tclvalue(npopmax)), ",nb.nuclei.max=", 
+                    as.numeric(tclvalue(nuclei)), ",nit=", as.numeric(tclvalue(nit)), 
+                    ",thinning=", as.numeric(tclvalue(thinning)), 
+                    ",freq.model=\"", tclvalue(freq), "\",varnpop=", 
+                    varnpop, ",spatial=", as.logical(tclvalue(spatial)), 
                     ",jcf=", as.logical(tclvalue(jcf)), ",filter.null.alleles =", 
                     as.logical(tclvalue(null)), ")", sep = ""), 
                     "[FAILED] ")
@@ -315,19 +442,21 @@ function (lib.loc = NULL)
                 }
                 else {
                   Log(paste("MCMC(coordinates=", matrix2str(globalcoordinates), 
-                    ",genotypes=", matrix2str(globalgenotypes), 
-                    ",ploidy=", dploidy, ",path.mcmc=\"", tclvalue(outputdir), 
-                    "\",rate.max=", as.numeric(tclvalue(rate)), 
-                    ",delta.coord=", as.numeric(tclvalue(delta)), 
-                    ",npopmin=", as.numeric(tclvalue(npopmin)), 
-                    ",npopinit=", as.numeric(tclvalue(npopinit)), 
-                    ",npopmax=", as.numeric(tclvalue(npopmax)), 
-                    ",nb.nuclei.max=", as.numeric(tclvalue(nuclei)), 
-                    ",nit=", as.numeric(tclvalue(nit)), ",thinning=", 
-                    as.numeric(tclvalue(thinning)), ",freq.model=\"", 
-                    tclvalue(freq), "\",shape1=", shape1 = as.numeric(tclvalue(gshape1)), 
-                    ",shape2=", shape2 = as.numeric(tclvalue(gshape2)), 
-                    ",varnpop=", varnpop, ",spatial=", as.logical(tclvalue(spatial)), 
+                    ",geno.dip.dom =", matrix2str(globaldominantgenotypes), 
+                    ",geno.dip.codom =", matrix2str(globalcodominantgenotypes), 
+                    ",geno.hap =", matrix2str(globalhaploidgenotypes), 
+                    ",qtc=", matrix2str(globalqtc), ",qtd=", 
+                    matrix2str(globalqtd), ",ql=", matrix2str(globalql), 
+                    ",path.mcmc=\"", tclvalue(outputdir), "\",rate.max=", 
+                    as.numeric(tclvalue(rate)), ",delta.coord=", 
+                    as.numeric(tclvalue(delta)), ",npopmin=", 
+                    as.numeric(tclvalue(npopmin)), ",npopinit=", 
+                    as.numeric(tclvalue(npopinit)), ",npopmax=", 
+                    as.numeric(tclvalue(npopmax)), ",nb.nuclei.max=", 
+                    as.numeric(tclvalue(nuclei)), ",nit=", as.numeric(tclvalue(nit)), 
+                    ",thinning=", as.numeric(tclvalue(thinning)), 
+                    ",freq.model=\"", tclvalue(freq), "\",varnpop=", 
+                    varnpop, ",spatial=", as.logical(tclvalue(spatial)), 
                     ",jcf=", as.logical(tclvalue(jcf)), ",filter.null.alleles =", 
                     as.logical(tclvalue(null)), ")", sep = ""), 
                     "[SUCCESS] ")
@@ -574,35 +703,38 @@ function (lib.loc = NULL)
                   tcl("update")
                   Sys.sleep(0.5)
                   err <- try(MCMC(coordinates = globalcoordinates, 
-                    genotypes = globalgenotypes, ploidy = dploidy, 
-                    path.mcmc = tempoutputdir, rate.max = as.numeric(tclvalue(rate)), 
-                    delta.coord = as.numeric(tclvalue(delta)), 
+                    geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
+                    geno.hap = globalhaploidgenotypes, qtc = globalqtc, 
+                    qtd = globalqtd, ql = globalql, path.mcmc = tempoutputdir, 
+                    rate.max = as.numeric(tclvalue(rate)), delta.coord = as.numeric(tclvalue(delta)), 
                     npopmin = as.numeric(tclvalue(npopmin)), 
                     npopinit = as.numeric(tclvalue(npopinit)), 
                     npopmax = as.numeric(tclvalue(npopmax)), 
                     nb.nuclei.max = as.numeric(tclvalue(nuclei)), 
                     nit = as.numeric(tclvalue(nit)), thinning = as.numeric(tclvalue(thinning)), 
-                    freq.model = tclvalue(freq), shape1 = as.numeric(tclvalue(gshape1)), 
-                    shape2 = as.numeric(tclvalue(gshape2)), varnpop = varnpop, 
+                    freq.model = tclvalue(freq), varnpop = varnpop, 
                     spatial = as.logical(tclvalue(spatial)), 
                     jcf = as.logical(tclvalue(jcf)), filter.null.alleles = as.logical(tclvalue(null))), 
                     silent = TRUE)
                   print("Done")
                   if (class(err) == "try-error") {
                     Log(paste("MCMC(coordinates=", matrix2str(globalcoordinates), 
-                      ",genotypes=", matrix2str(globalgenotypes), 
-                      ",ploidy=", dploidy, ",path.mcmc=\"", tempoutputdir, 
-                      "\",rate.max=", as.numeric(tclvalue(rate)), 
-                      ",delta.coord=", as.numeric(tclvalue(delta)), 
-                      ",npopmin=", as.numeric(tclvalue(npopmin)), 
-                      ",npopinit=", as.numeric(tclvalue(npopinit)), 
-                      ",npopmax=", as.numeric(tclvalue(npopmax)), 
-                      ",nb.nuclei.max=", as.numeric(tclvalue(nuclei)), 
-                      ",nit=", as.numeric(tclvalue(nit)), ",thinning=", 
+                      ",geno.dip.dom =", matrix2str(globaldominantgenotypes), 
+                      ",geno.dip.codom =", matrix2str(globalcodominantgenotypes), 
+                      ",geno.hap =", matrix2str(globalhaploidgenotypes), 
+                      ",qtc=", matrix2str(globalqtc), ",qtd=", 
+                      matrix2str(globalqtd), ",ql=", matrix2str(globalql), 
+                      ",path.mcmc=\"", tempoutputdir, "\",rate.max=", 
+                      as.numeric(tclvalue(rate)), ",delta.coord=", 
+                      as.numeric(tclvalue(delta)), ",npopmin=", 
+                      as.numeric(tclvalue(npopmin)), ",npopinit=", 
+                      as.numeric(tclvalue(npopinit)), ",npopmax=", 
+                      as.numeric(tclvalue(npopmax)), ",nb.nuclei.max=", 
+                      as.numeric(tclvalue(nuclei)), ",nit=", 
+                      as.numeric(tclvalue(nit)), ",thinning=", 
                       as.numeric(tclvalue(thinning)), ",freq.model=\"", 
-                      tclvalue(freq), "\",shape1=", shape1 = as.numeric(tclvalue(gshape1)), 
-                      ",shape2=", shape2 = as.numeric(tclvalue(gshape2)), 
-                      ",varnpop=", varnpop, ",spatial=", as.logical(tclvalue(spatial)), 
+                      tclvalue(freq), "\",varnpop=", varnpop, 
+                      ",spatial=", as.logical(tclvalue(spatial)), 
                       ",jcf=", as.logical(tclvalue(jcf)), ",filter.null.alleles =", 
                       as.logical(tclvalue(null)), ")", sep = ""), 
                       "[FAILED] ")
@@ -616,19 +748,22 @@ function (lib.loc = NULL)
                   }
                   else {
                     Log(paste("MCMC(coordinates=", matrix2str(globalcoordinates), 
-                      ",genotypes=", matrix2str(globalgenotypes), 
-                      ",ploidy=", dploidy, ",path.mcmc=\"", tempoutputdir, 
-                      "\",rate.max=", as.numeric(tclvalue(rate)), 
-                      ",delta.coord=", as.numeric(tclvalue(delta)), 
-                      ",npopmin=", as.numeric(tclvalue(npopmin)), 
-                      ",npopinit=", as.numeric(tclvalue(npopinit)), 
-                      ",npopmax=", as.numeric(tclvalue(npopmax)), 
-                      ",nb.nuclei.max=", as.numeric(tclvalue(nuclei)), 
-                      ",nit=", as.numeric(tclvalue(nit)), ",thinning=", 
+                      ",geno.dip.dom =", matrix2str(globaldominantgenotypes), 
+                      ",geno.dip.codom =", matrix2str(globalcodominantgenotypes), 
+                      ",geno.hap =", matrix2str(globalhaploidgenotypes), 
+                      ",qtc=", matrix2str(globalqtc), ",qtd=", 
+                      matrix2str(globalqtd), ",ql=", matrix2str(globalql), 
+                      ",path.mcmc=\"", tempoutputdir, "\",rate.max=", 
+                      as.numeric(tclvalue(rate)), ",delta.coord=", 
+                      as.numeric(tclvalue(delta)), ",npopmin=", 
+                      as.numeric(tclvalue(npopmin)), ",npopinit=", 
+                      as.numeric(tclvalue(npopinit)), ",npopmax=", 
+                      as.numeric(tclvalue(npopmax)), ",nb.nuclei.max=", 
+                      as.numeric(tclvalue(nuclei)), ",nit=", 
+                      as.numeric(tclvalue(nit)), ",thinning=", 
                       as.numeric(tclvalue(thinning)), ",freq.model=\"", 
-                      tclvalue(freq), "\",shape1=", shape1 = as.numeric(tclvalue(gshape1)), 
-                      ",shape2=", shape2 = as.numeric(tclvalue(gshape2)), 
-                      ",varnpop=", varnpop, ",spatial=", as.logical(tclvalue(spatial)), 
+                      tclvalue(freq), "\",varnpop=", varnpop, 
+                      ",spatial=", as.logical(tclvalue(spatial)), 
                       ",jcf=", as.logical(tclvalue(jcf)), ",filter.null.alleles =", 
                       as.logical(tclvalue(null)), ")", sep = ""), 
                       "[SUCCESS] ")
@@ -711,22 +846,23 @@ function (lib.loc = NULL)
                 }
                 mrcluster <- function(i, outdir, crate.max, cdelta.coord, 
                   cnpopmin, cnpopinit, cnpopmax, cnb.nuclei.max, 
-                  cnit, cthinning, cfreq.model, cshape1, cshape2, 
-                  cspatial, cjcf, cfilter.null.alleles) {
+                  cnit, cthinning, cfreq.model, cspatial, cjcf, 
+                  cfilter.null.alleles) {
                   tempoutputdir <- paste(outdir, as.character(i), 
                     "/", sep = "")
                   dir.create(tempoutputdir, showWarnings = FALSE)
                   require("Geneland")
                   Sys.sleep(0.5)
                   err <- try(MCMC(coordinates = globalcoordinates, 
-                    genotypes = globalgenotypes, ploidy = dploidy, 
-                    path.mcmc = tempoutputdir, rate.max = crate.max, 
-                    delta.coord = cdelta.coord, npopmin = cnpopmin, 
-                    npopinit = cnpopinit, npopmax = cnpopmax, 
-                    nb.nuclei.max = cnb.nuclei.max, nit = cnit, 
-                    thinning = cthinning, freq.model = cfreq.model, 
-                    shape1 = cshape1, shape2 = cshape2, varnpop = varnpop, 
-                    spatial = cspatial, jcf = cjcf, filter.null.alleles = cfilter.null.alleles), 
+                    geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
+                    geno.hap = globalhaploidgenotypes, qtc = globalqtc, 
+                    qtd = globalqtd, ql = globalql, path.mcmc = tempoutputdir, 
+                    rate.max = crate.max, delta.coord = cdelta.coord, 
+                    npopmin = cnpopmin, npopinit = cnpopinit, 
+                    npopmax = cnpopmax, nb.nuclei.max = cnb.nuclei.max, 
+                    nit = cnit, thinning = cthinning, freq.model = cfreq.model, 
+                    varnpop = varnpop, spatial = cspatial, jcf = cjcf, 
+                    filter.null.alleles = cfilter.null.alleles), 
                     silent = TRUE)
                   zz1 <- file(paste(tempoutputdir, "ClusterLog.txt", 
                     sep = ""), "a")
@@ -818,13 +954,12 @@ function (lib.loc = NULL)
                   tkconfigure(timelabel.widget, text = "Parallel processing...")
                   tcl("update")
                   clusterApply(cluster, 1:tclvalue(ntestpop), 
-                    mrcluster, tclvalue(outputdir), as.numeric(tclvalue(rate)), 
-                    as.numeric(tclvalue(delta)), as.numeric(tclvalue(npopmin)), 
-                    as.numeric(tclvalue(npopinit)), as.numeric(tclvalue(npopmax)), 
-                    as.numeric(tclvalue(nuclei)), as.numeric(tclvalue(nit)), 
-                    cthinning <- as.numeric(tclvalue(thinning)), 
-                    tclvalue(freq), as.numeric(tclvalue(gshape1)), 
-                    as.numeric(tclvalue(gshape2)), as.logical(tclvalue(spatial)), 
+                    mrcluster, tclvalue(ploidy), tclvalue(outputdir), 
+                    as.numeric(tclvalue(rate)), as.numeric(tclvalue(delta)), 
+                    as.numeric(tclvalue(npopmin)), as.numeric(tclvalue(npopinit)), 
+                    as.numeric(tclvalue(npopmax)), as.numeric(tclvalue(nuclei)), 
+                    as.numeric(tclvalue(nit)), cthinning <- as.numeric(tclvalue(thinning)), 
+                    tclvalue(freq), as.logical(tclvalue(spatial)), 
                     as.logical(tclvalue(jcf)), as.logical(tclvalue(null)))
                   for (i in 1:as.numeric(tclvalue(ntestpop))) mrafter(i)
                 }
@@ -840,20 +975,12 @@ function (lib.loc = NULL)
                 tkgrab("release", tttextpop)
             }
         }
-        ploidylabel.widget <- tklabel(ttrun, text = "Ploidy:")
-        ploidy <- tclVar("Diploid")
-        wdiplody <- .Tk.subwin(ttrun)
-        ploidyoptionmenu.widget <- tcl("tk_optionMenu", wdiplody, 
-            ploidy, "Diploid", "Haploid")
-        tkgrid(ploidylabel.widget, row = 2, column = 1, sticky = "w")
-        tkgrid(wdiplody, row = 2, column = 3, columnspan = 3, 
-            sticky = "w")
         rate <- tclVar(100)
         rate.widget <- tkentry(ttrun, width = "23", textvariable = rate)
         ratelabel.widget <- tklabel(ttrun, text = "Maximum rate of poisson process:")
         delta <- tclVar(0)
         delta.widget <- tkentry(ttrun, width = "23", textvariable = delta)
-        deltalabel.widget <- tklabel(ttrun, text = "Uncertainty on coordinates:")
+        deltalabel.widget <- tklabel(ttrun, text = "Uncertainty on coordinate:")
         tkgrid(deltalabel.widget, row = 4, column = 1, sticky = "w")
         tkgrid(delta.widget, row = 4, column = 3, columnspan = 3, 
             sticky = "w")
@@ -918,11 +1045,6 @@ function (lib.loc = NULL)
         wfreq <- .Tk.subwin(ttrun)
         freqoptionmenu.widget <- tcl("tk_optionMenu", wfreq, 
             freq, "Correlated", "Uncorrelated")
-        gshape1 <- tclVar(2)
-        gshape2 <- tclVar(18)
-        shape1.widget <- tkentry(ttrun, width = "6", textvariable = gshape1)
-        shape2.widget <- tkentry(ttrun, width = "6", textvariable = gshape2)
-        shapelabel.widget <- tklabel(ttrun, text = "Parameters drift (Gamma distrib.) :")
         spatiallabel.widget <- tklabel(ttrun, text = "Spatial model:")
         spatial <- tclVar("TRUE")
         wspatial <- .Tk.subwin(ttrun)
@@ -932,7 +1054,7 @@ function (lib.loc = NULL)
         tkgrid(wspatial, row = 12, column = 3, columnspan = 3, 
             sticky = "w")
         nulllabel.widget <- tklabel(ttrun, text = "Null allele model:")
-        null <- tclVar("TRUE")
+        null <- tclVar("FALSE")
         wnull <- .Tk.subwin(ttrun)
         nulloptionmenu.widget <- tcl("tk_optionMenu", wnull, 
             null, "FALSE", "TRUE")
@@ -990,17 +1112,11 @@ function (lib.loc = NULL)
             sticky = "w")
         tkgrid(freqlabel.widget, row = 10, column = 1, sticky = "w")
         tkgrid(wfreq, row = 10, column = 3, columnspan = 3, sticky = "w")
-        tkgrid(shapelabel.widget, row = 11, column = 1, sticky = "w")
-        tkgrid(shape1.widget, row = 11, column = 3, sticky = "w")
-        tkgrid(shape2.widget, row = 11, column = 4, sticky = "w")
         if (tclvalue(advanced) == 1) {
             tkconfigure(ratelabel.widget, state = "normal")
             tkconfigure(rate.widget, state = "normal")
             tkconfigure(nucleilabel.widget, state = "normal")
             tkconfigure(nuclei.widget, state = "normal")
-            tkconfigure(shapelabel.widget, state = "normal")
-            tkconfigure(shape1.widget, state = "normal")
-            tkconfigure(shape2.widget, state = "normal")
             tkgrid.remove(labelspace3)
             tkgrid(winit, row = 6, column = 4, sticky = "w")
             tkconfigure(npopinitlabel.widget, state = "normal")
@@ -1010,9 +1126,6 @@ function (lib.loc = NULL)
             tkconfigure(rate.widget, state = "disable")
             tkconfigure(nucleilabel.widget, state = "disable")
             tkconfigure(nuclei.widget, state = "disable")
-            tkconfigure(shapelabel.widget, state = "disable")
-            tkconfigure(shape1.widget, state = "disable")
-            tkconfigure(shape2.widget, state = "disable")
             tkconfigure(winit, relief = "raised")
             tkconfigure(npopinitlabel.widget, state = "disable")
             tkgrid.remove(winit)
@@ -1022,9 +1135,9 @@ function (lib.loc = NULL)
     initialimage <- function() {
         imgAsLabel <- tklabel(ttinit, image = image1, bg = "white")
         tkgrid(imgAsLabel, sticky = "news")
-        notice <- tklabel(ttinit, text = "Geneland is loaded\n\n* Please *\n\nRegister on http://folk.uio.no/gillesg/Geneland/register.php")
+        notice <- tklabel(ttinit, text = "Geneland is loaded\n\n* Please *\n\nRegister on http://www2.imm.dtu.dk/~gigu/Geneland/register.php")
         tkbind(notice, "<Button-1>", function() {
-            browseURL("http://folk.uio.no/gillesg/Geneland/register.php")
+            browseURL("http://www2.imm.dtu.dk/~gigu/Geneland/register.php")
         })
         tkgrid(notice, sticky = "news")
     }
@@ -1041,14 +1154,13 @@ function (lib.loc = NULL)
             Sys.sleep(0.5)
             print("Starting...")
             err <- try(PostProcessChain(coordinates = globalcoordinates, 
-                genotypes = globalgenotypes, path.mcmc = tclvalue(outputdir), 
-                nxdom = as.numeric(tclvalue(nxdom)), nydom = as.numeric(tclvalue(nydom)), 
-                burnin = as.numeric(tclvalue(burnin))), silent = TRUE)
+                path.mcmc = tclvalue(outputdir), nxdom = as.numeric(tclvalue(nxdom)), 
+                nydom = as.numeric(tclvalue(nydom)), burnin = as.numeric(tclvalue(burnin))), 
+                silent = TRUE)
             tkdestroy(tttry)
             print("Done.")
             if (class(err) == "try-error") {
                 Log(paste("PostProcessChain(coordinates=", matrix2str(globalcoordinates), 
-                  ",genotypes=", matrix2str(globalgenotypes), 
                   ",path.mcmc=\"", tclvalue(outputdir), "\",nxdom=", 
                   as.numeric(tclvalue(nxdom)), ",nydom=", as.numeric(tclvalue(nydom)), 
                   ",burnin=", as.numeric(tclvalue(burnin)), ")", 
@@ -1060,7 +1172,6 @@ function (lib.loc = NULL)
                 tkmessageBox(message = "Terminated with success", 
                   type = "ok", parent = tt)
                 Log(paste("PostProcessChain(coordinates=", matrix2str(globalcoordinates), 
-                  ",genotypes=", matrix2str(globalgenotypes), 
                   ",path.mcmc=\"", tclvalue(outputdir), "\",nxdom=", 
                   as.numeric(tclvalue(nxdom)), ",nydom=", as.numeric(tclvalue(nydom)), 
                   ",burnin=", as.numeric(tclvalue(burnin)), ")", 
@@ -1083,19 +1194,17 @@ function (lib.loc = NULL)
                 }
             }
             print("Starting...")
-            err <- try(EstimateFreqNA(genotypes = globalgenotypes, 
-                path.mcmc = tclvalue(outputdir)), silent = TRUE)
+            err <- try(EstimateFreqNA(path.mcmc = tclvalue(outputdir)), 
+                silent = TRUE)
             if (class(err) == "try-error") {
-                Log(paste("EstimateFreqNA(genotypes=", matrix2str(globalgenotypes), 
-                  ",path.mcmc=\"", tclvalue(outputdir), "\")", 
-                  sep = ""), "[FAILED] ")
+                Log(paste("EstimateFreqNA(path.mcmc=\"", tclvalue(outputdir), 
+                  "\")", sep = ""), "[FAILED] ")
                 tkmessageBox(message = err, icon = "error", type = "ok", 
                   parent = tt)
             }
             else {
-                Log(paste("EstimateFreqNA(genotypes=", matrix2str(globalgenotypes), 
-                  ",path.mcmc=\"", tclvalue(outputdir), "\")", 
-                  sep = ""), "[SUCCESS] ")
+                Log(paste("EstimateFreqNA(path.mcmc=\"", tclvalue(outputdir), 
+                  "\")", sep = ""), "[SUCCESS] ")
                 tkgrid.remove(nabutton)
                 tttextna <- tktoplevel(parent = .TkRoot)
                 tkwm.title(tttextna, "Estimated frequency of null alelles")
@@ -1473,34 +1582,33 @@ function (lib.loc = NULL)
                 print("Starting...")
                 Sys.sleep(0.5)
                 if (tclvalue(printit) == 1) {
-                  err <- try(PlotFreq(genotypes = globalgenotypes, 
-                    path.mcmc = tclvalue(outputdir), ipop = as.numeric(tclvalue(ipop)), 
-                    iloc = as.numeric(tclvalue(iloc)), iall = as.numeric(tclvalue(iall)), 
-                    printit = TRUE, path = tclvalue(printfile)), 
-                    silent = TRUE)
+                  err <- try(PlotFreq(path.mcmc = tclvalue(outputdir), 
+                    ipop = as.numeric(tclvalue(ipop)), iloc = as.numeric(tclvalue(iloc)), 
+                    iall = as.numeric(tclvalue(iall)), printit = TRUE, 
+                    path = tclvalue(printfile)), silent = TRUE)
                 }
                 else {
-                  err <- try(PlotFreq(genotypes = globalgenotypes, 
-                    path.mcmc = tclvalue(outputdir), ipop = as.numeric(tclvalue(ipop)), 
-                    iloc = as.numeric(tclvalue(iloc)), iall = as.numeric(tclvalue(iall)), 
-                    printit = FALSE), silent = TRUE)
+                  err <- try(PlotFreq(path.mcmc = tclvalue(outputdir), 
+                    ipop = as.numeric(tclvalue(ipop)), iloc = as.numeric(tclvalue(iloc)), 
+                    iall = as.numeric(tclvalue(iall)), printit = FALSE), 
+                    silent = TRUE)
                 }
                 tkdestroy(tttry)
                 print("Done.")
                 if (class(err) == "try-error") {
                   if (tclvalue(printit) == 1) {
-                    Log(paste("PlotFreq(genotypes=", matrix2str(globalgenotypes), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",ipop=", 
-                      as.numeric(tclvalue(ipop)), ",iloc=", as.numeric(tclvalue(iloc)), 
-                      ",iall=", as.numeric(tclvalue(iall)), ",printit=TRUE,path=\"", 
+                    Log(paste("PlotFreq(path.mcmc=\"", tclvalue(outputdir), 
+                      "\",ipop=", as.numeric(tclvalue(ipop)), 
+                      ",iloc=", as.numeric(tclvalue(iloc)), ",iall=", 
+                      as.numeric(tclvalue(iall)), ",printit=TRUE,path=\"", 
                       tclvalue(printfile), "\")", sep = ""), 
                       "[FAILED] ")
                   }
                   else {
-                    Log(paste("PlotFreq(genotypes=", matrix2str(globalgenotypes), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",ipop=", 
-                      as.numeric(tclvalue(ipop)), ",iloc=", as.numeric(tclvalue(iloc)), 
-                      ",iall=", as.numeric(tclvalue(iall)), ",printit=FALSE", 
+                    Log(paste("PlotFreq(path.mcmc=\"", tclvalue(outputdir), 
+                      "\",ipop=", as.numeric(tclvalue(ipop)), 
+                      ",iloc=", as.numeric(tclvalue(iloc)), ",iall=", 
+                      as.numeric(tclvalue(iall)), ",printit=FALSE", 
                       ")", sep = ""), "[FAILED] ")
                   }
                   tkmessageBox(message = err, icon = "error", 
@@ -1508,18 +1616,18 @@ function (lib.loc = NULL)
                 }
                 else {
                   if (tclvalue(printit) == 1) {
-                    Log(paste("PlotFreq(genotypes=", matrix2str(globalgenotypes), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",ipop=", 
-                      as.numeric(tclvalue(ipop)), ",iloc=", as.numeric(tclvalue(iloc)), 
-                      ",iall=", as.numeric(tclvalue(iall)), ",printit=TRUE,path=\"", 
+                    Log(paste("PlotFreq(path.mcmc=\"", tclvalue(outputdir), 
+                      "\",ipop=", as.numeric(tclvalue(ipop)), 
+                      ",iloc=", as.numeric(tclvalue(iloc)), ",iall=", 
+                      as.numeric(tclvalue(iall)), ",printit=TRUE,path=\"", 
                       tclvalue(printfile), "\")", sep = ""), 
                       "[SUCCESS] ")
                   }
                   else {
-                    Log(paste("PlotFreq(genotypes=", matrix2str(globalgenotypes), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",ipop=", 
-                      as.numeric(tclvalue(ipop)), ",iloc=", as.numeric(tclvalue(iloc)), 
-                      ",iall=", as.numeric(tclvalue(iall)), ",printit=FALSE)", 
+                    Log(paste("PlotFreq(path.mcmc=\"", tclvalue(outputdir), 
+                      "\",ipop=", as.numeric(tclvalue(ipop)), 
+                      ",iloc=", as.numeric(tclvalue(iloc)), ",iall=", 
+                      as.numeric(tclvalue(iall)), ",printit=FALSE)", 
                       sep = ""), "[SUCCESS] ")
                   }
                 }
@@ -1591,49 +1699,48 @@ function (lib.loc = NULL)
                 print("Starting...")
                 Sys.sleep(0.5)
                 if (tclvalue(printit) == 1) {
-                  err <- try(PlotFreqA(genotypes = globalgenotypes, 
-                    path.mcmc = tclvalue(outputdir), iloc = as.numeric(tclvalue(iloc)), 
-                    iall = as.numeric(tclvalue(iall)), printit = TRUE, 
-                    path = tclvalue(printfile)), silent = TRUE)
+                  err <- try(PlotFreqA(path.mcmc = tclvalue(outputdir), 
+                    iloc = as.numeric(tclvalue(iloc)), iall = as.numeric(tclvalue(iall)), 
+                    printit = TRUE, path = tclvalue(printfile)), 
+                    silent = TRUE)
                 }
                 else {
-                  err <- try(PlotFreqA(genotypes = globalgenotypes, 
-                    path.mcmc = tclvalue(outputdir), iloc = as.numeric(tclvalue(iloc)), 
-                    iall = as.numeric(tclvalue(iall)), printit = FALSE), 
-                    silent = TRUE)
+                  err <- try(PlotFreqA(path.mcmc = tclvalue(outputdir), 
+                    iloc = as.numeric(tclvalue(iloc)), iall = as.numeric(tclvalue(iall)), 
+                    printit = FALSE), silent = TRUE)
                 }
                 tkdestroy(tttry)
                 print("Done.")
                 if (class(err) == "try-error") {
                   if (tclvalue(printit) == 1) {
-                    Log(paste("PlotFreqA(genotypes=", matrix2str(globalgenotypes), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",iloc=", 
-                      as.numeric(tclvalue(iloc)), ",iall=", as.numeric(tclvalue(iall)), 
-                      ",printit=TRUE,path=\"", tclvalue(printfile), 
-                      "\")", sep = ""), "[FAILED] ")
+                    Log(paste("PlotFreqA(path.mcmc=\"", tclvalue(outputdir), 
+                      "\",iloc=", as.numeric(tclvalue(iloc)), 
+                      ",iall=", as.numeric(tclvalue(iall)), ",printit=TRUE,path=\"", 
+                      tclvalue(printfile), "\")", sep = ""), 
+                      "[FAILED] ")
                   }
                   else {
-                    Log(paste("PlotFreqA(genotypes=", matrix2str(globalgenotypes), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",iloc=", 
-                      as.numeric(tclvalue(iloc)), ",iall=", as.numeric(tclvalue(iall)), 
-                      ",printit=FALSE)", sep = ""), "[FAILED] ")
+                    Log(paste("PlotFreqA(path.mcmc=\"", tclvalue(outputdir), 
+                      "\",iloc=", as.numeric(tclvalue(iloc)), 
+                      ",iall=", as.numeric(tclvalue(iall)), ",printit=FALSE)", 
+                      sep = ""), "[FAILED] ")
                   }
                   tkmessageBox(message = err, icon = "error", 
                     type = "ok", parent = tt)
                 }
                 else {
                   if (tclvalue(printit) == 1) {
-                    Log(paste("PlotFreqA(genotypes=", matrix2str(globalgenotypes), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",iloc=", 
-                      as.numeric(tclvalue(iloc)), ",iall=", as.numeric(tclvalue(iall)), 
-                      ",printit=TRUE,path=\"", tclvalue(printfile), 
-                      "\")", sep = ""), "[SUCCESS] ")
+                    Log(paste("PlotFreqA(path.mcmc=\"", tclvalue(outputdir), 
+                      "\",iloc=", as.numeric(tclvalue(iloc)), 
+                      ",iall=", as.numeric(tclvalue(iall)), ",printit=TRUE,path=\"", 
+                      tclvalue(printfile), "\")", sep = ""), 
+                      "[SUCCESS] ")
                   }
                   else {
-                    Log(paste("PlotFreqA(genotypes=", matrix2str(globalgenotypes), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",iloc=", 
-                      as.numeric(tclvalue(iloc)), ",iall=", as.numeric(tclvalue(iall)), 
-                      ",printit=FALSE)", sep = ""), "[SUCCESS] ")
+                    Log(paste("PlotFreqA(path.mcmc=\"", tclvalue(outputdir), 
+                      "\",iloc=", as.numeric(tclvalue(iloc)), 
+                      ",iall=", as.numeric(tclvalue(iall)), ",printit=FALSE)", 
+                      sep = ""), "[SUCCESS] ")
                   }
                 }
             }
@@ -1687,58 +1794,64 @@ function (lib.loc = NULL)
             printit <- tclVar(0)
             printfile <- tclVar("")
             Drawtessellation <- function() {
-                tttry <- tktoplevel(parent = .TkRoot)
-                tkgrab(tttry)
-                tkwm.geometry(tttry, "+200+200")
-                tkwm.title(tttry, "wait")
-                warn <- tklabel(tttry, image = imagepleasewait)
-                tkpack(warn)
-                tkfocus(tttry)
-                tcl("update")
-                print("Starting...")
-                Sys.sleep(0.5)
-                if (tclvalue(printit) == 1) {
-                  err <- try(PlotTessellation(coordinates = globalcoordinates, 
-                    path.mcmc = tclvalue(outputdir), printit = TRUE, 
-                    path = tclvalue(printfile)), silent = TRUE)
+                if (is.null(globalcoordinates)) {
+                  tkmessageBox(message = "You need coordinates to get the map of probabilities of populations", 
+                    icon = "info", type = "ok", parent = tt)
                 }
                 else {
-                  err <- try(PlotTessellation(coordinates = globalcoordinates, 
-                    path.mcmc = tclvalue(outputdir), printit = FALSE), 
-                    silent = TRUE)
-                }
-                tkdestroy(tttry)
-                print("Done.")
-                if (class(err) == "try-error") {
+                  tttry <- tktoplevel(parent = .TkRoot)
+                  tkgrab(tttry)
+                  tkwm.geometry(tttry, "+200+200")
+                  tkwm.title(tttry, "wait")
+                  warn <- tklabel(tttry, image = imagepleasewait)
+                  tkpack(warn)
+                  tkfocus(tttry)
+                  tcl("update")
+                  print("Starting...")
+                  Sys.sleep(0.5)
                   if (tclvalue(printit) == 1) {
-                    Log(paste("PlotTessellation(coordinates=", 
-                      matrix2str(globalcoordinates), ",path.mcmc=\"", 
-                      tclvalue(outputdir), "\",printit=TRUE,path=\"", 
-                      tclvalue(printfile), "\")", sep = ""), 
-                      "[FAILED] ")
+                    err <- try(PlotTessellation(coordinates = globalcoordinates, 
+                      path.mcmc = tclvalue(outputdir), printit = TRUE, 
+                      path = tclvalue(printfile)), silent = TRUE)
                   }
                   else {
-                    Log(paste("PlotTessellation(coordinates=", 
-                      matrix2str(globalcoordinates), ",path.mcmc=\"", 
-                      tclvalue(outputdir), "\",printit=FALSE)", 
-                      sep = ""), "[FAILED] ")
+                    err <- try(PlotTessellation(coordinates = globalcoordinates, 
+                      path.mcmc = tclvalue(outputdir), printit = FALSE), 
+                      silent = TRUE)
                   }
-                  tkmessageBox(message = err, icon = "error", 
-                    type = "ok", parent = tt)
-                }
-                else {
-                  if (tclvalue(printit) == 1) {
-                    Log(paste("PlotTessellation(coordinates=", 
-                      matrix2str(globalcoordinates), ",path.mcmc=\"", 
-                      tclvalue(outputdir), "\",printit=TRUE,path=\"", 
-                      tclvalue(printfile), "\")", sep = ""), 
-                      "[SUCCESS] ")
+                  tkdestroy(tttry)
+                  print("Done.")
+                  if (class(err) == "try-error") {
+                    if (tclvalue(printit) == 1) {
+                      Log(paste("PlotTessellation(coordinates=", 
+                        matrix2str(globalcoordinates), ",path.mcmc=\"", 
+                        tclvalue(outputdir), "\",printit=TRUE,path=\"", 
+                        tclvalue(printfile), "\")", sep = ""), 
+                        "[FAILED] ")
+                    }
+                    else {
+                      Log(paste("PlotTessellation(coordinates=", 
+                        matrix2str(globalcoordinates), ",path.mcmc=\"", 
+                        tclvalue(outputdir), "\",printit=FALSE)", 
+                        sep = ""), "[FAILED] ")
+                    }
+                    tkmessageBox(message = err, icon = "error", 
+                      type = "ok", parent = tt)
                   }
                   else {
-                    Log(paste("PlotTessellation(coordinates=", 
-                      matrix2str(globalcoordinates), ",path.mcmc=\"", 
-                      tclvalue(outputdir), "\",printit=FALSE)", 
-                      sep = ""), "[SUCCESS] ")
+                    if (tclvalue(printit) == 1) {
+                      Log(paste("PlotTessellation(coordinates=", 
+                        matrix2str(globalcoordinates), ",path.mcmc=\"", 
+                        tclvalue(outputdir), "\",printit=TRUE,path=\"", 
+                        tclvalue(printfile), "\")", sep = ""), 
+                        "[SUCCESS] ")
+                    }
+                    else {
+                      Log(paste("PlotTessellation(coordinates=", 
+                        matrix2str(globalcoordinates), ",path.mcmc=\"", 
+                        tclvalue(outputdir), "\",printit=FALSE)", 
+                        sep = ""), "[SUCCESS] ")
+                    }
                   }
                 }
             }
@@ -2096,66 +2209,72 @@ function (lib.loc = NULL)
             plotit <- tclVar("TRUE")
             maintitle <- tclVar("")
             Drawposm <- function() {
-                tttry <- tktoplevel(parent = .TkRoot)
-                tkgrab(tttry)
-                tkwm.geometry(tttry, "+200+200")
-                tkwm.title(tttry, "wait")
-                warn <- tklabel(tttry, image = imagepleasewait)
-                tkpack(warn)
-                tkfocus(tttry)
-                tcl("update")
-                print("Starting...")
-                Sys.sleep(0.5)
-                if (tclvalue(printit) == 1) {
-                  err <- try(PosteriorMode(coordinates = globalcoordinates, 
-                    path.mcmc = tclvalue(outputdir), plotit = as.logical(tclvalue(plotit)), 
-                    printit = TRUE, file = tclvalue(printfile), 
-                    main.title = tclvalue(maintitle)), silent = TRUE)
+                if (is.null(globalcoordinates)) {
+                  tkmessageBox(message = "You need coordinates to get the map of populations", 
+                    icon = "info", type = "ok", parent = tt)
                 }
                 else {
-                  err <- try(PosteriorMode(coordinates = globalcoordinates, 
-                    path.mcmc = tclvalue(outputdir), plotit = as.logical(tclvalue(plotit)), 
-                    printit = FALSE, file = "", main.title = as.character(tclvalue(maintitle))), 
-                    silent = TRUE)
-                }
-                tkdestroy(tttry)
-                print("Done.")
-                if (class(err) == "try-error") {
+                  tttry <- tktoplevel(parent = .TkRoot)
+                  tkgrab(tttry)
+                  tkwm.geometry(tttry, "+200+200")
+                  tkwm.title(tttry, "wait")
+                  warn <- tklabel(tttry, image = imagepleasewait)
+                  tkpack(warn)
+                  tkfocus(tttry)
+                  tcl("update")
+                  print("Starting...")
+                  Sys.sleep(0.5)
                   if (tclvalue(printit) == 1) {
-                    Log(paste("PosteriorMode(coordinates=", matrix2str(globalcoordinates), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",plotit=", 
-                      as.logical(tclvalue(plotit)), ",printit=TRUE,file=\"", 
-                      tclvalue(printfile), "\",main.title=\"", 
-                      tclvalue(maintitle), "\")", sep = ""), 
-                      "[FAILED] ")
+                    err <- try(PosteriorMode(coordinates = globalcoordinates, 
+                      path.mcmc = tclvalue(outputdir), plotit = as.logical(tclvalue(plotit)), 
+                      printit = TRUE, file = tclvalue(printfile), 
+                      main.title = tclvalue(maintitle)), silent = TRUE)
                   }
                   else {
-                    Log(paste("PosteriorMode(coordinates=", matrix2str(globalcoordinates), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",plotit=", 
-                      as.logical(tclvalue(plotit)), ",printit=FALSE,file=\"", 
-                      tclvalue(printfile), "\",main.title=\"", 
-                      tclvalue(maintitle), "\")", sep = ""), 
-                      "[FAILED] ")
+                    err <- try(PosteriorMode(coordinates = globalcoordinates, 
+                      path.mcmc = tclvalue(outputdir), plotit = as.logical(tclvalue(plotit)), 
+                      printit = FALSE, file = "", main.title = as.character(tclvalue(maintitle))), 
+                      silent = TRUE)
                   }
-                  tkmessageBox(message = err, icon = "error", 
-                    type = "ok", parent = tt)
-                }
-                else {
-                  if (tclvalue(printit) == 1) {
-                    Log(paste("PosteriorMode(coordinates=", matrix2str(globalcoordinates), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",plotit=", 
-                      as.logical(tclvalue(plotit)), ",printit=TRUE,file=\"", 
-                      tclvalue(printfile), "\",main.title=\"", 
-                      tclvalue(maintitle), "\")", sep = ""), 
-                      "[SUCCESS] ")
+                  tkdestroy(tttry)
+                  print("Done.")
+                  if (class(err) == "try-error") {
+                    if (tclvalue(printit) == 1) {
+                      Log(paste("PosteriorMode(coordinates=", 
+                        matrix2str(globalcoordinates), ",path.mcmc=\"", 
+                        tclvalue(outputdir), "\",plotit=", as.logical(tclvalue(plotit)), 
+                        ",printit=TRUE,file=\"", tclvalue(printfile), 
+                        "\",main.title=\"", tclvalue(maintitle), 
+                        "\")", sep = ""), "[FAILED] ")
+                    }
+                    else {
+                      Log(paste("PosteriorMode(coordinates=", 
+                        matrix2str(globalcoordinates), ",path.mcmc=\"", 
+                        tclvalue(outputdir), "\",plotit=", as.logical(tclvalue(plotit)), 
+                        ",printit=FALSE,file=\"", tclvalue(printfile), 
+                        "\",main.title=\"", tclvalue(maintitle), 
+                        "\")", sep = ""), "[FAILED] ")
+                    }
+                    tkmessageBox(message = err, icon = "error", 
+                      type = "ok", parent = tt)
                   }
                   else {
-                    Log(paste("PosteriorMode(coordinates=", matrix2str(globalcoordinates), 
-                      ",path.mcmc=\"", tclvalue(outputdir), "\",plotit=", 
-                      as.logical(tclvalue(plotit)), ",printit=FALSE,file=\"", 
-                      tclvalue(printfile), "\",main.title=\"", 
-                      tclvalue(maintitle), "\")", sep = ""), 
-                      "[SUCCESS] ")
+                    if (tclvalue(printit) == 1) {
+                      Log(paste("PosteriorMode(coordinates=", 
+                        matrix2str(globalcoordinates), ",path.mcmc=\"", 
+                        tclvalue(outputdir), "\",plotit=", as.logical(tclvalue(plotit)), 
+                        ",printit=TRUE,file=\"", tclvalue(printfile), 
+                        "\",main.title=\"", tclvalue(maintitle), 
+                        "\")", sep = ""), "[SUCCESS] ")
+                    }
+                    else {
+                      Log(paste("PosteriorMode(coordinates=", 
+                        matrix2str(globalcoordinates), ",path.mcmc=\"", 
+                        tclvalue(outputdir), "\",plotit=", as.logical(tclvalue(plotit)), 
+                        ",printit=FALSE,file=\"", tclvalue(printfile), 
+                        "\",main.title=\"", tclvalue(maintitle), 
+                        "\")", sep = ""), "[SUCCESS] ")
+                    }
                   }
                 }
             }
@@ -2574,55 +2693,42 @@ function (lib.loc = NULL)
             tcl("update")
             print("Starting...")
             Sys.sleep(0.5)
-            param <- as.matrix(read.table(paste(tclvalue(outputdir), 
-                "parameters.txt", sep = "")))
-            nploidy <- as.numeric(param[param[, 1] == "ploidy", 
-                3])
-            if (as.numeric(nploidy) == 1) {
-                tkmessageBox(message = "FST for haploid data:\nNot implemented", 
-                  icon = "error", type = "ok", parent = tt)
-                tkdestroy(tttry)
-                print("Done.")
+            err <- try(Fstat.output(coordinates = NULL, genotypes = globalcodominantgenotypes, 
+                ploidy = 2, burnin = NULL, path.mcmc = tclvalue(outputdir)), 
+                silent = TRUE)
+            tkdestroy(tttry)
+            print("Done.")
+            if (class(err) == "try-error") {
+                Log(paste("Fstat.output(coordinates=NULL,genotypes=", 
+                  matrix2str(globalcodominantgenotypes), ",ploidy=2,burnin=NULL,path.mcmc=\"", 
+                  tclvalue(outputdir), "\")", sep = ""), "[FAILED] ")
+                tkmessageBox(message = err, icon = "error", type = "ok", 
+                  parent = tt)
             }
             else {
-                err <- try(Fstat.output(coordinates = NULL, genotypes = globalgenotypes, 
-                  ploidy = nploidy, burnin = NULL, path.mcmc = tclvalue(outputdir)), 
-                  silent = TRUE)
-                tkdestroy(tttry)
-                print("Done.")
-                if (class(err) == "try-error") {
-                  Log(paste("Fstat.output(coordinates=NULL,genotypes=", 
-                    matrix2str(globalgenotypes), ",ploidy=", 
-                    nploidy, ",burnin=NULL,path.mcmc=\"", tclvalue(outputdir), 
-                    "\")", sep = ""), "[FAILED] ")
-                  tkmessageBox(message = err, icon = "error", 
-                    type = "ok", parent = tt)
-                }
-                else {
-                  Log(paste("Fstat.output(coordinates=", matrix2str(globalcoordinates), 
-                    ",genotypes=", matrix2str(globalgenotypes), 
-                    ",ploidy=", nploidy, ",burnin=NULL,path.mcmc=\"", 
-                    tclvalue(outputdir), "\")", sep = ""), "[SUCCESS] ")
-                  if (tclvalue(sep1) == "White space") 
-                    tclvalue(sep1) <- " "
-                  if (tclvalue(sep2) == "White space") 
-                    tclvalue(sep2) <- " "
-                  write.table(err$Fis, file = paste(tclvalue(outputdir), 
-                    "Fis.txt", sep = ""), row.names = FALSE, 
-                    col.names = FALSE)
-                  write.table(err$Fst, file = paste(tclvalue(outputdir), 
-                    "Fst.txt", sep = ""), row.names = FALSE, 
-                    col.names = FALSE)
-                  ShowtextFis()
-                  ShowtextFst()
-                  if (tclvalue(sep1) == " ") 
-                    tclvalue(sep1) <- "White space"
-                  if (tclvalue(sep2) == " ") 
-                    tclvalue(sep2) <- "White space"
-                }
+                Log(paste("Fstat.output(coordinates=NULL ,genotypes=", 
+                  matrix2str(globalcodominantgenotypes), ",ploidy=2,burnin=NULL,path.mcmc=\"", 
+                  tclvalue(outputdir), "\")", sep = ""), "[SUCCESS] ")
+                if (tclvalue(sep1) == "White space") 
+                  tclvalue(sep1) <- " "
+                if (tclvalue(sep2) == "White space") 
+                  tclvalue(sep2) <- " "
+                write.table(err$Fis, file = paste(tclvalue(outputdir), 
+                  "Fis.txt", sep = ""), row.names = FALSE, col.names = FALSE)
+                write.table(err$Fst, file = paste(tclvalue(outputdir), 
+                  "Fst.txt", sep = ""), row.names = FALSE, col.names = FALSE)
+                ShowtextFis()
+                ShowtextFst()
+                if (tclvalue(sep1) == " ") 
+                  tclvalue(sep1) <- "White space"
+                if (tclvalue(sep2) == " ") 
+                  tclvalue(sep2) <- "White space"
             }
         }
-        Runfstat()
+        if (is.null(globalcodominantgenotypes)) 
+            tkmessageBox(message = "You must define dominant diploid genotype file", 
+                icon = "error", type = "ok")
+        else Runfstat()
     }
     SimnonIBD <- function() {
         runnonibd <- function() {
@@ -2709,7 +2815,7 @@ function (lib.loc = NULL)
                     type = "ok", parent = tt)
                   globalcoordinates <<- idb.dataset$coord.indiv
                   tclvalue(labelcoordtext) <- "Coordinate:    Simulated panmictic data loaded"
-                  globalgenotypes <<- idb.dataset$genotypes
+                  globaldiploidgenotypes <<- idb.dataset$genotypes
                   tclvalue(labelgenotext) <- "Genotype:      Simulated panmictic data loaded"
                   if (tclvalue(save) == 1) {
                     auxcoord <- tclVar()
@@ -2840,8 +2946,8 @@ function (lib.loc = NULL)
         tkwm.title(ttcon, "Convert loaded data into genepop format")
         gltgp <- function() {
             if (tclvalue(filename) == "" | is.null(globalcoordinates) | 
-                length(globalgenotypes) == 1) {
-                tkmessageBox(message = "You must define filename, coordinate file and genotype file", 
+                is.null(globalcodominantgenotypes)) {
+                tkmessageBox(message = "You must define filename, coordinate file and dominant diploid genotype file", 
                   icon = "error", type = "ok")
             }
             else {
@@ -2855,22 +2961,22 @@ function (lib.loc = NULL)
                 tcl("update")
                 print("Starting...")
                 Sys.sleep(0.5)
-                err <- try(gl2gp(coordinates = globalcoordinates, 
-                  genotypes = globalgenotypes, file = tclvalue(filename)), 
+                err <- try(gl2gp(coordinates = globalcodominantgenotypes, 
+                  genotypes = globaldiploidgenotypes, file = tclvalue(filename)), 
                   silent = TRUE)
                 tkdestroy(tttry)
                 print("Done.")
                 if (class(err) == "try-error") {
-                  Log(paste("gl2gp(coordinates=", matrix2str(globalcoordinates), 
-                    ",genotypes=", matrix2str(globalgenotypes), 
+                  Log(paste("gl2gp(coordinates=", matrix2str(globalcodominantgenotypes), 
+                    ",genotypes=", matrix2str(globaldiploidgenotypes), 
                     ",file=", tclvalue(filename), ")", sep = ""), 
                     "[FAILED] ")
                   tkmessageBox(message = err, icon = "error", 
                     type = "ok", parent = tt)
                 }
                 else {
-                  Log(paste("gl2gp(coordinates=", matrix2str(globalcoordinates), 
-                    ",genotypes=", matrix2str(globalgenotypes), 
+                  Log(paste("gl2gp(coordinates=", matrix2str(globalcodominantgenotypes), 
+                    ",genotypes=", matrix2str(globaldiploidgenotypes), 
                     ",file=", tclvalue(filename), ")", sep = ""), 
                     "[SUCCESS] ")
                   tkmessageBox(message = "Terminated with success", 
@@ -2994,7 +3100,7 @@ function (lib.loc = NULL)
                     type = "ok", parent = tt)
                   globalcoordinates <<- idb.dataset$coord.indiv
                   tclvalue(labelcoordtext) <- "Coordinate:    Simulated IBD data loaded"
-                  globalgenotypes <<- idb.dataset$genotypes
+                  globaldiploidgenotypes <<- idb.dataset$genotypes
                   tclvalue(labelgenotext) <- "Genotype:       Simulated IBD data loaded"
                   if (tclvalue(save) == 1) {
                     auxcoord <- tclVar()
@@ -3153,7 +3259,7 @@ function (lib.loc = NULL)
         ttnul <- tktoplevel()
         tkwm.title(ttnul, "Simulate genotype with null alleles from loaded dataset")
         gltgp <- function() {
-            if (length(globalgenotypes) == 0) {
+            if (is.null(globaldiploidgenotypes)) {
                 tkmessageBox(message = "You must define genotype file", 
                   icon = "error", type = "ok")
             }
@@ -3168,7 +3274,7 @@ function (lib.loc = NULL)
                 tcl("update")
                 print("Starting...")
                 Sys.sleep(0.5)
-                err <- try(nullify(genotypes = globalgenotypes, 
+                err <- try(nullify(genotypes = globaldiploidgenotypes, 
                   nall.null = as.integer(tclvalue(nall)), nloc.null = as.integer(tclvalue(nloc))), 
                   silent = TRUE)
                 tkdestroy(tttry)
@@ -3176,19 +3282,19 @@ function (lib.loc = NULL)
                 if (class(err) == "try-error") {
                   tkmessageBox(message = err, icon = "error", 
                     type = "ok", parent = tt)
-                  Log(paste("nullify(genotypes=", matrix2str(globalgenotypes), 
+                  Log(paste("nullify(genotypes=", matrix2str(globaldiploidgenotypes), 
                     ",nall.null=", as.integer(tclvalue(nall)), 
                     ",nloc.null=", as.integer(tclvalue(nloc)), 
                     ")", sep = ""), "[FAILED] ")
                 }
                 else {
-                  Log(paste("nullify(genotypes=", matrix2str(globalgenotypes), 
+                  Log(paste("nullify(genotypes=", matrix2str(globaldiploidgenotypes), 
                     ",nall.null=", as.integer(tclvalue(nall)), 
                     ",nloc.null=", as.integer(tclvalue(nloc)), 
                     ")", sep = ""), "[SUCCESS] ")
                   tkmessageBox(message = "Terminated with success", 
                     type = "ok", parent = tt)
-                  globalgenotypes <<- err$genotypes
+                  globaldiploidgenotypes <<- err$genotypes
                   if (tclvalue(save) == 1) {
                     if (tclvalue(sep2) == "White space") 
                       tclvalue(sep2) <- " "
@@ -3235,10 +3341,17 @@ function (lib.loc = NULL)
         auxblink <<- 0
         idb.dataset <<- 0
         globalcoordinates <<- NULL
-        globalgenotypes <<- 0
+        globalhaploidgenotypes <<- NULL
+        globalcodominantgenotypes <<- NULL
+        globaldominantgenotypes <<- NULL
+        globalqtc <- 0
+        globalqtd <- 0
+        globalql <- 0
         globallabels <<- NA
         tclvalue(coordinatesfile) <<- ""
-        tclvalue(genotypefile) <<- ""
+        tclvalue(haploidgenotypefile) <<- ""
+        tclvalue(codominantgenotypefile) <<- ""
+        tclvalue(dominantgenotypefile) <<- ""
         tclvalue(outputdir) <<- ""
         tclvalue(advanced) <<- 0
         tclvalue(burnin) <<- 0
@@ -3800,7 +3913,7 @@ function (lib.loc = NULL)
         menu = missingMenu)
     tkadd(fileMenu, "cascade", label = "Coordinate file values separator", 
         menu = coordinatesMenu)
-    tkadd(fileMenu, "cascade", label = "Genotype file values separator", 
+    tkadd(fileMenu, "cascade", label = "Genotype files values separator", 
         menu = genotypesMenu)
     tkadd(toolsMenu, "command", label = "Convert to Genepop files", 
         command = function() Convert())

@@ -4,8 +4,9 @@ function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei,
     drift, dominance = "Codominant", plots = FALSE, ploth = FALSE) 
 {
     if (dominance == "Dominant" & sum(nall != rep(2, length(nall))) > 
-        0) 
+        0) {
         stop("Dominant option only for bi-allelic loci")
+    }
     if (missing(coordinates)) {
         coordinates <- rbind(runif(min = coord.lim[1], max = coord.lim[2], 
             nindiv), runif(min = coord.lim[3], max = coord.lim[4], 
@@ -115,7 +116,9 @@ function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei,
             }
         }
     }
+    true.codom.genotypes <- NULL
     if (dominance == "Dominant") {
+        true.codom.genotypes <- z
         for (iloc in 1:nloc) {
             for (iindiv in 1:nindiv) {
                 if (sum(z[iindiv, c(2 * iloc - 1, 2 * iloc)]) == 
@@ -125,20 +128,17 @@ function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei,
             }
         }
         z <- z[, seq(1, 2 * nloc - 1, 2)]
+        z <- z - 1
     }
-    if (freq.model == "Uncorrelated") {
-        res <- list(coordinates = t(coordinates), genotypes = z, 
-            allele.numbers = nall, number.nuclei = number.nuclei, 
-            coord.nuclei = t(coord.nuclei), color.nuclei = color.nuclei, 
-            frequencies = freq, index.nearest.nucleus = ppvois)
-        return(res)
-    }
+    res <- list(coordinates = t(coordinates), genotypes = z, 
+        allele.numbers = nall, number.nuclei = number.nuclei, 
+        coord.nuclei = t(coord.nuclei), color.nuclei = color.nuclei, 
+        frequencies = freq, index.nearest.nucleus = ppvois, dominance = dominance)
     if (freq.model == "Correlated") {
-        res <- list(coordinates = t(coordinates), genotypes = z, 
-            allele.numbers = nall, number.nuclei = number.nuclei, 
-            coord.nuclei = t(coord.nuclei), color.nuclei = color.nuclei, 
-            frequencies = freq, ancestral.frequencies = fa, drifts = drift, 
-            index.nearest.nucleus = ppvois)
-        return(res)
+        res <- c(res, list(ancestral.frequencies = fa, drifts = drift))
     }
+    if (dominance == "Dominant") {
+        res <- c(res, list(true.codom.genotypes = true.codom.genotypes))
+    }
+    return(res)
 }
