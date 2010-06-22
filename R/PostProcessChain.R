@@ -19,6 +19,14 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
     use.qtc <- as.logical(param[param[, 1] == "use.qtc", 3])
     use.ql <- as.logical(param[param[, 1] == "use.ql", 3])
     spatial <- as.logical(param[param[, 1] == "spatial", 3])
+    if (substring(path.mcmc, first = nchar(path.mcmc), last = nchar(path.mcmc)) != 
+        "/") {
+        path.mcmc <- paste(path.mcmc, "/", sep = "")
+    }
+    short.path <- substring(path.mcmc, first = 1, last = nchar(path.mcmc) - 
+        1)
+    if (!file_test("-d", short.path)) 
+        stop(paste("Directory ", path.mcmc, "does not exist."))
     if (nit/thinning <= burnin) {
         print(paste("nit=", nit))
         print(paste("thinning=", thinning))

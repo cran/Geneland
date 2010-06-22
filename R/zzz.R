@@ -21,7 +21,7 @@
   cat('o                                                                 o',fill=TRUE)  
 
   
-  cat('o        This is Geneland-3.2.1                                   o',fill=TRUE)
+  cat('o        This is Geneland-3.2.2                                   o',fill=TRUE)
   cat('o                                                                 o',fill=TRUE)
   cat('ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo',fill=TRUE)
 }

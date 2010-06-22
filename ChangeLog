@@ -1,40 +1,14 @@
 	-----------------------------------
-	Changes from version 3.1.5 to 3.2.1 
+	Changes from version 3.2.1 to 3.2.2
 	-----------------------------------
 
 ******************************
 *   In R
 ******************************
-- function MCMC modified to handle 
-	. diploid dominant genotypes
-	. haploid genotypes
-	. check if path.mcmc is an existing dir
+
 	
-- function ProstProcessChain modified accordingly
-
-- function EstimateFreqNA modified
-	. argument genotypes removed
-
-- functions PlotFreq and PlotFreqA
-	. argument genotypes removed
-
-- function Geneland.GUI.R
-	. Separated the genotype file input into diploid and haploid files, 
-	where one of them is required
-	. Added place for adding three variable files (Quantitative continuous, 
-	Quantitative discrete and Qualitative), where none is required.
-	. Removed the ploidy from the RUN screen.
-	. Added dominance to the RUN screen (choose between Codominant, Dominant).
-	. Changed MCMC call according to MCMC.R.
-	. Changed PostProcessChain call according to PostProcessChain.R.
-	. Changed the call to EstimateFreqNA, argument genotypes removed.
-	. Changed the call to PlotFreq and PlotFreqA, argument genotypes removed.
-	. Fstat.output genotypes argument is the diploid genotype file and fixed the 
-	argument ploidy to 2. (We already had a talk that Fstat was not for haploid data).
-	. When simulating data, the resulting genotype is being considered, by me, 
-	as diploid ( I don't know if this is right, we have to talk about this).
-***->	GG To FS: Function Simfmodel Can Produce Diploid Or Haploid Data, This Is Clarified 
-	In The Name Of The Elements Of The Resulting List
+- function ProstProcessChain 
+	check path ending with / in PostProcessChain
 
 
 
@@ -42,54 +16,5 @@
 ************************************
 *   In Fortran
 ************************************
-
-- function lpriorallvar
-	. init lpriorallvar = 0
-	. contrib lambda : lpriorallvar = lpriorallvar - dlog(lambdamax)
-	. contrib u  lpriorallvar = lpriorallvar - 
-          dble(npp)*dlog((xlim(2)-xlim(1))*(ylim(2)-ylim(1)))
-	
-- Some scalar parameters are grouped into vector to stay beyond the 65 arguments limit of .Fortran()
-	
-- function mcmcgld 
-	. takes a matrix of quantitative variables
-	. init of t: t=s
-
-- new function ratiogq
-	. takes genotypes and/or quant. variables
-	. use log
-
-- new function updugq
-	. update u when data consist of genotypes and/or quantitative variables
-
-- new function updcgq
-	. update c when data consist of genotypes and/or quantitative variables
-
-
-- new function bdppgq
-	. update number of tiles m when data consist of genotypes 
-	and/or quantitative variables
-
-- function ll (log-likelihood) corrected for haploid case
-
-- function lpp (log-posterior parameters) corrected for haploid case
-	
-- new function llgq
-	. compute log-likelihood when data consist of genotypes 
-	and/or quantitative variables
-
-- new function lppgq
-	. compute log-posterior parameters when data consist of genotypes 
-	and/or quantitative variables
-
-- function prostprocesschain2 modified to take an optional matrix of quantitative variables
-
-- new function relabelgq that relabels populations so as to minimize scalar product 
-	between pivot and current vector of parameters (=freq and mean of quantit. variables)
-
-- new function spfgq that computes scalar product 
-	between pivot and current vector of parameters (=freq and mean of quantit. variables)
-
-
-- new function smgq
-	. attempt to split or merge of populations with data consiting of genotypes and/or quantitative variables 
+- function udtallvar2 
+	. argument nloc2 removed from argument list 

@@ -5,8 +5,6 @@ year <- sub(".*(2[[:digit:]]{3})-.*", "\\1", desc$Date)
 vers <- paste("R package version", desc$Version)
 
 
-
-
 citEntry(entry="Article",
          author = 	 "Guillot, G. and Estoup, A. and Mortier, F. and Cosson, J.F.",
          title = 	 "A spatial statistical model for landscape genetics",
@@ -15,101 +13,79 @@ citEntry(entry="Article",
          volume =	 170,
          number =	 3,
          pages="1261-1280",
-         textVersion ="G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical model for landscape genetics. Genetics, 170, 1261-1280, 2005"  )
+         textVersion ="G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+model for landscape genetics. Genetics, 170, 1261-1280, 2005"  )
+
 
 
 
 citEntry(entry="Article",
-         author = 	 "",
-         title = 	        "",
-         journal = 	 "",	
-         year = 	 2005,
-         volume =	 "",
-         number =	 "",
-         pages="",
-         textVersion ="G. Guillot, Mortier, F., Estoup, A.  Geneland: A program for landscape genetics. Molecular Ecology Notes, 5, 712-715, 2005.")
-
-
-
-
-## citEntry(entry="Article",
-##          author = 	 "",
-##          title = 	        "",
-##          journal = 	 "",	
-##          year = 	 2006,
-##          volume =	 "",
-##          number =	 "",
-##          pages="",
-##          textVersion ="A. Coulon, G. Guillot G., Cosson J.-F., Angibault J.M.A. Aulagnier S., Cargnelutti B., Galan M., Hewison A.J.M.  Genetic structure is influenced by lansdcape features. Empirical evidence from a roe deer population. Molecular Ecology, 15 1669-1679, 2006.")
-
-
-citEntry(entry="Article",
-         author = 	 "",
-         title = 	        "",
-         journal = 	 "",	
+         author = 	 "U. Hannelius, E. Salmela, T. Lappalainen, G. Guillot,
+C.M.  Lindgren,  U. von Doebeln, P. Lahermo, P. and J. Kere",
+         title = 	        "Population substructure in Finland and Sweden
+revealed by a small number of unlinked autosomal SN",
+         journal = 	 "BMC Genetics",	
          year = 	 2008,
-         volume =	 "",
-         number =	 "",
+         volume =	 "9",
+         number =	 "54",
          pages="",
-         textVersion ="U. Hannelius, E. Salmela, T. Lappalainen, G. Guillot, C.M.  Lindgren,  U. von Doebeln, P. Lahermo, P. and J. Kere  . Population substructure in Finland and Sweden revealed by a small number of unlinked autosomal SNPs. BMC Genetics, 9:54, 2008.")
+         textVersion ="U. Hannelius, E. Salmela, T. Lappalainen, G. Guillot, C.M.
+Lindgren,  U. von Doebeln, P. Lahermo, P. and J. Kere  . Population substructure
+in Finland and Sweden revealed by a small number of unlinked autosomal SNPs. BMC Genetics, 9:54, 2008.")
 
 citEntry(entry="Article",
-         author = 	 "",
-         title = 	        "",
-         journal = 	 "",	
+         author = 	 "G. Guillot, F. Santos and A. Estoup",
+         title = 	        "Analysing georeferenced population genetics data w
+ith Geneland:  a new algorithm to deal with null alleles and a friendly graphical user interface",
+         journal = 	 " Bioinformatic",	
          year = 	 2008,
-         volume =	 "",
-         number =	 "",
-         pages="",
-         textVersion ="G. Guillot, F. Santos and A. Estoup. Analysing georeferenced population genetics data with Geneland:  a new algorithm to deal with null alleles and a friendly graphical user interface. Bioinformatics, 24(11):1406-1407, 2008.")
+         volume =	 "24",
+         number =	 "11",
+         pages="1406-14",
+         textVersion ="G. Guillot, F. Santos and A. Estoup. Analysing georeferenced
+population genetics data with Geneland:  a new algorithm to deal with null alleles
+and a friendly graphical user interface. Bioinformatics, 24(11):1406-1407, 2008.")
 
 
 citEntry(entry="Article",
-         author = 	 "",
-         title = 	        "",
-         journal = 	 "",	
+         author = 	 "G. Guillot",
+         title = 	        "Inference of structure in subdivided populations
+at low levels of genetic differentiation. The correlated allele frequencies model revisited",
+         journal = 	 "Bioinformatic",	
          year = 	 2008,
-         volume =	 "",
+         volume =	 "24",
          number =	 "",
-         pages="",
-         textVersion ="G. Guillot.  Inference of structure in subdivided populations at low levels of genetic differentiation. The correlated allele frequencies model revisited. Bioinformatics, 24:2222-2228, 2008.")
+         pages="2222-2228",
+         textVersion ="G. Guillot.  Inference of structure in subdivided populations
+at low levels of genetic differentiation. The correlated allele frequencies model revisited.
+Bioinformatics, 24:2222-2228, 2008.")
 
 
 citEntry(entry="Article",
-         author = 	 "",
-         title = 	        "",
-         journal = 	 "",	
+         author = 	 "G. Guillot and F. Santos",
+         title = 	        " A computer program to simulate multilocus genotype
+data with spatially auto-correlated allele frequencies",
+         journal = 	 "Molecular Ecology Resources",	
          year = 	 2009,
-         volume =	 "",
-         number =	 "",
-         pages="",
-         textVersion ="G. Guillot and F. Santos  A computer program to simulate multilocus genotype data with spatially auto-correlated allele frequencies. Molecular Ecology Resources, 9(4), 1112-1120, 2009.")
+         volume =	 "9",
+         number =	 "4",
+         pages=" 1112-1120",
+         textVersion ="G. Guillot and F. Santos  A computer program to simulate
+multilocus genotype data with spatially auto-correlated allele frequencies.
+Molecular Ecology Resources, 9(4), 1112-1120, 2009.")
 
 
 
 citEntry(entry="Article",
-         author = 	 "",
-         title = 	        "",
-         journal = 	 "",	
+         author = 	 "G. Guillot and F. Santos",
+         title = 	        "Using AFLP markers and the Geneland program for
+the inference of population genetic structure",
+         journal = 	 "Molecular Ecology Resources",	
          year = 	 2010,
          volume =	 "",
          number =	 "",
          pages="",
-         textVersion ="G. Guillot and F. Santos  Using AFLP markers and the Geneland program for the inference of population genetic structure. Molecular Ecology Resources, 2010")
+         textVersion ="G. Guillot and F. Santos  Using AFLP markers and the
+Geneland program for the inference of population genetic structure. Molecular Ecology Resources, 2010")
 
 
-
-
-## citEntry(entry="Manual",
-##          title = "Population genetics analysis using R and Geneland",
-##          author = personList(as.person("Gilles Guillot"),
-##            as.person("Filipe Santos"),
-##            as.person("Arnaud Estoup")),	
-##          year = year,	  
-##          note = vers,	  
-         
-##          textVersion =
-##          paste("Gilles Guillot, Filipe Santos, Arnaud Estoup,",
-##                year,
-##                "). Geneland program documentation: Population genetics analysis using R and Geneland. ",
-##                vers, ".", sep=""))

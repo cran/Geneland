@@ -101,8 +101,10 @@ c     parameter ploidy says how to interpret data in matrix z
       pudcel =    dblepar(5)
 
 
+
 *     look for smallest rectangle with edges parrallel to axes enclosing the spatial domain
       call limit(nindiv,s,xlim,ylim,dt)
+
 
 
 *     Ouverture des fichiers pour l'ecriture des sorties
@@ -3336,7 +3338,7 @@ c      enddo
 ************************************************************************
 *     update true un-observed spatial coordinates of individuals  
       subroutine udtallvar2(npp,nppmax,nindiv,
-     &     nlocd,nlocd2,nloch,nql,ncolt,nqtc,nalmax,npopmax,
+     &     nlocd,nloch,nql,ncolt,nqtc,nalmax,npopmax,
      &     t,ttmp,dt,s,c,indcell,distcell,indcelltmp,distcelltmp,
      &     u,yy,z,ql,qtc,f,meanqtc,sdqtc,
      &     usegeno2,usegeno1,useql,useqtc,ploidy)
