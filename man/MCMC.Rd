@@ -50,6 +50,7 @@
                  write.size.pop=FALSE,
                  write.mean.quanti=TRUE,
                  write.sd.quanti=TRUE,
+                 write.betaqtc=FALSE,
                  miss.loc=NULL)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -208,6 +209,9 @@
 
 \item{write.sd.quanti}{Logical: if TRUE (default is FALSE) write
     standard deviations of quantitatives variables in the various groups simulated by MCMC}
+
+  \item{write.betaqtc}{Logical: if TRUE (default is FALSE) write
+    hyper-parameter beta of distribution of quantitatives variables simulated by MCMC}
 
 \item{miss.loc}{A matrix with \code{nindiv} lines and \code{nloc}
   columns of 0 or 1. For each individual, at each locus it says if the

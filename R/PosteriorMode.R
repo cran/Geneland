@@ -1,6 +1,6 @@
 PosteriorMode <-
-function (coordinates, path.mcmc, plotit = TRUE, format = "pdf", 
-    printit = FALSE, file, main.title = "") 
+function (coordinates, path.mcmc, plotit = TRUE, printit = FALSE, 
+    format = "pdf", file, main.title = "", new.dev = TRUE) 
 {
     coordinates <- as.matrix(coordinates)
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "")
@@ -23,7 +23,8 @@ function (coordinates, path.mcmc, plotit = TRUE, format = "pdf",
     s[, 2] <- s[, 2] - min(s[, 2])
     map.dom <- t(apply(dom.post, 1, order))[, npopmax]
     if (plotit) {
-        dev.new()
+        if (new.dev) 
+            dev.new()
         frame <- max(max(coordinates[, 1]) - min(coordinates[, 
             1]), max(coordinates[, 2]) - min(coordinates[, 2]))/40
         image(seq(min(coordinates[, 1] - delta.coord/2), max(coordinates[, 

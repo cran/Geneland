@@ -6,15 +6,11 @@
 *   In R
 ******************************
 
-	
-- function ProstProcessChain 
-	check path ending with / in PostProcessChain
-
+ /
 
 
 	
 ************************************
 *   In Fortran
 ************************************
-- function udtallvar2 
-	. argument nloc2 removed from argument list 
+- Remove argument ploidy in call of function udNA3

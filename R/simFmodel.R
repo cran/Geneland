@@ -13,8 +13,9 @@ function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei,
             nindiv))
     }
     if (missing(coord.nuclei)) {
-        coord.nuclei <- rbind(runif(min = 0, max = 1, number.nuclei), 
-            runif(min = 0, max = 1, number.nuclei))
+        coord.nuclei <- rbind(runif(min = coord.lim[1], max = coord.lim[2], 
+            number.nuclei), runif(min = coord.lim[3], max = coord.lim[4], 
+            number.nuclei))
         color.nuclei <- sample(x = 1:npop, size = number.nuclei, 
             replace = TRUE)
     }

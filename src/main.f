@@ -7,6 +7,7 @@
      &     n,ntmp,a,ptmp,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,
      &     nnqtc,sqtc,ssqtc,
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,gbeta,hbeta,
      &     cellpop,listcell,
      &     yy,fcy) 
       implicit none 
@@ -19,7 +20,7 @@
 
 *     hyper parameters
       double precision lambdamax,dt,shape1,shape2,
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,gbeta,hbeta
 
 *     parameters
       integer npp,nppmax,npop,npopmin,npopmax,c,ctmp
@@ -39,9 +40,9 @@
      &     lpriorallvartmp,llallvartmp,fcy,pct,sqtc,ssqtc
       character*255 path,filef,filenpp,filelambda,filenpop,fileu,filec,
      &     filefa,filedrift,filelpp,filell,filet,filesize,
-     &     filemq,filesdq
+     &     filemq,filesdq,filebetaqtc
  
-*     dimensionnement 
+*     dimensions
       dimension s(2,nindiv),t(2,nindiv),zz(nindiv,2*nlocd),
      &     z(nindiv,nloch),ql(nindiv,nql),qtc(nindiv,nqtc),
      &     u(2,nppmax),utmp(2,nppmax),
@@ -60,7 +61,9 @@
      &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
      &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
-     &     ssqtc(npopmax,nqtc),intpar(100),dblepar(100)
+     &     ssqtc(npopmax,nqtc),intpar(100),dblepar(100),
+     &     ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc),
+     &     gbeta(nqtc),hbeta(nqtc)
 
  1000 format (2(1x,e15.8,1x))
  2000 format (300(1x,e15.8,1x))
@@ -78,21 +81,21 @@ c$$$      write(*,*) 'nloch=',nloch
 c$$$      write(*,*) ''
 
 *     unwrap computing options
-      fmodel =     intpar(14+1)
-      kfix =       intpar(14+2)
-      spatial =    intpar(14+3)
-      jcf =        intpar(14+4)
-      filtna =     intpar(14+5)
+      fmodel =     intpar(15+1)
+      kfix =       intpar(15+2)
+      spatial =    intpar(15+3)
+      jcf =        intpar(15+4)
+      filtna =     intpar(15+5)
 c     parameter ploidy says how to interpret data in matrix z
-      ploidy =     intpar(14+6)
-      nchpath =    intpar(14+7)
-      nit =        intpar(14+8)
-      thinning =   intpar(14+9)
-      usegeno1 = intpar(14+10)
-      usegeno2 = intpar(14+11)
-      useqtc =     intpar(14+12)
-      useqtd =     intpar(14+13)
-      useql =      intpar(14+14)
+      ploidy =     intpar(15+6)
+      nchpath =    intpar(15+7)
+      nit =        intpar(15+8)
+      thinning =   intpar(15+9)
+      usegeno1 = intpar(15+10)
+      usegeno2 = intpar(15+11)
+      useqtc =     intpar(15+12)
+      useqtd =     intpar(15+13)
+      useql =      intpar(15+14)
 
       lambdamax = dblepar(1)
       dt =        dblepar(2)
@@ -122,6 +125,7 @@ c     parameter ploidy says how to interpret data in matrix z
       filesize = path(1:nchpath) // "size.pop.txt"
       filemq  = path(1:nchpath) // "mean.qtc.txt"
       filesdq  = path(1:nchpath) // "sd.qtc.txt"
+      filebetaqtc = path(1:nchpath) // "beta.qtc.txt"
       if(intpar(1) .eq.1) then
          open(9,file=filelambda)
       endif
@@ -167,6 +171,9 @@ c     parameter ploidy says how to interpret data in matrix z
          endif
          if(intpar(14) .eq.1) then
             open(22,file=filesdq)
+         endif   
+         if(intpar(15) .eq.1) then
+            open(23,file=filebetaqtc)
          endif
       endif
 
@@ -180,11 +187,6 @@ c     parameter ploidy says how to interpret data in matrix z
 *     not used if (fmodel .eq. 1)
       alpha = 1
 
-*     hyper-prior parameters for quantitative variables
-      ksihpq = 0
-      kappahpq = 0.1
-      alphahpq = 0.1
-      betahpq = 0.1
 
       du = dsqrt((xlim(2)-xlim(1))*(ylim(2)-ylim(1))/dble(nindiv))
       lambda = lambdamax*ggrunif(0.d0,1.d0) 
@@ -314,7 +316,7 @@ c      write(*,*) 'avant init f =', f  ,"\n"
          enddo
          call rpostqtc(qtc,nindiv,nqtc,indcell,c,meanqtc,
      &        sdqtc,nnqtc,sqtc,ssqtc,npop,npopmax,nppmax,
-     &        ksihpq,kappahpq,alphahpq,betahpq)
+     &        ksiqtc,kappaqtc,alphaqtc,betaqtc)
       endif
 
       call intpr('All parameters have been initialised:',-1,0,0)
@@ -381,7 +383,7 @@ c$$$      write(*,*) 'missloc=',missloc
  
 
 *****************************************  
-* Main loop performing iterative updates
+* Main MCMC loop
 *****************************************  
       call intpr('Percentage of computations:',-1,0,0)
       do iit=1,nit
@@ -441,7 +443,7 @@ c$$$      write(*,*) 'missloc=',missloc
      &              lpriorallvar(lambdamax,lambda,
      &     npop,npp,drift,f,fa,c,nppmax,nindiv,npopmax,nlocd,nloch,nql,
      &     ncolt,nal,nalmax,indcell,fmodel,xlim,ylim,shape1,shape2,
-     &     nqtc,meanqtc,sdqtc,ksihpq,kappahpq,alphahpq,betahpq,
+     &     nqtc,meanqtc,sdqtc,ksiqtc,kappaqtc,alphaqtc,betaqtc,
      &     usegeno2,usegeno1,useql,useqtc)
                 write(17,*) lpriorallvartmp + llallvartmp
             endif
@@ -470,11 +472,14 @@ c$$$      write(*,*) 'missloc=',missloc
      &                    (sngl(meanqtc(ipop,iqtc)),iqtc=1,nqtc)
                   enddo
                endif
-               if(intpar(14) .eq.1) then
+               if(intpar(14) .eq. 1) then
                   do ipop = 1,npopmax
                      write(22,2000)  
      &                    (sngl(sdqtc(ipop,iqtc)),iqtc=1,nqtc)
                   enddo
+               endif
+               if(intpar(15) .eq. 1) then
+                     write(23,2000)  (betaqtc(iqtc),iqtc=1,nqtc)
                endif
             endif
          endif
@@ -508,6 +513,13 @@ c              write(*,*) 'update fa'
      &     f,fa,drift,usegeno2,usegeno1,useql)
 c              write(*,*) "apres updfa=",ggrunif(0.d0,1.d0) 
           endif
+
+***************************************
+*     update betaqtc
+          if(useqtc .eq. 1) then
+             call rpostbetaqtc(nqtc,npop,npopmax, 
+     &     alphaqtc,betaqtc,gbeta,hbeta,sdqtc)
+          endif
      
 
 ************************************** 
@@ -519,14 +531,14 @@ c             write(*,*) 'update c and f'
                 call udcfallvar2(npop,npopmax,nlocd,nloch,nql,
      &     ncolt,nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,nqtc,qtc,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,a,ptmp,f,ftmp,yy,z,ql,n,
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,a,ptmp,f,ftmp,yy,z,ql,n,
      &     ntmp,alpha,nudcel,usegeno2,usegeno1,useql,useqtc,ploidy)
              else
                 call udcfallvarcfm2(npop,npopmax,f,fa,drift,
      &               nlocd,nloch,nql,ncolt,
      &               nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,nqtc,
      &               qtc,meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
-     &               sqtc,ssqtc,ksihpq,kappahpq,alphahpq,betahpq,
+     &               sqtc,ssqtc,ksiqtc,kappaqtc,alphaqtc,betaqtc,
      &               a,ptmp,ftmp,yy,z,ql,n,ntmp,nudcel,
      &               usegeno2,usegeno1,useql,useqtc,ploidy)
              endif
@@ -543,7 +555,7 @@ c             write(*,*) "apres c,f=",ggrunif(0.d0,1.d0)
              if(useqtc .eq. 1) then
                 call rpostqtc(qtc,nindiv,nqtc,indcell,c,meanqtc,
      &               sdqtc,nnqtc,sqtc,ssqtc,npop,npopmax,nppmax,
-     &               ksihpq,kappahpq,alphahpq,betahpq)
+     &               ksiqtc,kappaqtc,alphaqtc,betaqtc)
              endif
              call udcallvar2(npp,nppmax,c,ctmp,yy,z,ql,nindiv,nlocd,
      &            nloch,nql,ncolt,nalmax,npop,npopmax,f,indcell,nudcel,
@@ -595,7 +607,7 @@ c      write(*,*) 'update npop'
      &                  a,ptmp,ftmp,drifttmp,yy,z,ql,cellpop,listcell,
      &                  cellpophost,n,ntmp,qtc,nqtc,meanqtc,sdqtc,
      &                  meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &                  ksihpq,kappahpq,alphahpq,betahpq,
+     &                  ksiqtc,kappaqtc,alphaqtc,betaqtc,
      &                  usegeno2,usegeno1,useql,useqtc,ploidy)
                 else
                    call smfallvar2(npop,npopmin,npopmax,f,fa,drift,
@@ -604,7 +616,7 @@ c      write(*,*) 'update npop'
      &                  a,ptmp,ftmp,drifttmp,yy,z,ql,cellpop,listcell,
      &                  cellpophost,n,ntmp,qtc,nqtc,meanqtc,sdqtc,
      &                  meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &                  ksihpq,kappahpq,alphahpq,betahpq,shape1,shape2,
+     &                  ksiqtc,kappaqtc,alphaqtc,betaqtc,shape1,shape2,
      &                  usegeno2,usegeno1,useql,useqtc,ploidy)
                 endif
              endif
@@ -616,8 +628,8 @@ c      write(*,*) 'update npop'
           if(usegeno2 .eq. 1) then 
              if(filtna .eq. 1) then
 c                write(*,*) 'udNA3'
-                call udNA3(nindiv,nlocd,nal,nalmax,ncolt,nppmax,
-     &               yy,zz,c,indcell,npopmax,f,fcy,npop,missloc,ploidy) 
+                call udNA3(nindiv,nlocd,nloch,nal,nalmax,ncolt,nppmax,
+     &               yy,zz,c,indcell,npopmax,f,fcy,npop,missloc) 
              endif    
           endif
 
@@ -687,6 +699,9 @@ c             write(*,*) 'udyDOM3'
          if(intpar(14) .eq.1) then
             close(22)
          endif
+         if(intpar(15) .eq.1) then
+            close(23)
+         endif
       endif
 
       call intpr('************************************',-1,0,0)
@@ -748,29 +763,49 @@ c$$$      write(*,*) "avant rndend ggrunif=",ggrunif(0.d0,1.d0)
 
 
 
-
-
-
+**************************************************************
+*     Update components of parameter beta in distributions 
+*     of variances of continuous quantitative variables
+*     (as in Richardson and Green JRSS B 1997)
+      subroutine rpostbetaqtc(nqtc,npop,npopmax, 
+     &     alphaqtc,betaqtc,gbeta,hbeta,sdqtc)
+      implicit none
+      integer nqtc,npop,npopmax
+      double precision alphaqtc,betaqtc,gbeta,hbeta,sdqtc
+      dimension alphaqtc(nqtc),betaqtc(nqtc),gbeta(nqtc),hbeta(nqtc),
+     &     sdqtc(npopmax,nqtc)
+      integer iqtc,ipop
+      double precision aa,bb,ggrgam
+      do iqtc = 1,nqtc
+         aa = gbeta(iqtc) + npop*alphaqtc(iqtc)
+         bb = hbeta(iqtc)
+         do ipop = 1,npop
+            bb = bb + 1/(sdqtc(ipop,iqtc)**2)
+         enddo
+         betaqtc(iqtc) = ggrgam(aa,1/bb)
+      enddo
+      end subroutine rpostbetaqtc
 
 
 
 **************************************************************
 *     sample mean and variance of quantitative variables 
 *     from the posterior
-*     prior mean: Normal
-*     prior sd: Gamma
-*     likelihood: Normal
+*     prior mean : Normal
+*     prior 1/sd**2 : Gamma
+*     qtc | mean,sd (likelihood) : Normal
       subroutine rpostqtc(qtc,nindiv,nqtc,indcell,c,meanqtc,sdqtc,
      &     nnqtc,sqtc,ssqtc,npop,npopmax,nppmax,
-     &     ksihpq,kappahpq,alphahpq,betahpq)
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc)
       implicit none
       integer nindiv,nqtc,indcell,c,nnqtc,npop,npopmax,nppmax
       double precision qtc,meanqtc,sdqtc,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
       dimension qtc(nindiv,nqtc),indcell(nindiv),c(nppmax),
      &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
      &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
-     &     ssqtc(npopmax,nqtc)
+     &     ssqtc(npopmax,nqtc),
+     &     ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc)
       integer ipop,iindiv,iqtc
       double precision xx,vv,ap,bp,ggrnorm,ggrgam
 
@@ -798,13 +833,13 @@ c$$$      write(*,*) "avant rndend ggrunif=",ggrunif(0.d0,1.d0)
       do iqtc = 1,nqtc
          do ipop = 1,npop
              xx = (sqtc(ipop,iqtc)+
-     &           ksihpq*kappahpq*sdqtc(ipop,iqtc)**2)/
-     &           (nnqtc(ipop,iqtc)+kappahpq*sdqtc(ipop,iqtc)**2)
+     &           ksiqtc(iqtc)*kappaqtc(iqtc)*sdqtc(ipop,iqtc)**2)/
+     &           (nnqtc(ipop,iqtc)+kappaqtc(iqtc)*sdqtc(ipop,iqtc)**2)
              vv = sdqtc(ipop,iqtc)**2 /
-     &            (nnqtc(ipop,iqtc)+kappahpq*sdqtc(ipop,iqtc)**2)
+     &            (nnqtc(ipop,iqtc)+kappaqtc(iqtc)*sdqtc(ipop,iqtc)**2)
              meanqtc(ipop,iqtc) = ggrnorm(xx,dsqrt(vv))
-             ap = alphahpq + 0.5*nnqtc(ipop,iqtc)
-             bp = betahpq + 0.5*(ssqtc(ipop,iqtc) - 
+             ap = alphaqtc(iqtc) + 0.5*nnqtc(ipop,iqtc)
+             bp = betaqtc(iqtc) + 0.5*(ssqtc(ipop,iqtc) - 
      &            2*sqtc(ipop,iqtc)*meanqtc(ipop,iqtc) + 
      &            nnqtc(ipop,iqtc)*meanqtc(ipop,iqtc)**2)
              sdqtc(ipop,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -2295,7 +2330,7 @@ c      write(*,*) 'end udcf'
       subroutine udcfparvq(npop,npopmax,f,nloc,nlocmax,nlocmax2,
      &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,nqtc,qtc,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,
      &     a,ptmp,ftmp,zz,n,ntmp,ploidy,alpha,nudcel,usegeno2,useqtc)
       implicit none
       integer npop,npopmax,nloc,nlocmax,nal(nlocmax),
@@ -2305,7 +2340,7 @@ c      write(*,*) 'end udcf'
      &     ploidy,nudcel,nnqtc,nqtc,usegeno2,useqtc
       double precision f,ftmp,a,ptmp,qtc,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
       dimension f(npopmax,nlocmax,nalmax),
      &     ftmp(npopmax,nlocmax,nalmax),
      &     a(nalmax),ptmp(nalmax),qtc(nindiv,nqtc),
@@ -2383,7 +2418,7 @@ c$$$               write(*,*) 'ipop2=',ipop2
             call propparqvudc(qtc,nindiv,nqtc,indcell,c,ctmp,
      &           meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
      &           sqtc,ssqtc,npop,npopmax,nppmax,
-     &           ksihpq,kappahpq,alphahpq,betahpq,ipop1,ipop2,
+     &           ksiqtc,kappaqtc,alphaqtc,betaqtc,ipop1,ipop2,
      &           contriblr)
 c            write(*,*) 'meanqtc=',meanqtc
 c            write(*,*) 'sdqtc=',sdqtc
@@ -2448,7 +2483,7 @@ c      write(*,*) 'end udcf'
       subroutine udcfallvar2(npop,npopmax,nlocd,nloch,nql,ncolt, 
      &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,nqtc,qtc,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,a,ptmp,f,ftmp,yy,z,ql,
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,a,ptmp,f,ftmp,yy,z,ql,
      &     n,ntmp,alpha,nudcel,usegeno2,usegeno1,useql,useqtc,
      &     ploidy)
       implicit none
@@ -2460,14 +2495,15 @@ c      write(*,*) 'end udcf'
      &     usegeno1,useql,useqtc,ploidy
       double precision f,ftmp,a,ptmp,qtc,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
       dimension f(npopmax,ncolt,nalmax),
      &     ftmp(npopmax,ncolt,nalmax),
      &     a(nalmax),ptmp(nalmax),qtc(nindiv,nqtc),
      &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
      &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
-     &     ssqtc(npopmax,nqtc)
+     &     ssqtc(npopmax,nqtc),
+     &     ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc)
       integer ipop,ipp,ipop1,ipop2,iloc,ial,iqtc,iipp,n1,n2,ntmp1,
      &     ntmp2,iud
       double precision ggrunif,lrpf,lratio,ratio,llr6,contriblr
@@ -2595,7 +2631,7 @@ c$$$  write(*,*) 'ipop2=',ipop2
                call propparqvudc(qtc,nindiv,nqtc,indcell,c,ctmp,
      &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
      &              sqtc,ssqtc,npop,npopmax,nppmax,
-     &              ksihpq,kappahpq,alphahpq,betahpq,ipop1,ipop2,
+     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipop1,ipop2,
      &              contriblr)
 c     write(*,*) 'meanqtc=',meanqtc
 c     write(*,*) 'sdqtc=',sdqtc
@@ -2759,7 +2795,7 @@ c         write(*,*) 'bern=',bern
      &     nloc,nlocmax,nlocmax2,
      &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,nqtc,qtc,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,
      &     a,ptmp,ftmp,zz,n,ntmp,ploidy,nudcel,usegeno2,useqtc)
       implicit none
       integer npop,npopmax,nloc,nlocmax,nal(nlocmax),
@@ -2769,7 +2805,7 @@ c         write(*,*) 'bern=',bern
      &     ploidy,nudcel,nnqtc,nqtc,usegeno2,useqtc
       double precision f,drift,ftmp,a,ptmp,fa,qtc,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
       dimension f(npopmax,nlocmax,nalmax),drift(npopmax),
      &      ftmp(npopmax,nlocmax,nalmax),
      &     a(nalmax),ptmp(nalmax),fa(nlocmax,nalmax),
@@ -2819,7 +2855,7 @@ c         write(*,*) 'ipp=',ipp
                call propparqvudc(qtc,nindiv,nqtc,indcell,c,ctmp,
      &           meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
      &              sqtc,ssqtc,npop,npopmax,nppmax,
-     &              ksihpq,kappahpq,alphahpq,betahpq,ipop1,ipop2,
+     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipop1,ipop2,
      &              contriblr)
 *     contrib likelihood
 *     argument usegeno2 is passed as 0 to ignore genotypes 
@@ -2886,7 +2922,7 @@ c$$$  enddo
      &     nlocd,nloch,nql,ncolt,
      &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,nqtc,qtc,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,
      &     a,ptmp,ftmp,yy,z,ql,n,ntmp,nudcel,
      &     usegeno2,usegeno1,useql,useqtc,ploidy)
       implicit none
@@ -2898,7 +2934,7 @@ c$$$  enddo
      &     usegeno2,usegeno1,useql,useqtc,ploidy
       double precision f,drift,ftmp,a,ptmp,fa,qtc,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
       dimension f(npopmax,ncolt,nalmax),drift(npopmax),
      &      ftmp(npopmax,ncolt,nalmax),
      &     a(nalmax),ptmp(nalmax),fa(ncolt,nalmax),
@@ -2906,7 +2942,8 @@ c$$$  enddo
      &     sdqtc(npopmax,nqtc),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
      &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
-     &     ssqtc(npopmax,nqtc)
+     &     ssqtc(npopmax,nqtc),
+     &     ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc) 
       integer ipop,ipp,ipop1,ipop2,iloc,ial,iud,iqtc
       double precision alpha,ggrunif,lratio,lTfallvar,contriblr,bern,
      &     ggrbinom,lrallvar2
@@ -2964,7 +3001,7 @@ c$$$     &              - lTf(ipop2,n,fa,drift,npopmax,nloc,nal,nalmax)
                call propparqvudc(qtc,nindiv,nqtc,indcell,c,ctmp,
      &           meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
      &              sqtc,ssqtc,npop,npopmax,nppmax,
-     &              ksihpq,kappahpq,alphahpq,betahpq,ipop1,ipop2,
+     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipop1,ipop2,
      &              contriblr)
 *     contrib likelihood
 *     argument usegeno2,usegeno1,useql passed as 0 to disregard these variables 
@@ -6603,7 +6640,7 @@ c$$$      write(*,*) 'ftmp(',ipophost,2,2,')=',ftmp(ipophost,2,2)
      &     nindiv,nlocmax2,npopmax,nlocmax,nalmax,indcell,nal,
      &     fmodel,xlim,ylim,shape1,shape2,ploidy,
      &     qtc,nqtc,meanqtc,sdqtc,usegeno2,useqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq)
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc)
       implicit none
       integer nindiv,nlocmax2,npop,npopmax,nlocmax,nalmax,
      &     npp,nppmax,zz(nindiv,nlocmax2),indcell(nindiv),
@@ -6612,7 +6649,7 @@ c$$$      write(*,*) 'ftmp(',ipophost,2,2,')=',ftmp(ipophost,2,2)
      &     fa(nlocmax,nalmax),lambdamax,lambda,xlim(2),ylim(2),
      &     qtc(nindiv,nqtc),
      &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
       integer ipp,ipop,iloc,ial,iqtc
       double precision gglgamfn,shape1,shape2,llgq,lg,ggdnorm,ggdgamma
 *     contrib npop
@@ -6669,8 +6706,8 @@ c$$$      write(*,*) 'ftmp(',ipophost,2,2,')=',ftmp(ipophost,2,2)
          do iqtc = 1,nqtc
             do ipop = 1,npop
                lppgq = lppgq + 
-     &            ggdnorm(meanqtc(ipop,iqtc),ksihpq,
-     &              dsqrt(1/kappahpq),1)
+     &            ggdnorm(meanqtc(ipop,iqtc),ksiqtc,
+     &              dsqrt(1/kappaqtc),1)
             enddo
          enddo
 *     contrib precision of quantit. variables
@@ -6678,7 +6715,7 @@ c$$$      write(*,*) 'ftmp(',ipophost,2,2,')=',ftmp(ipophost,2,2)
             do ipop = 1,npop
                lppgq = lppgq + 
      &              ggdgamma(1/sdqtc(ipop,iqtc)**2,
-     &              alphahpq,1/betahpq,1)
+     &              alphaqtc,1/betaqtc,1)
             enddo
          enddo
       endif
@@ -6698,7 +6735,7 @@ c$$$      write(*,*) 'ftmp(',ipophost,2,2,')=',ftmp(ipophost,2,2)
       double precision function lpriorallvar(lambdamax,lambda,
      &     npop,npp,drift,f,fa,c,nppmax,nindiv,npopmax,nlocd,nloch,nql,
      &     ncolt,nal,nalmax,indcell,fmodel,xlim,ylim,shape1,shape2,
-     &     nqtc,meanqtc,sdqtc,ksihpq,kappahpq,alphahpq,betahpq,
+     &     nqtc,meanqtc,sdqtc,ksiqtc,kappaqtc,alphaqtc,betaqtc,
      &     usegeno2,usegeno1,useql,useqtc)
       implicit none
       integer nindiv,npop,npopmax,nlocd,nloch,nql,ncolt,nalmax,
@@ -6708,9 +6745,12 @@ c$$$      write(*,*) 'ftmp(',ipophost,2,2,')=',ftmp(ipophost,2,2)
       double precision drift(npopmax),f(npopmax,ncolt,nalmax),
      &     fa(ncolt,nalmax),lambdamax,lambda,xlim(2),ylim(2),
      &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
       integer ipp,ipop,iloc,ial,iqtc
       double precision gglgamfn,shape1,shape2,llgq,lg,ggdnorm,ggdgamma
+      dimension  ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),
+     &     betaqtc(nqtc)
+
       lpriorallvar = 0
 *     contrib npop
       lpriorallvar = lpriorallvar - dlog(dble(npopmax))
@@ -6835,8 +6875,8 @@ c$$$      write(*,*) 'ftmp(',ipophost,2,2,')=',ftmp(ipophost,2,2)
          do iqtc = 1,nqtc
             do ipop = 1,npop
                lpriorallvar = lpriorallvar + 
-     &            ggdnorm(meanqtc(ipop,iqtc),ksihpq,
-     &              dsqrt(1/kappahpq),1)
+     &            ggdnorm(meanqtc(ipop,iqtc),ksiqtc(iqtc),
+     &              dsqrt(1/kappaqtc(iqtc)),1)
             enddo
          enddo
 *     contrib precision of quantit. variables
@@ -6844,7 +6884,7 @@ c$$$      write(*,*) 'ftmp(',ipophost,2,2,')=',ftmp(ipophost,2,2)
             do ipop = 1,npop
                lpriorallvar = lpriorallvar + 
      &              ggdgamma(1/sdqtc(ipop,iqtc)**2,
-     &              alphahpq,1/betahpq,1)
+     &              alphaqtc(iqtc),1/betaqtc(iqtc),1)
             enddo
          enddo
       endif
@@ -7541,7 +7581,7 @@ c       write(*,*) 'fin smd'
      &     a,ptmp,ftmp,drifttmp,zz,cellpop,listcell,
      &     cellpophost,n,ntmp,ploidy,qtc,nqtc,meanqtc,sdqtc,
      &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,usegeno2,useqtc)
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,usegeno2,useqtc)
       implicit none 
       integer npop,npopmin,npopmax,nloc,nal(nloc),
      &     nalmax,nindiv,npp,nppmax,indcell(nindiv),
@@ -7554,7 +7594,7 @@ c       write(*,*) 'fin smd'
      &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
      &     sqtc(npopmax,nqtc),ssqtc(npopmax,nqtc),
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
       integer ipoprem,ipp,isplit,
      &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
      &     ipophost,ncellpophost,cellpophost(nppmax),ii
@@ -7645,7 +7685,7 @@ c     write(*,*) 'in smd lratio=',lratio
                call propparqvsplit(qtc,nindiv,nqtc,indcell,c,ctmp,
      &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
      &              ssqtc,npop,npopmax,nppmax,
-     &              ksihpq,kappahpq,alphahpq,betahpq,isplit,contriblr)
+     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,isplit,contriblr)
 *     contrib prior and proposal 
                lratio = lratio + contriblr
 *     contrib likelihood quant. variable
@@ -7755,7 +7795,7 @@ c     write(*,*) 'lratio =',lratio
                call propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
      &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
      &              ssqtc,npop,npopmax,nppmax,
-     &              ksihpq,kappahpq,alphahpq,betahpq,ipophost,ipoprem,
+     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,ipoprem,
      &              contriblr)
 *     contrib prior and proposal 
                lratio = lratio + contriblr   
@@ -7815,7 +7855,7 @@ c       write(*,*) 'fin smd'
      &     a,ptmp,ftmp,drifttmp,yy,z,ql,cellpop,listcell,
      &     cellpophost,n,ntmp,qtc,nqtc,meanqtc,sdqtc,
      &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,
      &     usegeno2,usegeno1,useql,useqtc,ploidy)
       implicit none 
       integer npop,npopmin,npopmax,ncolt,nal(ncolt),
@@ -7830,7 +7870,7 @@ c       write(*,*) 'fin smd'
      &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
      &     sqtc(npopmax,nqtc),ssqtc(npopmax,nqtc),
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
       integer ipoprem,ipp,isplit,
      &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
      &     ipophost,ncellpophost,cellpophost(nppmax),ii
@@ -7838,6 +7878,7 @@ c       write(*,*) 'fin smd'
       integer b,iloc,iqtc,ipop,ipoptmp,iindiv
       double precision llr6,termf9bis,gglgamfn,bern,ggrbinom,ggdnorm,
      &     ggdgamma,lrallvar2,contriblr,junk
+      dimension ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc)
       
 c      write(*,*) 'debut smdallvar2' 
 c      write(*,*) 'npop =',npop
@@ -7933,7 +7974,7 @@ c               write(6,*) 'split apres prior contrib freq =',lratio
                call propparqvsplit(qtc,nindiv,nqtc,indcell,c,ctmp,
      &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
      &              ssqtc,npop,npopmax,nppmax,
-     &              ksihpq,kappahpq,alphahpq,betahpq,isplit,contriblr)
+     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,isplit,contriblr)
 *     contrib prior and proposal 
                lratio = lratio + contriblr
 *     contrib likelihood quant. variable
@@ -8065,7 +8106,7 @@ c               write(6,*) 'merge apres prior contrib freq =',lratio
                call propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
      &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
      &              ssqtc,npop,npopmax,nppmax,
-     &              ksihpq,kappahpq,alphahpq,betahpq,ipophost,ipoprem,
+     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,ipoprem,
      &              contriblr)
 *     contrib prior and proposal 
                lratio = lratio + contriblr   
@@ -8145,18 +8186,19 @@ c       write(*,*) 'fin smdallvar2'
       subroutine propparqvudc(qtc,nindiv,nqtc,indcell,c,ctmp,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
      &     npop,npopmax,nppmax,
-     &     ksihpq,kappahpq,alphahpq,betahpq,ipop1,ipop2,contriblr)
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,ipop1,ipop2,contriblr)
       implicit none
       integer nindiv,nqtc,indcell,c,ctmp,nnqtc,npop,npopmax,nppmax,
      &     ipop1,ipop2
       double precision qtc,meanqtc,sdqtc,
      &     meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,contriblr
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,contriblr
       dimension qtc(nindiv,nqtc),indcell(nindiv),c(nppmax),
      &     ctmp(nppmax),meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
      &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
-     &     ssqtc(npopmax,nqtc)
+     &     ssqtc(npopmax,nqtc),
+     &     ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc)
       integer ipop,iindiv,iqtc
       double precision xx,vv,ap,bp,ggrnorm,ggrgam,ggdnorm,ggdgamma,junk
        contriblr = 0
@@ -8185,25 +8227,25 @@ c       write(*,*) 'fin smdallvar2'
 *     contrib proposal  reverse move to log ratio
       do iqtc = 1,nqtc
 *     mean 
-         xx = (sqtc(ipop1,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(ipop1,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(ipop1,iqtc)+kappahpq)
+         xx = (sqtc(ipop1,iqtc)+ksiqtc(iqtc)*kappaqtc(iqtc))/
+     &        (nnqtc(ipop1,iqtc)+kappaqtc(iqtc))
+         vv = 1 / (nnqtc(ipop1,iqtc)+kappaqtc(iqtc))
          contriblr = contriblr +
      &        ggdnorm(meanqtc(ipop1,iqtc),xx,dsqrt(vv),1)
-          xx = (sqtc(ipop2,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(ipop2,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(ipop2,iqtc)+kappahpq)
+         xx = (sqtc(ipop2,iqtc)+ksiqtc(iqtc)*kappaqtc(iqtc))/
+     &        (nnqtc(ipop2,iqtc)+kappaqtc(iqtc))
+         vv = 1 / (nnqtc(ipop2,iqtc)+kappaqtc(iqtc))
          contriblr = contriblr +
      &        ggdnorm(meanqtc(ipop2,iqtc),xx,dsqrt(vv),1)
 *     variance
-         ap = alphahpq + 0.5*nnqtc(ipop1,iqtc)
-         bp = betahpq + 0.5*(ssqtc(ipop1,iqtc) - 
+         ap = alphaqtc(iqtc) + 0.5*nnqtc(ipop1,iqtc)
+         bp = betaqtc(iqtc) + 0.5*(ssqtc(ipop1,iqtc) - 
      &        2*sqtc(ipop1,iqtc)*meanqtc(ipop1,iqtc) + 
      &        nnqtc(ipop1,iqtc)*meanqtc(ipop1,iqtc)**2)
          contriblr = contriblr + 
      &        ggdgamma(1/sdqtc(ipop1,iqtc)**2,ap,1/bp,1)
-         ap = alphahpq + 0.5*nnqtc(ipop2,iqtc)
-         bp = betahpq + 0.5*(ssqtc(ipop2,iqtc) - 
+         ap = alphaqtc(iqtc) + 0.5*nnqtc(ipop2,iqtc)
+         bp = betaqtc(iqtc) + 0.5*(ssqtc(ipop2,iqtc) - 
      &        2*sqtc(ipop2,iqtc)*meanqtc(ipop2,iqtc) + 
      &        nnqtc(ipop2,iqtc)*meanqtc(ipop2,iqtc)**2)
          contriblr = contriblr + 
@@ -8239,25 +8281,25 @@ c       write(*,*) 'fin smdallvar2'
       do iqtc = 1,nqtc
 *     propose mean pop ipop1 direct move 
 *     and compute contrib proposal to log ratio
-         xx = (sqtc(ipop1,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(ipop1,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(ipop1,iqtc)+kappahpq)
+         xx = (sqtc(ipop1,iqtc)+ksiqtc(iqtc)*kappaqtc(iqtc))/
+     &        (nnqtc(ipop1,iqtc)+kappaqtc(iqtc))
+         vv = 1 / (nnqtc(ipop1,iqtc)+kappaqtc(iqtc))
          meanqtctmp(ipop1,iqtc) = ggrnorm(xx,dsqrt(vv))
          contriblr = contriblr - 
      &        ggdnorm(meanqtctmp(ipop1,iqtc),xx,dsqrt(vv),1)
 *     propose mean pop ipop2 direct move 
 *     and compute contrib proposal to log ratio
-         xx = (sqtc(ipop2,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(ipop2,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(ipop2,iqtc)+kappahpq)
+         xx = (sqtc(ipop2,iqtc)+ksiqtc(iqtc)*kappaqtc(iqtc))/
+     &        (nnqtc(ipop2,iqtc)+kappaqtc(iqtc))
+         vv = 1 / (nnqtc(ipop2,iqtc)+kappaqtc(iqtc))
          meanqtctmp(ipop2,iqtc) = ggrnorm(xx,dsqrt(vv))
          contriblr = contriblr - 
      &        ggdnorm(meanqtctmp(ipop2,iqtc),xx,dsqrt(vv),1)
 *     propose variance pop ipop1 direct move 
 *     and compute contrib proposal to log ratio
 *     sample variance from full conditional
-         ap = alphahpq + 0.5*nnqtc(ipop1,iqtc)
-         bp = betahpq + 0.5*(ssqtc(ipop1,iqtc) - 
+         ap = alphaqtc(iqtc) + 0.5*nnqtc(ipop1,iqtc)
+         bp = betaqtc(iqtc) + 0.5*(ssqtc(ipop1,iqtc) - 
      &        2*sqtc(ipop1,iqtc)*meanqtctmp(ipop1,iqtc) + 
      &        nnqtc(ipop1,iqtc)*meanqtctmp(ipop1,iqtc)**2)
          sdqtctmp(ipop1,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -8266,8 +8308,8 @@ c       write(*,*) 'fin smdallvar2'
 *     propose variance pop ipop2 direct move 
 *     and compute contrib proposal to log ratio
 *     sample variance from full conditional
-         ap = alphahpq + 0.5*nnqtc(ipop2,iqtc)
-         bp = betahpq + 0.5*(ssqtc(ipop2,iqtc) - 
+         ap = alphaqtc(iqtc) + 0.5*nnqtc(ipop2,iqtc)
+         bp = betaqtc(iqtc) + 0.5*(ssqtc(ipop2,iqtc) - 
      &        2*sqtc(ipop2,iqtc)*meanqtctmp(ipop2,iqtc) + 
      &        nnqtc(ipop2,iqtc)*meanqtctmp(ipop2,iqtc)**2)
          sdqtctmp(ipop2,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -8279,23 +8321,23 @@ c       write(*,*) 'fin smdallvar2'
 *     contrib prior of means to log ratio
          contriblr = contriblr + 
      &        ggdnorm(meanqtctmp(ipop1,iqtc),
-     &        ksihpq,1/dsqrt(kappahpq),1) + 
+     &        ksiqtc(iqtc),1/dsqrt(kappaqtc(iqtc)),1) + 
      &        ggdnorm(meanqtctmp(ipop2,iqtc),
-     &        ksihpq,1/dsqrt(kappahpq),1)  - 
+     &        ksiqtc(iqtc),1/dsqrt(kappaqtc(iqtc)),1)  - 
      &        ggdnorm(meanqtc(ipop1,iqtc),
-     &        ksihpq,1/dsqrt(kappahpq),1)  - 
+     &        ksiqtc(iqtc),1/dsqrt(kappaqtc(iqtc)),1)  - 
      &        ggdnorm(meanqtc(ipop2,iqtc),
-     &        ksihpq,1/dsqrt(kappahpq),1) 
+     &        ksiqtc(iqtc),1/dsqrt(kappaqtc(iqtc)),1) 
 *     contrib prior of variances to log ratio
          contriblr = contriblr +
      &        ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,
-     &        alphahpq,1/betahpq,1) + 
+     &        alphaqtc(iqtc),1/betaqtc(iqtc),1) + 
      &        ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,
-     &        alphahpq,1/betahpq,1) -
+     &        alphaqtc(iqtc),1/betaqtc(iqtc),1) -
      &        ggdgamma(1/sdqtc(ipop1,iqtc)**2,
-     &        alphahpq,1/betahpq,1) -
+     &        alphaqtc(iqtc),1/betaqtc(iqtc),1) -
      &        ggdgamma(1/sdqtc(ipop2,iqtc)**2,
-     &        alphahpq,1/betahpq,1)
+     &        alphaqtc(iqtc),1/betaqtc(iqtc),1)
       enddo
 c$$$ccccc
 c$$$      contriblr = 0
@@ -8324,9 +8366,9 @@ c$$$
 c$$$*     contrib proposal  reverse move to log ratio
 c$$$      do iqtc = 1,nqtc
 c$$$*     mean 
-c$$$         xx = (sqtc(ipop1,iqtc)+ksihpq*kappahpq)/
-c$$$     &        (nnqtc(ipop1,iqtc)+kappahpq)
-c$$$         vv = 1 / (nnqtc(ipop1,iqtc)+kappahpq)
+c$$$         xx = (sqtc(ipop1,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(ipop1,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(ipop1,iqtc)+kappaqtc)
 c$$$         contriblr = contriblr +
 c$$$     &        ggdnorm(meanqtc(ipop1,iqtc),xx,dsqrt(vv),1)
 c$$$         write(*,*) 'xx=',xx
@@ -8335,9 +8377,9 @@ c$$$         write(*,*) 'sqtc=',sqtc
 c$$$         write(*,*) 'q(mu1)=',
 c$$$     &        ggdnorm(meanqtc(ipop1,iqtc),xx,dsqrt(vv),1)
 c$$$c         write(*,*) 'contriblr',contriblr
-c$$$         xx = (sqtc(ipop2,iqtc)+ksihpq*kappahpq)/
-c$$$     &        (nnqtc(ipop2,iqtc)+kappahpq)
-c$$$         vv = 1 / (nnqtc(ipop2,iqtc)+kappahpq)
+c$$$         xx = (sqtc(ipop2,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(ipop2,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(ipop2,iqtc)+kappaqtc)
 c$$$         contriblr = contriblr +
 c$$$     &        ggdnorm(meanqtc(ipop2,iqtc),xx,dsqrt(vv),1)
 c$$$         write(*,*) 'xx=',xx
@@ -8347,8 +8389,8 @@ c$$$         write(*,*) 'q(mu2)=',
 c$$$     &        ggdnorm(meanqtc(ipop2,iqtc),xx,dsqrt(vv),1)
 c$$$c         write(*,*) 'contriblr',contriblr
 c$$$*     variance
-c$$$         ap = alphahpq + 0.5*nnqtc(ipop1,iqtc)
-c$$$         bp = betahpq + 0.5*(ssqtc(ipop1,iqtc) - 
+c$$$         ap = alphaqtc + 0.5*nnqtc(ipop1,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(ipop1,iqtc) - 
 c$$$     &        2*sqtc(ipop1,iqtc)*meanqtc(ipop1,iqtc) + 
 c$$$     &        nnqtc(ipop1,iqtc)*meanqtc(ipop1,iqtc)**2)
 c$$$         contriblr = contriblr + 
@@ -8356,8 +8398,8 @@ c$$$     &        ggdgamma(1/sdqtc(ipop1,iqtc)**2,ap,1/bp,1)
 c$$$        write(*,*) 'q(sd1)=',
 c$$$     &        ggdgamma(1/sdqtc(ipop1,iqtc)**2,ap,1/bp,1)
 c$$$c         write(*,*) 'contriblr',contriblr
-c$$$         ap = alphahpq + 0.5*nnqtc(ipop2,iqtc)
-c$$$         bp = betahpq + 0.5*(ssqtc(ipop2,iqtc) - 
+c$$$         ap = alphaqtc + 0.5*nnqtc(ipop2,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(ipop2,iqtc) - 
 c$$$     &        2*sqtc(ipop2,iqtc)*meanqtc(ipop2,iqtc) + 
 c$$$     &        nnqtc(ipop2,iqtc)*meanqtc(ipop2,iqtc)**2)
 c$$$         contriblr = contriblr + 
@@ -8399,9 +8441,9 @@ c$$$*     assuming current value for variance is 1
 c$$$      do iqtc = 1,nqtc
 c$$$*     propose mean pop ipop1 direct move 
 c$$$*     and compute contrib proposal to log ratio
-c$$$         xx = (sqtc(ipop1,iqtc)+ksihpq*kappahpq)/
-c$$$     &        (nnqtc(ipop1,iqtc)+kappahpq)
-c$$$         vv = 1 / (nnqtc(ipop1,iqtc)+kappahpq)
+c$$$         xx = (sqtc(ipop1,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(ipop1,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(ipop1,iqtc)+kappaqtc)
 c$$$         meanqtctmp(ipop1,iqtc) = ggrnorm(xx,dsqrt(vv))
 c$$$         write(*,*) 'mu1*=',meanqtctmp(ipop1,iqtc)
 c$$$         contriblr = contriblr - 
@@ -8410,9 +8452,9 @@ c$$$         write(*,*) 'q(mu1*)=',
 c$$$     &        ggdnorm(meanqtctmp(ipop1,iqtc),xx,dsqrt(vv),1)
 c$$$*     propose mean pop ipop2 direct move 
 c$$$*     and compute contrib proposal to log ratio
-c$$$         xx = (sqtc(ipop2,iqtc)+ksihpq*kappahpq)/
-c$$$     &        (nnqtc(ipop2,iqtc)+kappahpq)
-c$$$         vv = 1 / (nnqtc(ipop2,iqtc)+kappahpq)
+c$$$         xx = (sqtc(ipop2,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(ipop2,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(ipop2,iqtc)+kappaqtc)
 c$$$         meanqtctmp(ipop2,iqtc) = ggrnorm(xx,dsqrt(vv))
 c$$$         write(*,*) 'mu2*=',meanqtctmp(ipop2,iqtc)
 c$$$         contriblr = contriblr - 
@@ -8422,8 +8464,8 @@ c$$$     &        ggdnorm(meanqtctmp(ipop2,iqtc),xx,dsqrt(vv),1)
 c$$$*     propose variance pop ipop1 direct move 
 c$$$*     and compute contrib proposal to log ratio
 c$$$*     sample variance from full conditional
-c$$$         ap = alphahpq + 0.5*nnqtc(ipop1,iqtc)
-c$$$         bp = betahpq + 0.5*(ssqtc(ipop1,iqtc) - 
+c$$$         ap = alphaqtc + 0.5*nnqtc(ipop1,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(ipop1,iqtc) - 
 c$$$     &        2*sqtc(ipop1,iqtc)*meanqtctmp(ipop1,iqtc) + 
 c$$$     &        nnqtc(ipop1,iqtc)*meanqtctmp(ipop1,iqtc)**2)
 c$$$         sdqtctmp(ipop1,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -8435,8 +8477,8 @@ c$$$     &        ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,ap,1/bp,1)
 c$$$*     propose variance pop ipop2 direct move 
 c$$$*     and compute contrib proposal to log ratio
 c$$$*     sample variance from full conditional
-c$$$         ap = alphahpq + 0.5*nnqtc(ipop2,iqtc)
-c$$$         bp = betahpq + 0.5*(ssqtc(ipop2,iqtc) - 
+c$$$         ap = alphaqtc + 0.5*nnqtc(ipop2,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(ipop2,iqtc) - 
 c$$$     &        2*sqtc(ipop2,iqtc)*meanqtctmp(ipop2,iqtc) + 
 c$$$     &        nnqtc(ipop2,iqtc)*meanqtctmp(ipop2,iqtc)**2)
 c$$$         sdqtctmp(ipop2,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -8453,23 +8495,23 @@ c$$$      do iqtc = 1,nqtc
 c$$$*     contrib prior of means to log ratio
 c$$$         contriblr = contriblr + 
 c$$$     &        ggdnorm(meanqtctmp(ipop1,iqtc),
-c$$$     &        ksihpq,1/dsqrt(kappahpq),1) + 
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1) + 
 c$$$     &        ggdnorm(meanqtctmp(ipop2,iqtc),
-c$$$     &        ksihpq,1/dsqrt(kappahpq),1)  - 
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1)  - 
 c$$$     &        ggdnorm(meanqtc(ipop1,iqtc),
-c$$$     &        ksihpq,1/dsqrt(kappahpq),1)  - 
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1)  - 
 c$$$     &        ggdnorm(meanqtc(ipop2,iqtc),
-c$$$     &        ksihpq,1/dsqrt(kappahpq),1) 
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1) 
 c$$$*     contrib prior of variances to log ratio
 c$$$         contriblr = contriblr +
 c$$$     &        ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,
-c$$$     &        alphahpq,1/betahpq,1) + 
+c$$$     &        alphaqtc,1/betaqtc,1) + 
 c$$$     &        ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,
-c$$$     &        alphahpq,1/betahpq,1) -
+c$$$     &        alphaqtc,1/betaqtc,1) -
 c$$$     &        ggdgamma(1/sdqtc(ipop1,iqtc)**2,
-c$$$     &        alphahpq,1/betahpq,1) -
+c$$$     &        alphaqtc,1/betaqtc,1) -
 c$$$     &        ggdgamma(1/sdqtc(ipop2,iqtc)**2,
-c$$$     &        alphahpq,1/betahpq,1)
+c$$$     &        alphaqtc,1/betaqtc,1)
 c$$$      enddo
 c$$$      write(*,*) 'contrib prior =',contriblr-junk
 c$$$      write(*,*) 'in propparqvudc, meanqtc=',meanqtc
@@ -8486,18 +8528,19 @@ c$$$      write(*,*) 'in propparqvudc, sdqtctmp=',sdqtctmp
       subroutine propparqvsplit(qtc,nindiv,nqtc,indcell,c,ctmp,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
      &     sqtc,ssqtc,npop,npopmax,nppmax,
-     &     ksihpq,kappahpq,alphahpq,betahpq,isplit,contriblr)
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,isplit,contriblr)
       implicit none
       integer nindiv,nqtc,indcell,c,ctmp,nnqtc,npop,npopmax,nppmax,
      &     isplit
       double precision qtc,meanqtc,sdqtc,
      &     meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,contriblr
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,contriblr
       dimension qtc(nindiv,nqtc),indcell(nindiv),c(nppmax),
      &     ctmp(nppmax),meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
      &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
-     &     ssqtc(npopmax,nqtc)
+     &     ssqtc(npopmax,nqtc),
+     &     ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc)
       integer ipop,iindiv,iqtc
       double precision xx,vv,ap,bp,ggrnorm,ggrgam,ggdnorm,ggdgamma,junk
 
@@ -8531,15 +8574,15 @@ c$$$      write(*,*) 'in propparqvudc, sdqtctmp=',sdqtctmp
       do iqtc = 1,nqtc
 *     mean 
          junk = contriblr
-         xx = (sqtc(isplit,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(isplit,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(isplit,iqtc)+kappahpq)
+         xx = (sqtc(isplit,iqtc)+ksiqtc(iqtc)*kappaqtc(iqtc))/
+     &        (nnqtc(isplit,iqtc)+kappaqtc(iqtc))
+         vv = 1 / (nnqtc(isplit,iqtc)+kappaqtc(iqtc))
          contriblr = contriblr +
      &        ggdnorm(meanqtc(isplit,iqtc),xx,dsqrt(vv),1)
 *     variance
          junk = contriblr
-         ap = alphahpq + 0.5*nnqtc(isplit,iqtc)
-         bp = betahpq + 0.5*(ssqtc(isplit,iqtc) - 
+         ap = alphaqtc(iqtc) + 0.5*nnqtc(isplit,iqtc)
+         bp = betaqtc(iqtc) + 0.5*(ssqtc(isplit,iqtc) - 
      &        2*sqtc(isplit,iqtc)*meanqtc(isplit,iqtc) + 
      &        nnqtc(isplit,iqtc)*meanqtc(isplit,iqtc)**2)
           contriblr = contriblr + 
@@ -8576,25 +8619,25 @@ c$$$      write(*,*) 'in propparqvudc, sdqtctmp=',sdqtctmp
 *     propose mean pop isplit direct move 
 *     and compute contrib proposal to log ratio
          junk = contriblr
-         xx = (sqtc(isplit,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(isplit,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(isplit,iqtc)+kappahpq)
+         xx = (sqtc(isplit,iqtc)+ksiqtc(iqtc)*kappaqtc(iqtc))/
+     &        (nnqtc(isplit,iqtc)+kappaqtc(iqtc))
+         vv = 1 / (nnqtc(isplit,iqtc)+kappaqtc(iqtc))
          meanqtctmp(isplit,iqtc) = ggrnorm(xx,dsqrt(vv))
          contriblr = contriblr - 
      &        ggdnorm(meanqtctmp(isplit,iqtc),xx,dsqrt(vv),1)
 *     propose mean pop npop+1 direct move 
 *     and compute contrib proposal to log ratio
-         xx = (sqtc(npop+1,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(npop+1,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(npop+1,iqtc)+kappahpq)
+         xx = (sqtc(npop+1,iqtc)+ksiqtc(iqtc)*kappaqtc(iqtc))/
+     &        (nnqtc(npop+1,iqtc)+kappaqtc(iqtc))
+         vv = 1 / (nnqtc(npop+1,iqtc)+kappaqtc(iqtc))
          meanqtctmp(npop+1,iqtc) = ggrnorm(xx,dsqrt(vv))
          contriblr = contriblr - 
      &        ggdnorm(meanqtctmp(npop+1,iqtc),xx,dsqrt(vv),1)
 *     propose variance pop isplit direct move 
 *     and compute contrib proposal to log ratio
 *     sample variance from full conditional
-         ap = alphahpq + 0.5*nnqtc(isplit,iqtc)
-         bp = betahpq + 0.5*(ssqtc(isplit,iqtc) - 
+         ap = alphaqtc(iqtc) + 0.5*nnqtc(isplit,iqtc)
+         bp = betaqtc(iqtc) + 0.5*(ssqtc(isplit,iqtc) - 
      &        2*sqtc(isplit,iqtc)*meanqtctmp(isplit,iqtc) + 
      &        nnqtc(isplit,iqtc)*meanqtctmp(isplit,iqtc)**2)
          sdqtctmp(isplit,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -8603,8 +8646,8 @@ c$$$      write(*,*) 'in propparqvudc, sdqtctmp=',sdqtctmp
 *     propose variance pop npop+1 direct move 
 *     and compute contrib proposal to log ratio
 *     sample variance from full conditional
-         ap = alphahpq + 0.5*nnqtc(npop+1,iqtc)
-         bp = betahpq + 0.5*(ssqtc(npop+1,iqtc) - 
+         ap = alphaqtc(iqtc) + 0.5*nnqtc(npop+1,iqtc)
+         bp = betaqtc(iqtc) + 0.5*(ssqtc(npop+1,iqtc) - 
      &        2*sqtc(npop+1,iqtc)*meanqtctmp(npop+1,iqtc) + 
      &        nnqtc(npop+1,iqtc)*meanqtctmp(npop+1,iqtc)**2)
          sdqtctmp(npop+1,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -8616,19 +8659,19 @@ c$$$      write(*,*) 'in propparqvudc, sdqtctmp=',sdqtctmp
 *     contrib prior of means to log ratio
          contriblr = contriblr + 
      &        ggdnorm(meanqtctmp(isplit,iqtc),
-     &        ksihpq,1/dsqrt(kappahpq),1) + 
+     &        ksiqtc(iqtc),1/dsqrt(kappaqtc(iqtc)),1) + 
      &        ggdnorm(meanqtctmp(npop+1,iqtc),
-     &        ksihpq,1/dsqrt(kappahpq),1)  - 
+     &        ksiqtc(iqtc),1/dsqrt(kappaqtc(iqtc)),1)  - 
      &        ggdnorm(meanqtc(isplit,iqtc),
-     &        ksihpq,1/dsqrt(kappahpq),1) 
+     &        ksiqtc(iqtc),1/dsqrt(kappaqtc(iqtc)),1) 
 *     contrib prior of variances to log ratio
          contriblr = contriblr +
      &        ggdgamma(1/sdqtctmp(isplit,iqtc)**2,
-     &        alphahpq,1/betahpq,1) + 
+     &        alphaqtc(iqtc),1/betaqtc(iqtc),1) + 
      &        ggdgamma(1/sdqtctmp(npop+1,iqtc)**2,
-     &        alphahpq,1/betahpq,1) -
+     &        alphaqtc(iqtc),1/betaqtc(iqtc),1) -
      &        ggdgamma(1/sdqtc(isplit,iqtc)**2,
-     &        alphahpq,1/betahpq,1)
+     &        alphaqtc(iqtc),1/betaqtc(iqtc),1)
       enddo
 
   
@@ -8665,16 +8708,16 @@ c$$$*     contrib proposal pop isplit reverse move to log ratio
 c$$$      do iqtc = 1,nqtc
 c$$$*     mean 
 c$$$         junk = contriblr
-c$$$         xx = (sqtc(isplit,iqtc)+ksihpq*kappahpq)/
-c$$$     &        (nnqtc(isplit,iqtc)+kappahpq)
-c$$$         vv = 1 / (nnqtc(isplit,iqtc)+kappahpq)
+c$$$         xx = (sqtc(isplit,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(isplit,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(isplit,iqtc)+kappaqtc)
 c$$$         contriblr = contriblr +
 c$$$     &        ggdnorm(meanqtc(isplit,iqtc),xx,dsqrt(vv),1)
 c$$$         write(*,*) 'contrib mean rev.move=',contriblr-junk
 c$$$*     variance
 c$$$         junk = contriblr
-c$$$         ap = alphahpq + 0.5*nnqtc(isplit,iqtc)
-c$$$         bp = betahpq + 0.5*(ssqtc(isplit,iqtc) - 
+c$$$         ap = alphaqtc + 0.5*nnqtc(isplit,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(isplit,iqtc) - 
 c$$$     &        2*sqtc(isplit,iqtc)*meanqtc(isplit,iqtc) + 
 c$$$     &        nnqtc(isplit,iqtc)*meanqtc(isplit,iqtc)**2)
 c$$$          contriblr = contriblr + 
@@ -8715,9 +8758,9 @@ c$$$      do iqtc = 1,nqtc
 c$$$*     propose mean pop isplit direct move 
 c$$$*     and compute contrib proposal to log ratio
 c$$$         junk = contriblr
-c$$$         xx = (sqtc(isplit,iqtc)+ksihpq*kappahpq)/
-c$$$     &        (nnqtc(isplit,iqtc)+kappahpq)
-c$$$         vv = 1 / (nnqtc(isplit,iqtc)+kappahpq)
+c$$$         xx = (sqtc(isplit,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(isplit,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(isplit,iqtc)+kappaqtc)
 c$$$         meanqtctmp(isplit,iqtc) = ggrnorm(xx,dsqrt(vv))
 c$$$         contriblr = contriblr - 
 c$$$     &        ggdnorm(meanqtctmp(isplit,iqtc),xx,dsqrt(vv),1)
@@ -8727,9 +8770,9 @@ c$$$         write(*,*) 'contrib mean prop.=',contriblr - junk
 c$$$         junk = contriblr
 c$$$*     propose mean pop npop+1 direct move 
 c$$$*     and compute contrib proposal to log ratio
-c$$$         xx = (sqtc(npop+1,iqtc)+ksihpq*kappahpq)/
-c$$$     &        (nnqtc(npop+1,iqtc)+kappahpq)
-c$$$         vv = 1 / (nnqtc(npop+1,iqtc)+kappahpq)
+c$$$         xx = (sqtc(npop+1,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(npop+1,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(npop+1,iqtc)+kappaqtc)
 c$$$         meanqtctmp(npop+1,iqtc) = ggrnorm(xx,dsqrt(vv))
 c$$$         contriblr = contriblr - 
 c$$$     &        ggdnorm(meanqtctmp(npop+1,iqtc),xx,dsqrt(vv),1)
@@ -8740,8 +8783,8 @@ c$$$         junk = contriblr
 c$$$*     propose variance pop isplit direct move 
 c$$$*     and compute contrib proposal to log ratio
 c$$$*     sample variance from full conditional
-c$$$         ap = alphahpq + 0.5*nnqtc(isplit,iqtc)
-c$$$         bp = betahpq + 0.5*(ssqtc(isplit,iqtc) - 
+c$$$         ap = alphaqtc + 0.5*nnqtc(isplit,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(isplit,iqtc) - 
 c$$$     &        2*sqtc(isplit,iqtc)*meanqtctmp(isplit,iqtc) + 
 c$$$     &        nnqtc(isplit,iqtc)*meanqtctmp(isplit,iqtc)**2)
 c$$$         sdqtctmp(isplit,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -8754,8 +8797,8 @@ c$$$         junk = contriblr
 c$$$*     propose variance pop npop+1 direct move 
 c$$$*     and compute contrib proposal to log ratio
 c$$$*     sample variance from full conditional
-c$$$         ap = alphahpq + 0.5*nnqtc(npop+1,iqtc)
-c$$$         bp = betahpq + 0.5*(ssqtc(npop+1,iqtc) - 
+c$$$         ap = alphaqtc + 0.5*nnqtc(npop+1,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(npop+1,iqtc) - 
 c$$$     &        2*sqtc(npop+1,iqtc)*meanqtctmp(npop+1,iqtc) + 
 c$$$     &        nnqtc(npop+1,iqtc)*meanqtctmp(npop+1,iqtc)**2)
 c$$$         sdqtctmp(npop+1,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -8771,29 +8814,29 @@ c$$$      do iqtc = 1,nqtc
 c$$$*     contrib prior of means to log ratio
 c$$$         contriblr = contriblr + 
 c$$$     &        ggdnorm(meanqtctmp(isplit,iqtc),
-c$$$     &        ksihpq,1/dsqrt(kappahpq),1) + 
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1) + 
 c$$$     &        ggdnorm(meanqtctmp(npop+1,iqtc),
-c$$$     &        ksihpq,1/dsqrt(kappahpq),1)  - 
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1)  - 
 c$$$     &        ggdnorm(meanqtc(isplit,iqtc),
-c$$$     &        ksihpq,1/dsqrt(kappahpq),1) 
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1) 
 c$$$*     contrib prior of variances to log ratio
 c$$$         contriblr = contriblr +
 c$$$     &        ggdgamma(1/sdqtctmp(isplit,iqtc)**2,
-c$$$     &        alphahpq,1/betahpq,1) + 
+c$$$     &        alphaqtc,1/betaqtc,1) + 
 c$$$     &        ggdgamma(1/sdqtctmp(npop+1,iqtc)**2,
-c$$$     &        alphahpq,1/betahpq,1) -
+c$$$     &        alphaqtc,1/betaqtc,1) -
 c$$$     &        ggdgamma(1/sdqtc(isplit,iqtc)**2,
-c$$$     &        alphahpq,1/betahpq,1)
+c$$$     &        alphaqtc,1/betaqtc,1)
 c$$$         write(*,*) 'contrib prior='
 c$$$         write(*,*)  'contrib meanqtctmp(isplit,iqtc)=',
 c$$$     &        ggdnorm(meanqtctmp(isplit,iqtc),
-c$$$     &        ksihpq,1/dsqrt(kappahpq),1)
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1)
 c$$$         write(*,*)  'contrib meanqtctmp(npop+1,iqtc)=',
 c$$$     &        ggdnorm(meanqtctmp(npop+1,iqtc),
-c$$$     &        ksihpq,1/dsqrt(kappahpq),1)
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1)
 c$$$         write(*,*)  'contrib meanqtc(isplit,iqtc)=',
 c$$$     &        ggdnorm(meanqtc(isplit,iqtc),
-c$$$     &        ksihpq,1/dsqrt(kappahpq),1)        
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1)        
 c$$$      enddo
 c$$$
 c$$$      write(*,*) 'meanqtc=',meanqtc
@@ -8811,13 +8854,13 @@ c$$$      write(*,*) 'sdqtctmp=',sdqtctmp
       subroutine propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
      &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
      &     sqtc,ssqtc,npop,npopmax,nppmax,
-     &     ksihpq,kappahpq,alphahpq,betahpq,ipophost,ipoprem,contriblr)
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,ipoprem,contriblr)
       implicit none
       integer nindiv,nqtc,indcell,c,ctmp,nnqtc,npop,npopmax,nppmax,
      &     ipophost,ipoprem
       double precision qtc,meanqtc,sdqtc,
      &     meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,contriblr
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,contriblr
       dimension qtc(nindiv,nqtc),indcell(nindiv),c(nppmax),
      &     ctmp(nppmax),meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
@@ -8854,28 +8897,28 @@ c$$$      write(*,*) 'sdqtctmp=',sdqtctmp
       do iqtc = 1,nqtc
 *     contrib proposal pop ipophost to log ratio in reverse move 
 *     mean 
-         xx = (sqtc(ipophost,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(ipophost,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(ipophost,iqtc)+kappahpq)
+         xx = (sqtc(ipophost,iqtc)+ksiqtc*kappaqtc)/
+     &        (nnqtc(ipophost,iqtc)+kappaqtc)
+         vv = 1 / (nnqtc(ipophost,iqtc)+kappaqtc)
          contriblr = contriblr +
      &        ggdnorm(meanqtc(ipophost,iqtc),xx,dsqrt(vv),1)
 *     variance
-         ap = alphahpq + 0.5*nnqtc(ipophost,iqtc)
-         bp = betahpq + 0.5*(ssqtc(ipophost,iqtc) - 
+         ap = alphaqtc + 0.5*nnqtc(ipophost,iqtc)
+         bp = betaqtc + 0.5*(ssqtc(ipophost,iqtc) - 
      &        2*sqtc(ipophost,iqtc)*meanqtc(ipophost,iqtc) + 
      &        nnqtc(ipophost,iqtc)*meanqtc(ipophost,iqtc)**2)
          contriblr = contriblr + 
      &        ggdgamma(1/sdqtc(ipophost,iqtc)**2,ap,1/bp,1)
 *     contrib proposal pop ipoprem to log ratio in reverse move 
 *     mean 
-         xx = (sqtc(ipoprem,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(ipoprem,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(ipoprem,iqtc)+kappahpq)
+         xx = (sqtc(ipoprem,iqtc)+ksiqtc*kappaqtc)/
+     &        (nnqtc(ipoprem,iqtc)+kappaqtc)
+         vv = 1 / (nnqtc(ipoprem,iqtc)+kappaqtc)
          contriblr = contriblr +
      &        ggdnorm(meanqtc(ipoprem,iqtc),xx,dsqrt(vv),1)
 *     variance
-         ap = alphahpq + 0.5*nnqtc(ipoprem,iqtc)
-         bp = betahpq + 0.5*(ssqtc(ipoprem,iqtc) - 
+         ap = alphaqtc + 0.5*nnqtc(ipoprem,iqtc)
+         bp = betaqtc + 0.5*(ssqtc(ipoprem,iqtc) - 
      &        2*sqtc(ipoprem,iqtc)*meanqtc(ipoprem,iqtc) + 
      &        nnqtc(ipoprem,iqtc)*meanqtc(ipoprem,iqtc)**2)
          contriblr = contriblr + 
@@ -8912,17 +8955,17 @@ c$$$      write(*,*) 'sdqtctmp=',sdqtctmp
       do iqtc = 1,nqtc
 *     propose mean pop ipophost direct move 
 *     and compute contrib proposal to log ratio
-         xx = (sqtc(ipophost,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(ipophost,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(ipophost,iqtc)+kappahpq)
+         xx = (sqtc(ipophost,iqtc)+ksiqtc*kappaqtc)/
+     &        (nnqtc(ipophost,iqtc)+kappaqtc)
+         vv = 1 / (nnqtc(ipophost,iqtc)+kappaqtc)
          meanqtctmp(ipophost,iqtc) = ggrnorm(xx,dsqrt(vv))
          contriblr = contriblr - 
      &        ggdnorm(meanqtctmp(ipophost,iqtc),xx,dsqrt(vv),1)
 *     propose variance pop ipophost direct move 
 *     and compute contrib proposal to log ratio
 *     sample variance from full conditional
-         ap = alphahpq + 0.5*nnqtc(ipophost,iqtc)
-         bp = betahpq + 0.5*(ssqtc(ipophost,iqtc) - 
+         ap = alphaqtc + 0.5*nnqtc(ipophost,iqtc)
+         bp = betaqtc + 0.5*(ssqtc(ipophost,iqtc) - 
      &        2*sqtc(ipophost,iqtc)*meanqtctmp(ipophost,iqtc) + 
      &        nnqtc(ipophost,iqtc)*meanqtctmp(ipophost,iqtc)**2)
          sdqtctmp(ipophost,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -8947,19 +8990,19 @@ c$$$      write(*,*) 'sdqtctmp=',sdqtctmp
 *     contrib prior of means to log ratio
          contriblr = contriblr + 
      &        ggdnorm(meanqtctmp(ipophost,iqtc),
-     &        ksihpq,1/dsqrt(kappahpq),1) -
+     &        ksiqtc,1/dsqrt(kappaqtc),1) -
      &        ggdnorm(meanqtc(ipophost,iqtc),
-     &        ksihpq,1/dsqrt(kappahpq),1) -
+     &        ksiqtc,1/dsqrt(kappaqtc),1) -
      &        ggdnorm(meanqtc(ipoprem,iqtc),
-     &        ksihpq,1/dsqrt(kappahpq),1) 
+     &        ksiqtc,1/dsqrt(kappaqtc),1) 
 *     contrib prior of variances to log ratio
          contriblr = contriblr +
      &        ggdgamma(1/sdqtctmp(ipophost,iqtc)**2,
-     &        alphahpq,1/betahpq,1) - 
+     &        alphaqtc,1/betaqtc,1) - 
      &        ggdgamma(1/sdqtc(ipophost,iqtc)**2,
-     &        alphahpq,1/betahpq,1) - 
+     &        alphaqtc,1/betaqtc,1) - 
      &        ggdgamma(1/sdqtc(ipoprem,iqtc)**2,
-     &        alphahpq,1/betahpq,1)
+     &        alphaqtc,1/betaqtc,1)
       enddo
       end subroutine propparqvmerge
 
@@ -8969,12 +9012,12 @@ c$$$      write(*,*) 'sdqtctmp=',sdqtctmp
 *     propose mean and variance of quantitative variables in a merge
       subroutine propparqvmrg(qtc,nindiv,nqtc,indcell,ctmp,
      &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,npop,npopmax,
-     &     nppmax,ksihpq,kappahpq,alphahpq,betahpq,ihost)
+     &     nppmax,ksiqtc,kappaqtc,alphaqtc,betaqtc,ihost)
       implicit none
       integer nindiv,nqtc,indcell,ctmp,nnqtc,npop,npopmax,nppmax,
      &     ihost
       double precision qtc,meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
       dimension qtc(nindiv,nqtc),indcell(nindiv),ctmp(nppmax),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
      &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
@@ -9002,13 +9045,13 @@ c$$$      write(*,*) 'sdqtctmp=',sdqtctmp
 *     sample mean from the full conditional
 *     assuming current value for variance is 1
       do iqtc = 1,nqtc
-         xx = (sqtc(ihost,iqtc)+ksihpq*kappahpq)/
-     &        (nnqtc(ihost,iqtc)+kappahpq)
-         vv = 1 / (nnqtc(ihost,iqtc)+kappahpq)
+         xx = (sqtc(ihost,iqtc)+ksiqtc*kappaqtc)/
+     &        (nnqtc(ihost,iqtc)+kappaqtc)
+         vv = 1 / (nnqtc(ihost,iqtc)+kappaqtc)
          meanqtctmp(ihost,iqtc) = ggrnorm(xx,dsqrt(vv))
 *     sample variance from full conditional
-         ap = alphahpq + 0.5*nnqtc(ihost,iqtc)
-         bp = betahpq + 0.5*(ssqtc(ihost,iqtc) - 
+         ap = alphaqtc + 0.5*nnqtc(ihost,iqtc)
+         bp = betaqtc + 0.5*(ssqtc(ihost,iqtc) - 
      &        2*sqtc(ihost,iqtc)*meanqtctmp(ihost,iqtc) + 
      &        nnqtc(ihost,iqtc)*meanqtctmp(ihost,iqtc)**2)
          sdqtctmp(ihost,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
@@ -9423,7 +9466,7 @@ c$$$               write(*,*) 'term en c lratio =',lratio
      &     a,ptmp,ftmp,drifttmp,yy,z,ql,cellpop,listcell,
      &     cellpophost,n,ntmp,qtc,nqtc,meanqtc,sdqtc,
      &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksihpq,kappahpq,alphahpq,betahpq,shape1,shape2,
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,shape1,shape2,
      &     usegeno2,usegeno1,useql,useqtc,ploidy)
       implicit none 
       integer npop,npopmin,npopmax,ncolt,nal(ncolt),
@@ -9438,7 +9481,7 @@ c$$$               write(*,*) 'term en c lratio =',lratio
      &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
      &     sqtc(npopmax,nqtc),ssqtc(npopmax,nqtc),
-     &     ksihpq,kappahpq,alphahpq,betahpq,shape1,shape2
+     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,shape1,shape2
       integer ipoprem,ipp,isplit,
      &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
      &     ipophost,ncellpophost,cellpophost(nppmax),ii
@@ -9446,6 +9489,7 @@ c$$$               write(*,*) 'term en c lratio =',lratio
       integer b,iloc,iqtc,ipop,ipoptmp,iindiv
       double precision llr6,termf9bis,gglgamfn,bern,ggrbinom,ggdnorm,
      &     ggdgamma,ggrnorm,lrallvar2,contriblr,deltad,rr,junk
+      dimension ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc)
  
       deltad = shape1/(shape1+shape2)
 
@@ -9569,8 +9613,8 @@ c                  write(6,*) 'split apres prior contrib drift =',lratio
 *     propose mean and variance of quantitative variables
                   call propparqvsplit(qtc,nindiv,nqtc,indcell,c,ctmp,
      &                 meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
-     &                 ssqtc,npop,npopmax,nppmax,ksihpq,kappahpq,
-     &                 alphahpq,betahpq,isplit,contriblr)
+     &                 ssqtc,npop,npopmax,nppmax,ksiqtc,kappaqtc,
+     &                 alphaqtc,betaqtc,isplit,contriblr)
 *     contrib prior and proposal 
                   lratio = lratio + contriblr
 *     contrib likelihood quant. variable
@@ -9719,7 +9763,7 @@ c               write(6,*) 'merge apres prior contrib drift =',lratio
                call propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
      &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
      &              ssqtc,npop,npopmax,nppmax,
-     &              ksihpq,kappahpq,alphahpq,betahpq,ipophost,
+     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,
      &              ipoprem,contriblr)
 *     contrib prior and proposal 
                lratio = lratio + contriblr   

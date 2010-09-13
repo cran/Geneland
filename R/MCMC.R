@@ -9,7 +9,7 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
     write.color.nuclei = TRUE, write.freq = TRUE, write.ancestral.freq = TRUE, 
     write.drifts = TRUE, write.logposterior = TRUE, write.loglikelihood = TRUE, 
     write.true.coord = TRUE, write.size.pop = FALSE, write.mean.quanti = TRUE, 
-    write.sd.quanti = TRUE, miss.loc = NULL) 
+    write.sd.quanti = TRUE, write.betaqtc = FALSE, miss.loc = NULL) 
 {
     ploidy <- 2
     if (!is.null(geno.dip.dom) & !is.null(geno.hap)) {
@@ -50,8 +50,7 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         stop(paste("Error:", freq.model, "is not a frequency model. Check spelling (case sensitive) "))
     }
     if ((ploidy != 1) & (ploidy != 2)) {
-        print(paste("ploidy = ", ploidy, " is not a valid value."))
-        stop()
+        stop(paste("ploidy = ", ploidy, " is not a valid value."))
     }
     if (!is.null(geno1) & is.null(geno2)) {
         if (filter.null.alleles) {
@@ -78,6 +77,7 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
     if (is.null(geno2)) {
         nloc.geno2 <- 1
         nindiv.geno2 <- 0
+        print(c("in MCMC.R nindiv.geno2=", nindiv.geno2))
     }
     else {
         nloc.geno2 <- ncol(geno2)/2
@@ -111,14 +111,12 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         nindivql)
     sub <- nnn > 0
     if (length(unique(nnn[sub])) > 1) {
-        print("The various variables should be given for the same individuals")
-        print("Data dimensions do not comply with this requirement:")
         print(paste("nindiv.geno1 = ", nindiv.geno1))
         print(paste("nindiv.geno2 = ", nindiv.geno2))
         print(paste("nindivqtc = ", nindivqtc))
         print(paste("nindivqtd = ", nindivqtd))
         print(paste("nindivql = ", nindivql))
-        stop("")
+        stop("Number of rows of data matrices do not match")
     }
     else {
         nindiv <- nnn[sub][1]
@@ -166,7 +164,7 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
                 nindiv))
             print(paste("number of individuals in coordinate matrix =", 
                 nrow(coordinates)))
-            stop("Try again!")
+            stop("Number of rows in coordinate matrix and data matrices do not match ")
         }
     }
     if (!is.matrix(coordinates)) 
@@ -273,6 +271,14 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         nc = nqtc, data = -999)
     nnqtc <- sqtc <- ssqtc <- matrix(nr = npopmax, nc = nqtc, 
         data = -999)
+    ksiqtc <- kappaqtc <- alphaqtc <- betaqtc <- gbeta <- hbeta <- rep(-999, 
+        nqtc)
+    ksiqtc <- apply(qtc, 2, mean, na.rm = TRUE)
+    kappaqtc <- hbeta <- 2 * (apply(qtc, 2, max, na.rm = TRUE) - 
+        apply(qtc, 2, min, na.rm = TRUE))
+    alphaqtc <- rep(2, nqtc)
+    gbeta <- rep(0.5, nqtc)
+    betaqtc <- rgamma(n = nqtc, shape = gbeta, rate = hbeta)
     geno2.999 <- geno2
     geno2.999[is.na(geno2)] <- -999
     geno1.999 <- geno1
@@ -295,9 +301,10 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         write.number.pop, write.coord.nuclei, write.color.nuclei, 
         write.freq, write.ancestral.freq, write.drifts, write.logposterior, 
         write.loglikelihood, write.true.coord, write.size.pop, 
-        write.mean.quanti, write.sd.quanti, fmodel, kfix, spatial, 
-        jcf, filter.null.alleles, ploidy, nchar.path, nit, thinning, 
-        use.geno1, use.geno2, use.qtc, use.qtd, use.ql)
+        write.mean.quanti, write.sd.quanti, write.betaqtc, fmodel, 
+        kfix, spatial, jcf, filter.null.alleles, ploidy, nchar.path, 
+        nit, thinning, use.geno1, use.geno2, use.qtc, use.qtd, 
+        use.ql)
     integer.par <- c(integer.par, rep(-999, 100 - length(integer.par)))
     double.par <- c(rate.max, delta.coord, shape1, shape2, prop.update.cell)
     double.par <- c(double.par, rep(-999, 100 - length(double.par)))
@@ -318,7 +325,9 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         as.integer(n), as.integer(ntemp), as.double(a), as.double(ptemp), 
         as.double(meanqtc), as.double(sdqtc), as.double(meanqtctmp), 
         as.double(sdqtctmp), as.integer(nnqtc), as.double(sqtc), 
-        as.double(ssqtc), as.integer(cellclass), as.integer(listcell), 
+        as.double(ssqtc), as.double(ksiqtc), as.double(kappaqtc), 
+        as.double(alphaqtc), as.double(betaqtc), as.double(gbeta), 
+        as.double(hbeta), as.integer(cellclass), as.integer(listcell), 
         as.integer(true.geno), as.double(full.cond.y))
     param <- c(paste("nindiv :", nindiv), paste("rate.max :", 
         rate.max), paste("nb.nuclei.max :", nb.nuclei.max), paste("nit :", 

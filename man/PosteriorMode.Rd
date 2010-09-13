@@ -6,8 +6,8 @@
   color code for each pixel.}
 
 \usage{
-PosteriorMode(coordinates,path.mcmc,plotit=TRUE,format="pdf",
-                          printit=FALSE,file,main.title)
+PosteriorMode(coordinates,path.mcmc,plotit=TRUE,
+              printit=FALSE,format="pdf",file,main.title,new.dev=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -20,6 +20,7 @@ PosteriorMode(coordinates,path.mcmc,plotit=TRUE,format="pdf",
   \item{file}{Character : Path to file where figures
     should be printed}
   \item{main.title}{Character : Title to appear on top of the graphic}
+   \item{new.dev}{Logical. Open a new graphical device if TRUE}
 }
 
 \references{G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
