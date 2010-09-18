@@ -273,12 +273,14 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         data = -999)
     ksiqtc <- kappaqtc <- alphaqtc <- betaqtc <- gbeta <- hbeta <- rep(-999, 
         nqtc)
-    ksiqtc <- apply(qtc, 2, mean, na.rm = TRUE)
-    kappaqtc <- hbeta <- 2 * (apply(qtc, 2, max, na.rm = TRUE) - 
-        apply(qtc, 2, min, na.rm = TRUE))
-    alphaqtc <- rep(2, nqtc)
-    gbeta <- rep(0.5, nqtc)
-    betaqtc <- rgamma(n = nqtc, shape = gbeta, rate = hbeta)
+    if (use.qtc) {
+        ksiqtc <- apply(qtc, 2, mean, na.rm = TRUE)
+        kappaqtc <- hbeta <- 2 * (apply(qtc, 2, max, na.rm = TRUE) - 
+            apply(qtc, 2, min, na.rm = TRUE))
+        alphaqtc <- rep(2, nqtc)
+        gbeta <- rep(0.5, nqtc)
+        betaqtc <- rgamma(n = nqtc, shape = gbeta, rate = hbeta)
+    }
     geno2.999 <- geno2
     geno2.999[is.na(geno2)] <- -999
     geno1.999 <- geno1

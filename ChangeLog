@@ -1,16 +1,17 @@
 	-----------------------------------
-	Changes from version 3.2.1 to 3.2.2
+	Changes from version 3.2.3 to 3.2.4
 	-----------------------------------
 
 ******************************
 *   In R
 ******************************
 
- /
+- function MCMC: Init of hyper-parameters for quantitative variables modified
+	to account for missing data (reported by Piero Cossu Sept. 17 2010)
 
 
 	
 ************************************
 *   In Fortran
 ************************************
-- Remove argument ploidy in call of function udNA3
+- /
