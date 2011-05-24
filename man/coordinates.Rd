@@ -5,11 +5,7 @@
 \description{Example of coordinate file}
 
 
-\usage{}
 
 
-\author{}
-\references{}
 
-\keyword{}
- 
+\author{G. Guillot}

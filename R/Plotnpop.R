@@ -22,12 +22,12 @@ function (path.mcmc, burnin, printit = FALSE, file, format = "pdf")
         {
             par(mfrow = c(1, 2))
             plot((1:length(npop)) * thinning, npop, type = "l", 
-                ylab = "Number of classes", xlab = paste("Index of MCMC iteration", 
+                ylab = "Number of clusters", xlab = paste("Index of MCMC iteration", 
                   "\n Whole chain", sep = ""), ylim = c(1, max(npop) + 
                   0.5))
             hist(npop[sub], plot = TRUE, prob = TRUE, breaks = seq(0.5, 
-                max(npop) + 0.5, 1), xlab = paste("Nb. of pop. along the chain \n(after a burnin of ", 
-                burnin, "x", thinning, "i t.)", sep = ""), main = "Number of populations\n along the chain \n after burnin")
+                max(npop) + 0.5, 1), xlab = paste("Nb. of clusters along the chain \n(after a burnin of ", 
+                burnin, "x", thinning, "i t.)", sep = ""), main = "Number of clusters\n along the chain \n after burnin")
             dev.off()
         }
     }
@@ -36,6 +36,6 @@ function (path.mcmc, burnin, printit = FALSE, file, format = "pdf")
         xlab = paste("Index of MCMC iteration", "\n Whole chain", 
             sep = ""), ylim = c(1, max(npop) + 0.5))
     hist(npop[sub], plot = TRUE, prob = TRUE, breaks = seq(0.5, 
-        max(npop) + 0.5, 1), xlab = paste("Nb. of pop. along the chain \n(after a burnin of ", 
-        burnin, "x", thinning, "i t.)", sep = ""), main = "Number of populations\n along the chain \n after burnin")
+        max(npop) + 0.5, 1), xlab = paste("Nb. of clusters along the chain \n(after a burnin of ", 
+        burnin, "x", thinning, "i t.)", sep = ""), main = "Number of clusters\n along the chain \n after burnin")
 }

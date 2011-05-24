@@ -1,6 +1,6 @@
 PostProcessMultChain <-
-function (coordinates, genotypes, path.all, nrun, nxdom, nydom, 
-    burnin) 
+function (coordinates = NULL, genotypes, ploidy, path.all, nrun, 
+    nxdom, nydom, burnin) 
 {
     print("Reading parameters")
     path.mcmc <- paste(path.all, "1/", sep = "/")
@@ -12,8 +12,8 @@ function (coordinates, genotypes, path.all, nrun, nxdom, nydom,
     nb.nuclei.max <- as.numeric(param[param[, 1] == "nb.nuclei.max", 
         3])
     nit <- as.numeric(param[param[, 1] == "nit", 3])
+    spatial <- as.logical(param[param[, 1] == "spatial", 3])
     thinning <- as.numeric(param[param[, 1] == "thinning", 3])
-    ploidy <- as.numeric(param[param[, 1] == "ploidy", 3])
     filter.null.alleles <- as.logical(param[param[, 1] == "filter.null.alleles", 
         3])
     if (ploidy == 1) {
@@ -23,14 +23,39 @@ function (coordinates, genotypes, path.all, nrun, nxdom, nydom,
         data.tmp[, seq(2, ncol(genotypes) * 2, 2)] <- genotypes
         genotypes <- data.tmp
     }
+    print("defining dummy coordinates if coord are missing")
+    nindiv <- nrow(genotypes)
+    if (is.null(coordinates)) {
+        if (spatial) {
+            stop("Please give spatial coordinates of individuals or set argument spatial to FALSE")
+        }
+        else {
+            n.int <- ceiling(sqrt(nindiv))
+            x <- rep(seq(from = 0, to = 1, length = n.int), n.int)
+            y <- rep(seq(from = 0, to = 1, length = n.int), n.int)
+            y <- as.vector(t(matrix(nr = n.int, nc = n.int, y, 
+                byrow = FALSE)))
+            coordinates <- cbind(x, y)[1:nindiv, ]
+        }
+    }
+    else {
+        if (ncol(coordinates) != 2) 
+            stop("matrix of coordinates does not have 2 columns")
+        if (nrow(coordinates) != nindiv) {
+            print(paste("number of individuals in data matrix =", 
+                nindiv))
+            print(paste("number of individuals in coordinate matrix =", 
+                nrow(coordinates)))
+            stop("Number of rows in coordinate matrix and data matrices do not match ")
+        }
+    }
     coordinates <- as.matrix(coordinates)
-    data.tmp <- FormatGenotypes(as.matrix(genotypes))
+    data.tmp <- FormatGenotypes(as.matrix(genotypes), ploidy = ploidy)
     genotypes <- data.tmp$genotypes
     allele.numbers <- data.tmp$allele.numbers
     if (filter.null.alleles) {
         allele.numbers <- allele.numbers + 1
     }
-    nindiv <- nrow(genotypes)
     nloc <- length(allele.numbers)
     npop <- rep(NA, nit/thinning)
     for (irun in 1:nrun) {

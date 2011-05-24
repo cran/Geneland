@@ -23,6 +23,3 @@ EstimateFreqNA(path.mcmc)
   Analysing georeferenced population genetics data with
   Geneland: a new algorithm to deal with null alleles and a friendly graphical user interface
 Bioinformatics 2008 24(11):1406-1407.}
-
-\keyword{}
-   

@@ -1,8 +1,8 @@
 \name{MCMC}
 \alias{MCMC}
 %- Also NEED an '\alias' for EACH other topic documented here.
-\title{ Markov Chain Monte-Carlo inference under various models}
-\description{ Markov Chain Monte-Carlo inference under various models}
+\title{ Markov Chain Monte-Carlo inference of clusters from genotpype data}
+\description{ Markov Chain Monte-Carlo inference of clusters from genotpype data}
 \usage{
           MCMC(
  ## input data
@@ -324,10 +324,3 @@ current state of parameters in the Markov chain.
 
 
 \seealso{ \code{\link{simFmodel}}}
-
-\examples{}
-
-
-
-
-\keyword{}

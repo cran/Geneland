@@ -9,21 +9,58 @@
 \title{Simulation and inference for subdivided populations }
 
 \description{
-  The main function \code{\link{MCMC}} 
-  takes multilocus genetic data and tries to detect
-  population structure (i.e sub-populations),
+  Detect population structure (i.e sub-populations),
   making use of genetic (and optionally geographic) information.
 }
 
-\details{
-  \tabular{ll}{
-    Package: \tab Geneland\cr
-    Type: \tab Package\cr
-    Version: \tab 3.0.0\cr
-    Date: \tab 2008-11-15\cr
-    License: \tab GPL\cr
-  }
+
+\author{Arnaud Estoup, Gilles Guillot, Filipe Santos
+
+  \url{http://www2.imm.dtu.dk/~gigu/Geneland/}
+
+  See also
   
+  \url{http://www2.imm.dtu.dk/~gigu/Geneland/}
+}
+
+\references{
+ \itemize{
+  \item G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
+    model for landscape genetics. Genetics, 170, 1261-1280, 2005.
+    
+    \item  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
+    genetics. Molecular Ecology Notes, 5, 712-715, 2005.
+
+    
+    \item   Gilles Guillot, Filipe Santos  and Arnaud Estoup,
+    Analysing georeferenced population genetics data with
+    Geneland: a new algorithm to deal with null alleles and a friendly graphical user interface
+    Bioinformatics 2008 24(11):1406-1407.
+    
+    \item G. Guillot.  Inference of structure in subdivided populations at
+    low levels of genetic differentiation. The correlated allele
+    frequencies 
+    model revisited. Bioinformatics, 24:2222-2228, 2008
+  
+    \item G. Guillot and F. Santos  A computer program to simulate
+    multilocus 
+    genotype data with spatially auto-correlated allele frequencies.
+    Molecular Ecology Resources, 2009
+
+    \item G. Guillot, R. Leblois, A. Coulon, A. Frantz  Statistical
+    methods in spatial genetics, Molecular Ecology, 2009.
+    }
+  
+}
+\keyword{ }
+
+\seealso{}
+
+\examples{}
+
+
+\details{
+ 
 
   
   The main purpose of the program is to perform Bayesian inference of all the parameters involved 
@@ -92,49 +129,11 @@
 %    Transform a file of genotypes into
 %    a format suitable for function \code{\link{MCMC}}
 
-
+ \tabular{ll}{
+    Package: \tab Geneland\cr
+    Type: \tab Package\cr
+    License: \tab GPL\cr
+  }
+  
    
 }
-\author{Arnaud Estoup, Gilles Guillot, Filipe Santos
-
-  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/welcome.html}
-
-  See also
-  
-  \url{www.inapg.inra.fr/ens_rech/mathinfo/personnel/guillot/Geneland.html}
-}
-
-\references{
- \itemize{
-  \item G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
-    model for landscape genetics. Genetics, 170, 1261-1280, 2005.
-    
-    \item  G. Guillot, Mortier, F., Estoup, A. Geneland : A program for landscape
-    genetics. Molecular Ecology Notes, 5, 712-715, 2005.
-
-    
-    \item   Gilles Guillot, Filipe Santos  and Arnaud Estoup,
-    Analysing georeferenced population genetics data with
-    Geneland: a new algorithm to deal with null alleles and a friendly graphical user interface
-    Bioinformatics 2008 24(11):1406-1407.
-    
-    \item G. Guillot.  Inference of structure in subdivided populations at
-    low levels of genetic differentiation. The correlated allele
-    frequencies 
-    model revisited. Bioinformatics, 24:2222-2228, 2008
-  
-    \item G. Guillot and F. Santos  A computer program to simulate
-    multilocus 
-    genotype data with spatially auto-correlated allele frequencies.
-    Molecular Ecology Resources, 2009
-
-    \item G. Guillot, R. Leblois, A. Coulon, A. Frantz  Statistical
-    methods in spatial genetics, Molecular Ecology, 2009.
-    }
-  
-}
-\keyword{ }
-
-\seealso{}
-
-\examples{}

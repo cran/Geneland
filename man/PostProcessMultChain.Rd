@@ -7,7 +7,7 @@
  of the spatial domain. 
 }
 \usage{
-PostProcessMultChain(coordinates,genotypes,
+PostProcessMultChain(coordinates=NULL,genotypes,ploidy,
 path.all,nrun,nxdom, nydom,burnin)
 }
 %- maybe also 'usage' for other objects documented here.
@@ -16,6 +16,7 @@ path.all,nrun,nxdom, nydom,burnin)
     columns and one line per individual.}
   \item{genotypes}{Genotypes of individuals. A matrix with one line per
     individual and 2 columns per locus}
+  \item{ploidy}{1 or 2}
   \item{path.all}{Path to output files directory }
    \item{nrun}{Number of runs}
   \item{nxdom}{Number of pixel for discretization of the spatial domain

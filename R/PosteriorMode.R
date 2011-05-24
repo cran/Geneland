@@ -1,6 +1,6 @@
 PosteriorMode <-
-function (coordinates, path.mcmc, plotit = TRUE, printit = FALSE, 
-    format = "pdf", file, main.title = "", new.dev = TRUE) 
+function (coordinates, path.mcmc, plotit = TRUE, format = "pdf", 
+    new.dev = TRUE, printit = FALSE, file, main.title = "") 
 {
     coordinates <- as.matrix(coordinates)
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "")

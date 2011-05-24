@@ -60,7 +60,7 @@ function (coordinates = NULL, path.mcmc, nxgrid, nygrid)
             length = nxgrid), seq(min(coordinates[, 2]), max(coordinates[, 
             2]), length = nygrid), matrix(map.dom, nrow = nxgrid, 
             ncol = nygrid, byrow = TRUE), xlab = "Easting", ylab = "Northing", 
-            cex.main = 1.8, col = heat.colors(9), add = add)
+            cex.main = 1.8, col = terrain.colors(npopmax), add = add)
         points(coordinates)
     }
 }

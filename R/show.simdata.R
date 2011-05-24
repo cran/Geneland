@@ -11,7 +11,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
         if (is.na(file.plot.coord)) {
             dev.new()
         }
-        else postscript(file.plot.coord)
+        else pdf(file.plot.coord)
         plot(dataset$coord.indiv[, 1], dataset$coord.indiv[, 
             2], xlab = "x dataset$coordinates", ylab = "y dataset$coordinates", 
             asp = )
@@ -31,7 +31,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
         if (is.na(file.plot.tess)) {
             dev.new()
         }
-        else postscript(file.plot.tess)
+        else pdf(file.plot.tess)
         image(seq(from = dataset$coord.lim[1], to = dataset$coord.lim[2], 
             length = dataset$npix[1]), seq(from = dataset$coord.lim[3], 
             to = dataset$coord.lim[4], length = dataset$npix[2]), 
@@ -41,7 +41,6 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
             asp = 1)
         points(dataset$coord.nuclei[1, ], dataset$coord.nuclei[2, 
             ], col = 1, pch = ".", cex = 1.5)
-        title(main = "Population membership")
         if (!is.na(file.plot.tess)) 
             dev.off()
     }
@@ -52,9 +51,9 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
                   dev.new()
                 }
                 else {
-                  postscript(paste(substr(file.plot.freq.grid, 
-                    start = 1, stop = nchar(file.plot.freq.grid) - 
-                      3), iall, ".ps", sep = ""))
+                  pdf(paste(substr(file.plot.freq.grid, start = 1, 
+                    stop = nchar(file.plot.freq.grid) - 3), iall, 
+                    ".ps", sep = ""))
                 }
                 FF <- rep(-999, prod(dataset$npix))
                 for (ipop in 1:dataset$npop) {
@@ -87,9 +86,9 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
                 if (is.na(file.plot.freq.indiv)) {
                   dev.new()
                 }
-                else postscript(paste(substr(file.plot.freq.indiv, 
-                  start = 1, stop = nchar(file.plot.freq.indiv) - 
-                    3), iall, ".ps", sep = ""))
+                else pdf(paste(substr(file.plot.freq.indiv, start = 1, 
+                  stop = nchar(file.plot.freq.indiv) - 3), iall, 
+                  ".ps", sep = ""))
                 look <- as.image(x = t(dataset$coord.indiv), 
                   Z = FF)
                 image.plot(look, main = paste("Field of frequencies for locus #", 
@@ -107,9 +106,8 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
             if (is.na(file.plot.gen)) {
                 dev.new()
             }
-            else postscript(paste(substr(file.plot.gen, start = 1, 
-                stop = nchar(file.plot.gen) - 3), iloc, ".ps", 
-                sep = ""))
+            else pdf(paste(substr(file.plot.gen, start = 1, stop = nchar(file.plot.gen) - 
+                3), iloc, ".ps", sep = ""))
             plot(dataset$coord.indiv[1, ], dataset$coord.indiv[2, 
                 ], type = "n", cex = 1, lwd = 1, xlab = "", ylab = "", 
                 asp = 1)

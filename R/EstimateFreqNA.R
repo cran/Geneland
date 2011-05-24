@@ -8,7 +8,7 @@ function (path.mcmc)
     filter.null.alleles <- as.logical(param[param[, 1] == "filter.null.alleles", 
         3])
     if (!filter.null.alleles) {
-        stop("The null alleles option were not activated before MCMC inference")
+        stop("The null alleles option was not activated before MCMC inference")
     }
     allele.numbers.dip <- scan(paste(path.mcmc, "allele.numbers.geno2.txt", 
         sep = ""))

@@ -16,9 +16,29 @@ citEntry(entry="Article",
          textVersion ="G. Guillot, Estoup, A., Mortier, F. Cosson, J.F. A spatial statistical
 model for landscape genetics. Genetics, 170, 1261-1280, 2005"  )
 
+citEntry(entry="Article",
+         author = 	 "G. Guillot, Mortier, F., Estoup, A",
+         title = 	 "Geneland: A program for landscape genetics",
+         journal = 	 "Molecular Ecology Note",
+         year = 	 2005,
+         volume =	 5,
+         number =	 3,
+         pages="712-715",
+         textVersion ="G. Guillot, Mortier, F., Estoup, A. Geneland: A program for landscape genetics. Molecular Ecology Notes, 5, 712-715, 2005"  )
+
+
+citEntry(entry="Article",
+         author = 	 "A. Coulon, G. Guillot G., Cosson J.-F., Angibault J.M.A. Aulagnier S., Cargnelutti B., Galan M., Hewison A.J.M",
+         title = 	 "Genetic structure is influenced by lansdcape features. Empirical evidence from a roe deer population",
+         journal = 	 "Molecular Ecology",
+         year = 	 2006,
+         volume =	 15,
+         pages="1669-1679",
+         textVersion ="A. Coulon, G. Guillot G., Cosson J.-F., Angibault J.M.A. Aulagnier S., Cargnelutti B., Galan M., Hewison A.J.M. Genetic structure is influenced by lansdcape features. Empirical evidence from a roe deer population. Molecular Ecology, 15 1669-1679, 2006"  )
 
 
 
+ 
 citEntry(entry="Article",
          author = 	 "U. Hannelius, E. Salmela, T. Lappalainen, G. Guillot,
 C.M.  Lindgren,  U. von Doebeln, P. Lahermo, P. and J. Kere",
@@ -37,7 +57,7 @@ citEntry(entry="Article",
          author = 	 "G. Guillot, F. Santos and A. Estoup",
          title = 	        "Analysing georeferenced population genetics data w
 ith Geneland:  a new algorithm to deal with null alleles and a friendly graphical user interface",
-         journal = 	 " Bioinformatics",	
+         journal = 	 " Bioinformatic",	
          year = 	 2008,
          volume =	 "24",
          number =	 "11",
@@ -51,7 +71,7 @@ citEntry(entry="Article",
          author = 	 "G. Guillot",
          title = 	        "Inference of structure in subdivided populations
 at low levels of genetic differentiation. The correlated allele frequencies model revisited",
-         journal = 	 "Bioinformatics",	
+         journal = 	 "Bioinformatic",	
          year = 	 2008,
          volume =	 "24",
          number =	 "",

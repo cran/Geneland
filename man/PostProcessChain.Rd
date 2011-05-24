@@ -27,7 +27,7 @@ path.mcmc,nxdom, nydom,burnin)
   \item{burnin}{Number of iterations of the chain to throw away.
     WARNING : this argument should be given the number of stored
     iterations (and not the number of computed iterations which differ
-    if \code{burnin} !=1). If you have
+    if \code{thinning} !=1). If you have
     \code{nit}=100000 and \code{thinning}=100, then only 1000 iterations
     are stored. Then \code{burnin}=10 will throw away 10 stored
     iterations, namely 100*10 computed iterations.}

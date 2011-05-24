@@ -65,13 +65,6 @@ function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei,
             }
         }
     }
-    if (npop > 1) {
-        if (freq[1, 1, 1] < freq[2, 1, 1]) {
-            tmp <- freq[2, , ]
-            freq[2, , ] <- freq[1, , ]
-            freq[1, , ] <- tmp
-        }
-    }
     z <- matrix(nr = nindiv, nc = nloc * 2)
     for (iclass in 1:npop) {
         subclass <- (1:nindiv)[color.nuclei[ppvois] == iclass]
@@ -82,7 +75,7 @@ function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei,
         }
     }
     if (plots == TRUE) {
-        get(getOption("device"))()
+        dev.new()
         plot(coordinates[1, ], coordinates[2, ], xlab = "x coordinates", 
             ylab = "y coordinates")
         points(coord.nuclei[1, ], coord.nuclei[2, ], col = color.nuclei, 
@@ -93,7 +86,7 @@ function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei,
     }
     if (ploth == TRUE) {
         if (freq.model == "Correlated") {
-            get(getOption("device"))()
+            dev.new()
             par(mfrow = c(floor(sqrt(nloc) + 1), floor(sqrt(nloc))))
             for (iloc in 1:nloc) {
                 plot(1:nall[iloc], fa[iloc, 1:nall[iloc]], type = "h", 
@@ -101,9 +94,9 @@ function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei,
                     iloc), ylim = c(0, 1), main = "Frequencies in ancestral population")
             }
         }
-        get(getOption("device"))()
+        dev.new()
         for (iclass in 1:npop) {
-            get(getOption("device"))()
+            dev.new()
             par(mfrow = c(floor(sqrt(nloc) + 1), floor(sqrt(nloc))))
             for (iloc in 1:nloc) {
                 hist(c(z[color.nuclei[ppvois] == iclass, 2 * 

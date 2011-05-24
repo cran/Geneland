@@ -275,12 +275,18 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         nqtc)
     if (use.qtc) {
         ksiqtc <- apply(qtc, 2, mean, na.rm = TRUE)
-        kappaqtc <- hbeta <- 2 * (apply(qtc, 2, max, na.rm = TRUE) - 
-            apply(qtc, 2, min, na.rm = TRUE))
+        kappaqtc <- hbeta <- 2/(apply(qtc, 2, max, na.rm = TRUE) - 
+            apply(qtc, 2, min, na.rm = TRUE))^2
         alphaqtc <- rep(2, nqtc)
         gbeta <- rep(0.5, nqtc)
         betaqtc <- rgamma(n = nqtc, shape = gbeta, rate = hbeta)
     }
+    print(paste("ksiqtc", ksiqtc))
+    print(paste("kappaqtc", kappaqtc))
+    print(paste("alphaqtc", alphaqtc))
+    print(paste("hbeta", hbeta))
+    print(paste("gbeta", gbeta))
+    print(paste("betaqtc", betaqtc))
     geno2.999 <- geno2
     geno2.999[is.na(geno2)] <- -999
     geno1.999 <- geno1
@@ -341,7 +347,8 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         use.qtc), paste("use.qtd :", use.qtd), paste("use.ql :", 
         use.ql))
     if (use.geno1) {
-        param <- c(param, paste("nloc.geno1 :", nloc.geno1))
+        param <- c(param, paste("nloc.geno1 :", nloc.geno1), 
+            paste("filter.null.alleles :", filter.null.alleles))
     }
     if (use.geno2) {
         param <- c(param, paste("nloc.geno2 :", nloc.geno2), 

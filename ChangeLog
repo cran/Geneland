@@ -1,17 +1,23 @@
 	-----------------------------------
-	Changes from version 3.2.3 to 3.2.4
+	Changes 3.2.4 to 3.3.0
 	-----------------------------------
 
 ******************************
 *   In R
 ******************************
 
-- function MCMC: Init of hyper-parameters for quantitative variables modified
-	to account for missing data (reported by Piero Cossu Sept. 17 2010)
+	
+- function ProstProcessMultChain 
+	. take ploidy as  argument
+
+- new function HZ
+
+
+- new function  show.estimate.hz	
 
 
 	
 ************************************
 *   In Fortran
 ************************************
-- /
+

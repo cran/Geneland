@@ -104,6 +104,7 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
     filedomperm <- paste(path.mcmc, "proba.pop.membership.perm.txt", 
         sep = "")
     filemeanqtc <- paste(path.mcmc, "mean.qtc.txt", sep = "")
+    filemeanf <- paste(path.mcmc, "mean.freq.txt", sep = "")
     print("Estimating number of populations")
     npop <- scan(paste(path.mcmc, "populations.numbers.txt", 
         sep = ""))
@@ -125,7 +126,9 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
     u <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
     c <- rep(times = nb.nuclei.max, -999)
     xlim <- ylim <- rep(-999, 2)
-    f <- fpiv <- array(dim = c(npopmax, ncolt, nalmax), -999)
+    f <- fpiv <- fmean <- array(dim = c(npopmax, ncolt, nalmax), 
+        -999)
+    fmean[1:npop.est, , ] <- 0
     meanqv <- meanqvpiv <- matrix(nr = npopmax, ncol = nqtc, 
         -999)
     ninrub = 0
@@ -139,13 +142,14 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
         as.double(delta.coord), as.integer(nit), as.integer(thinning), 
         as.character(filenpop), as.character(filenpp), as.character(fileu), 
         as.character(filec), as.character(filef), as.character(fileperm), 
-        as.character(filedom), as.character(filemeanqtc), as.double(t(coordinates)), 
-        as.double(u), as.integer(c), as.double(f), as.integer(pivot), 
-        as.double(fpiv), as.double(dom), as.double(coorddom), 
-        as.integer(indvois), as.double(distvois), as.integer(orderf), 
-        as.integer(orderftmp), as.integer(npop.est), as.integer(use.geno2), 
-        as.integer(use.geno1), as.integer(use.ql), as.integer(use.qtc), 
-        as.integer(nqtc), as.double(meanqv), as.double(meanqvpiv))
+        as.character(filedom), as.character(filemeanqtc), as.character(filemeanf), 
+        as.double(t(coordinates)), as.double(u), as.integer(c), 
+        as.double(f), as.integer(pivot), as.double(fpiv), as.double(fmean), 
+        as.double(dom), as.double(coorddom), as.integer(indvois), 
+        as.double(distvois), as.integer(orderf), as.integer(orderftmp), 
+        as.integer(npop.est), as.integer(use.geno2), as.integer(use.geno1), 
+        as.integer(use.ql), as.integer(use.qtc), as.integer(nqtc), 
+        as.double(meanqv), as.double(meanqvpiv))
     print("End of Fortran function postprocesschain2")
     coord.grid <- read.table(filedom)[, 1:2]
     pmbr <- as.matrix(read.table(filedom)[, -(1:2)])

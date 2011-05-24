@@ -31,6 +31,3 @@
 
 
 \author{Gilles Guillot}
-
-
-\keyword{}

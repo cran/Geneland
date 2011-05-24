@@ -41,6 +41,7 @@ function (lib.loc = NULL)
     imageibd <- tclVar()
     imageconvert <- tclVar()
     imageline <- tclVar()
+    imagehybridzone <- tclVar()
     tcl("image", "create", "photo", imageconfigure, file = system.file("images/icon-configure.gif", 
         package = "Geneland", lib.loc = lib.loc))
     tcl("image", "create", "photo", imagerun, file = system.file("images/icon-run.gif", 
@@ -52,6 +53,8 @@ function (lib.loc = NULL)
     tcl("image", "create", "photo", imagefstat, file = system.file("images/icon-fstat.gif", 
         package = "Geneland", lib.loc = lib.loc))
     tcl("image", "create", "photo", imageplot, file = system.file("images/icon-output.gif", 
+        package = "Geneland", lib.loc = lib.loc))
+    tcl("image", "create", "photo", imagehybridzone, file = system.file("images/icon-hybridzone.gif", 
         package = "Geneland", lib.loc = lib.loc))
     tcl("image", "create", "photo", imagepostprocess, file = system.file("images/icon-postprocess.gif", 
         package = "Geneland", lib.loc = lib.loc))
@@ -73,6 +76,8 @@ function (lib.loc = NULL)
     dominantgenotypefile <- tclVar("")
     haploidgenotypefile <- tclVar("")
     outputdir <- tclVar("")
+    outputnoadm <- tclVar("")
+    outputadm <- tclVar("")
     labelsfile <- tclVar("")
     advanced <- tclVar(0)
     sep1 <- tclVar("White space")
@@ -95,6 +100,7 @@ function (lib.loc = NULL)
     ttfstat <- tkframe(tt, borderwidth = 2, relief = "sunken")
     ttibd <- tkframe(tt, borderwidth = 2, relief = "sunken")
     ttplot2 <- tkframe(tt, borderwidth = 2, relief = "sunken")
+    tthybzone <- tkframe(tt, borderwidth = 2, relief = "sunken")
     ttpan <- tkframe(tt)
     numberofdigits <- function(number) {
         i <- 0
@@ -1278,6 +1284,152 @@ function (lib.loc = NULL)
         tkgrid(nextbutton, row = 8, column = 2, sticky = "e")
         tkfocus(ttpost)
     }
+    hybridzone <- function() {
+        Hybzon <- function() {
+            tttry <- tktoplevel(parent = .TkRoot)
+            tkgrab(tttry)
+            tkwm.geometry(tttry, "+200+200")
+            tkwm.title(tttry, "wait")
+            warn <- tklabel(tttry, image = imagepleasewait)
+            tkpack(warn)
+            tkfocus(tttry)
+            tcl("update")
+            Sys.sleep(0.5)
+            print("Starting...")
+            if ((is.null(globaldominantgenotypes) && is.null(globalcodominantgenotypes) && 
+                !is.null(globalhaploidgenotypes)) || (is.null(globaldominantgenotypes) && 
+                !is.null(globalcodominantgenotypes) && is.null(globalhaploidgenotypes)) || 
+                (!is.null(globaldominantgenotypes) && is.null(globalcodominantgenotypes) && 
+                  is.null(globalhaploidgenotypes))) {
+                err <- try(HZ(coordinates = globalcoordinates, 
+                  geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
+                  geno.hap = globalhaploidgenotypes, path.mcmc.noadm = tclvalue(outputnoadm), 
+                  estimate.a = as.logical(tclvalue(estimatea)), 
+                  estimate.b = as.logical(tclvalue(estimateb)), 
+                  estimate.c = as.logical(tclvalue(estimatec)), 
+                  common.param = as.logical(tclvalue(cparam)), 
+                  nit = as.numeric(tclvalue(nit)), thinning = as.numeric(tclvalue(thinning)), 
+                  path.mcmc.adm = tclvalue(outputadm)), silent = TRUE)
+                tkdestroy(tttry)
+                print("Done.")
+                if (class(err) == "try-error") {
+                  Log(paste("HZ(coordinates=", matrix2str(globalcoordinates), 
+                    ",geno.dip.dom=", matrix2str(globaldominantgenotypes), 
+                    ",geno.dip.codom=", matrix2str(globalcodominantgenotypes), 
+                    ",geno.hap=", matrix2str(globalhaploidgenotypes), 
+                    ",path.mcmc.noadm=\"", tclvalue(outputnoadm), 
+                    "\",estimate.a=", as.logical(tclvalue(estimatea)), 
+                    ",estimate.b=", as.logical(tclvalue(estimateb)), 
+                    ",estimate.c=", as.logical(tclvalue(estimatec)), 
+                    ",common.param=", as.logical(tclvalue(cparam)), 
+                    ",nit =", as.numeric(tclvalue(nit)), ",thinning=", 
+                    as.numeric(tclvalue(thinning)), ",path.mcmc.adm=\"", 
+                    tclvalue(outputadm), "\")", sep = ""), "[FAILED] ")
+                  tkmessageBox(message = err, icon = "error", 
+                    type = "ok", parent = tt)
+                }
+                else {
+                  tkmessageBox(message = "Terminated with success", 
+                    type = "ok", parent = tt)
+                  Log(paste("HZ(coordinates=", matrix2str(globalcoordinates), 
+                    ",geno.dip.dom=", matrix2str(globaldominantgenotypes), 
+                    ",geno.dip.codom=", matrix2str(globalcodominantgenotypes), 
+                    ",geno.hap=", matrix2str(globalhaploidgenotypes), 
+                    ",path.mcmc.noadm=\"", outputnoadm, "\",estimate.a=", 
+                    as.logical(tclvalue(estimatea)), ",estimate.b=", 
+                    as.logical(tclvalue(estimateb)), ",estimate.c=", 
+                    as.logical(tclvalue(estimatec)), ",common.param=", 
+                    as.logical(tclvalue(cparam)), ",nit =", as.numeric(tclvalue(nit)), 
+                    ",thinning=", as.numeric(tclvalue(thinning)), 
+                    ",path.mcmc.adm=\"", tclvalue(outputadm), 
+                    "\")", sep = ""), "[SUCCESS] ")
+                }
+            }
+            else {
+                tkdestroy(tttry)
+                tkmessageBox(message = "You can only set either dominant genotype, codominant genotype or haploid genoptype", 
+                  type = "ok", parent = tt)
+            }
+        }
+        labelnoadm.widget <- tklabel(tthybzone, text = tclvalue(outputnoadm), 
+            width = 45, justify = "left")
+        tkconfigure(labelnoadm.widget, textvariable = outputnoadm)
+        getnoadm <- function() {
+            tclvalue(outputnoadm) <- tclvalue(tkchooseDirectory(parent = tt, 
+                title = "Please choose an output directory for no admixture data"))
+            if (tclvalue(outputnoadm) != "") {
+                tcl("regsub", "-all", "\\\\", tclvalue(outputnoadm), 
+                  "/", outputnoadm)
+                tcl("append", outputnoadm, "/")
+            }
+            tkfocus(tt)
+        }
+        buttonnoadm.widget <- tkbutton(tthybzone, text = "No admixture directory", 
+            command = getnoadm, width = 15, justify = "left")
+        tkgrid(buttonnoadm.widget, row = 1, column = 1, sticky = "we")
+        tkgrid(labelnoadm.widget, row = 1, column = 2, columnspan = 4, 
+            sticky = "we")
+        labeladm.widget <- tklabel(tthybzone, text = tclvalue(outputadm), 
+            width = 45, justify = "left")
+        tkconfigure(labeladm.widget, textvariable = outputadm)
+        getadm <- function() {
+            tclvalue(outputadm) <- tclvalue(tkchooseDirectory(parent = tt, 
+                title = "Please choose an output directory for admixture data"))
+            if (tclvalue(outputadm) != "") {
+                tcl("regsub", "-all", "\\\\", tclvalue(outputadm), 
+                  "/", outputadm)
+                tcl("append", outputadm, "/")
+            }
+            tkfocus(tt)
+        }
+        buttonadm.widget <- tkbutton(tthybzone, text = "Admixture directory", 
+            command = getadm, width = 15, justify = "left")
+        tkgrid(buttonadm.widget, row = 2, column = 1, sticky = "we")
+        tkgrid(labeladm.widget, row = 2, column = 2, columnspan = 4, 
+            sticky = "we")
+        estimatealabel.widget <- tklabel(tthybzone, text = "Estimate a:")
+        estimatea <- tclVar("TRUE")
+        westimatea <- .Tk.subwin(tthybzone)
+        estimateaoptionmenu.widget <- tcl("tk_optionMenu", westimatea, 
+            estimatea, "FALSE", "TRUE")
+        tkgrid(estimatealabel.widget, row = 3, column = 1, sticky = "w")
+        tkgrid(westimatea, row = 3, column = 3, columnspan = 3, 
+            sticky = "w")
+        estimateblabel.widget <- tklabel(tthybzone, text = "Estimate b:")
+        estimateb <- tclVar("TRUE")
+        westimateb <- .Tk.subwin(tthybzone)
+        estimateboptionmenu.widget <- tcl("tk_optionMenu", westimateb, 
+            estimateb, "FALSE", "TRUE")
+        tkgrid(estimateblabel.widget, row = 4, column = 1, sticky = "w")
+        tkgrid(westimateb, row = 4, column = 3, columnspan = 3, 
+            sticky = "w")
+        estimateclabel.widget <- tklabel(tthybzone, text = "Estimate c:")
+        estimatec <- tclVar("FALSE")
+        westimatec <- .Tk.subwin(tthybzone)
+        estimatecoptionmenu.widget <- tcl("tk_optionMenu", westimatec, 
+            estimatec, "FALSE", "TRUE")
+        cparamlabel.widget <- tklabel(tthybzone, text = "Common parameter:")
+        cparam <- tclVar("TRUE")
+        wcparam <- .Tk.subwin(tthybzone)
+        cparamoptionmenu.widget <- tcl("tk_optionMenu", wcparam, 
+            cparam, "FALSE", "TRUE")
+        nit <- tclVar()
+        nit.widget <- tkentry(tthybzone, width = "23", textvariable = nit)
+        nitlabel.widget <- tklabel(tthybzone, text = "Number of iterations:")
+        tkgrid(nitlabel.widget, row = 7, column = 1, sticky = "w")
+        tkgrid(nit.widget, row = 7, column = 2, columnspan = 3, 
+            sticky = "w")
+        thinning <- tclVar()
+        thinning.widget <- tkentry(tthybzone, width = "23", textvariable = thinning)
+        thinninglabel.widget <- tklabel(tthybzone, text = "Thinning:")
+        tkgrid(thinninglabel.widget, row = 8, column = 1, sticky = "w")
+        tkgrid(thinning.widget, row = 8, column = 2, columnspan = 3, 
+            sticky = "w")
+        nextbutton <- tkbutton(tthybzone, image = imagerun2, 
+            text = "RUN >>", command = Hybzon)
+        tkgrid(nextbutton, row = 9, column = 3, sticky = "e")
+        tkfocus(tthybzone)
+    }
     GraficalIBD <- function() {
         if (length(idb.dataset) == 1) {
             tkmessageBox(message = "First simulate some data", 
@@ -2329,6 +2481,80 @@ function (lib.loc = NULL)
             buttonfreqA <- tkbutton(ttplot, width = 30, text = "Frequencies in ancestral population", 
                 command = FreqA)
         }
+        EHybZon <- function() {
+            printit <- tclVar(0)
+            printfile <- tclVar("")
+            DrawHib <- function() {
+                tttry <- tktoplevel(parent = .TkRoot)
+                tkgrab(tttry)
+                tkwm.geometry(tttry, "+200+200")
+                tkwm.title(tttry, "wait")
+                warn <- tklabel(tttry, image = imagepleasewait)
+                tkpack(warn)
+                tkfocus(tttry)
+                tcl("update")
+                print("Starting...")
+                Sys.sleep(0.5)
+                err <- try(show.estimate.hz(coordinates = globalcoordinates, 
+                  path.mcmc.adm = tclvalue(outputadm), burnin = as.numeric(tclvalue(burnin)), 
+                  angle = as.numeric(tclvalue(angle))), silent = TRUE)
+                tkdestroy(tttry)
+                print("Done.")
+                if (class(err) == "try-error") {
+                  Log(paste("show.estimate.hz(coordinates=", 
+                    matrix2string(globalcoordinates), ",path.mcmc.adm=\"", 
+                    tclvalue(outputadm), "\",burnin=", as.numeric(tclvalue(burnin)), 
+                    "angle=", as.numeric(tclvalue(angle)), ")", 
+                    sep = ""), "[FAILED] ")
+                  tkmessageBox(message = err, icon = "error", 
+                    type = "ok", parent = tt)
+                }
+                else {
+                  Log(paste("show.estimate.hz(coordinates=", 
+                    matrix2string(globalcoordinates), ",path.mcmc.adm=\"", 
+                    tclvalue(outputadm), "\",burnin=", as.numeric(tclvalue(burnin)), 
+                    "angle=", as.numeric(tclvalue(angle)), ")", 
+                    sep = ""), "[SUCCESS] ")
+                }
+            }
+            ttehz <- tktoplevel()
+            tkwm.title(ttehz, "Hybrid zone")
+            printit <- tclVar(0)
+            printfile <- tclVar("")
+            labeladm.widget <- tklabel(ttehz, text = tclvalue(outputadm), 
+                width = 45, justify = "left")
+            tkconfigure(labeladm.widget, textvariable = outputadm)
+            getadm <- function() {
+                tclvalue(outputadm) <- tclvalue(tkchooseDirectory(parent = tt, 
+                  title = "Please choose an output directory for admixture data"))
+                if (tclvalue(outputadm) != "") {
+                  tcl("regsub", "-all", "\\\\", tclvalue(outputadm), 
+                    "/", outputadm)
+                  tcl("append", outputadm, "/")
+                }
+                tkfocus(tt)
+            }
+            buttonadm.widget <- tkbutton(ttehz, text = "Admixture directory", 
+                command = getadm, width = 15, justify = "left")
+            tkgrid(buttonadm.widget, row = 1, column = 1, sticky = "we")
+            tkgrid(labeladm.widget, row = 1, column = 2, sticky = "we")
+            burnin <- tclVar()
+            burnin.widget <- tkentry(ttehz, width = "23", textvariable = burnin)
+            burninlabel.widget <- tklabel(ttehz, text = "Burnin:")
+            tkgrid(burninlabel.widget, row = 2, column = 1, sticky = "w")
+            tkgrid(burnin.widget, row = 2, column = 2, sticky = "w")
+            angle <- tclVar("0")
+            angle.widget <- tkentry(ttehz, width = "23", textvariable = angle)
+            anglelabel.widget <- tklabel(ttehz, text = "Angle:")
+            tkgrid(anglelabel.widget, row = 3, column = 1, sticky = "w")
+            tkgrid(angle.widget, row = 3, column = 2, sticky = "w")
+            labelspace <- tklabel(ttehz, text = " ")
+            tkgrid(labelspace, row = 4, column = 1)
+            nextbutton <- tkbutton(ttehz, image = imagedraw, 
+                text = "Draw >>", command = DrawHib)
+            tkgrid(nextbutton, row = 5, column = 2, sticky = "e")
+            tkfocus(ttehz)
+        }
         buttonfreq <- tkbutton(ttplot, width = 30, text = "Frequencies in population", 
             command = Freq)
         buttontessellation <- tkbutton(ttplot, width = 30, text = "Map of proba. of pop. membership", 
@@ -2341,6 +2567,8 @@ function (lib.loc = NULL)
             command = PosteriorM)
         buttondpost <- tkbutton(ttplot, width = 30, text = "Posterior density of model", 
             command = Dpost)
+        buttonehyb <- tkbutton(ttplot, width = 30, text = "Hybrid zone", 
+            command = EHybZon)
         labelfigures <- tklabel(ttplot, text = "-Graphics-", 
             font = "*-Times-bold-i-normal--20-*", foreground = "blue")
         labeltables <- tklabel(ttplot, text = "-Tables-", font = "*-Times-bold-i-normal--20-*", 
@@ -2402,19 +2630,20 @@ function (lib.loc = NULL)
         tkgrid(buttonntile, row = 2, column = 2, sticky = "w")
         tkgrid(buttonposm, row = 3, column = 1, sticky = "w")
         tkgrid(buttondpost, row = 5, column = 1, sticky = "w")
-        tkgrid(labelspace1, row = 6, column = 1, sticky = "w")
-        tkgrid(labeltables, row = 7, column = 1, sticky = "w")
-        tkgrid(proba.pop.membership, row = 8, column = 1, columnspan = 2, 
+        tkgrid(buttonehyb, row = 6, column = 1, sticky = "w")
+        tkgrid(labelspace1, row = 7, column = 1, sticky = "w")
+        tkgrid(labeltables, row = 8, column = 1, sticky = "w")
+        tkgrid(proba.pop.membership, row = 9, column = 1, columnspan = 2, 
             sticky = "w")
-        tkgrid(proba.pop.membership.ind, row = 9, column = 1, 
+        tkgrid(proba.pop.membership.ind, row = 10, column = 1, 
             columnspan = 2, sticky = "w")
-        tkgrid(modal.pop.ind, row = 10, column = 1, columnspan = 2, 
+        tkgrid(modal.pop.ind, row = 11, column = 1, columnspan = 2, 
             sticky = "w")
-        tkgrid(model.global.density, row = 11, column = 1, columnspan = 2, 
+        tkgrid(model.global.density, row = 12, column = 1, columnspan = 2, 
             sticky = "w")
-        tkgrid(labelspace2, row = 12, column = 1, sticky = "w")
-        tkgrid(labelfstat, row = 13, column = 1, sticky = "w")
-        tkgrid(buttonfstat, row = 14, column = 1, sticky = "w")
+        tkgrid(labelspace2, row = 13, column = 1, sticky = "w")
+        tkgrid(labelfstat, row = 14, column = 1, sticky = "w")
+        tkgrid(buttonfstat, row = 15, column = 1, sticky = "w")
     }
     plot2 <- function() {
         pfstat <- function() {
@@ -3957,6 +4186,7 @@ function (lib.loc = NULL)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttpost)
             tkgrid.remove(ttplot)
+            tkgrid.remove(tthybzone)
             tkgrid(ttconf, row = 1, column = 2, sticky = "we", 
                 pady = 10)
         })
@@ -3971,6 +4201,7 @@ function (lib.loc = NULL)
             tkgrid.remove(ttplot2)
             tkgrid.remove(ttpost)
             tkgrid.remove(ttplot)
+            tkgrid.remove(tthybzone)
             tkgrid(ttrun, row = 1, column = 2, sticky = "we", 
                 pady = 10)
         })
@@ -3985,7 +4216,23 @@ function (lib.loc = NULL)
             tkgrid.remove(ttconf)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttplot)
+            tkgrid.remove(tthybzone)
             tkgrid(ttpost, row = 1, column = 2, sticky = "we", 
+                pady = 10)
+        })
+    buttonhybridzone <- tkbutton(ttpan, image = imagehybridzone, 
+        text = "Hybrid zone", command = function() {
+            hybridzone()
+            tkgrid.remove(ttinit)
+            tkgrid.remove(ttsimf)
+            tkgrid.remove(ttibd)
+            tkgrid.remove(ttfstat)
+            tkgrid.remove(ttplot2)
+            tkgrid.remove(ttconf)
+            tkgrid.remove(ttrun)
+            tkgrid.remove(ttpost)
+            tkgrid.remove(ttplot)
+            tkgrid(tthybzone, row = 1, column = 2, sticky = "we", 
                 pady = 10)
         })
     buttonsimfmodel <- tkbutton(ttpan, image = imagefmodel, text = "F-model", 
@@ -3998,6 +4245,7 @@ function (lib.loc = NULL)
             tkgrid.remove(ttplot2)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttplot)
+            tkgrid.remove(tthybzone)
             tkgrid(ttsimf, row = 1, column = 2, sticky = "we", 
                 pady = 10)
         })
@@ -4012,6 +4260,7 @@ function (lib.loc = NULL)
             tkgrid.remove(ttplot2)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttpost)
+            tkgrid.remove(tthybzone)
             tkgrid(ttplot, row = 1, column = 2, sticky = "we", 
                 pady = 10)
         })
@@ -4026,6 +4275,7 @@ function (lib.loc = NULL)
             tkgrid.remove(ttfstat)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttpost)
+            tkgrid.remove(tthybzone)
             tkgrid(ttibd, row = 1, column = 2, sticky = "we", 
                 pady = 10)
         })
@@ -4040,6 +4290,7 @@ function (lib.loc = NULL)
             tkgrid.remove(ttfstat)
             tkgrid.remove(ttrun)
             tkgrid.remove(ttpost)
+            tkgrid.remove(tthybzone)
             tkgrid(ttplot2, row = 1, column = 2, sticky = "we", 
                 pady = 10)
         })
@@ -4049,11 +4300,13 @@ function (lib.loc = NULL)
     tkgrid(buttonrun, row = 3, column = 1, sticky = "we", padx = 10)
     tkgrid(buttonpostprocess, row = 4, column = 1, sticky = "we", 
         padx = 10)
-    tkgrid(buttonplot, row = 5, column = 1, sticky = "we", padx = 10)
-    tkgrid(labelspace, row = 6, column = 1, sticky = "w", padx = 10)
-    tkgrid(labelsimulation, row = 7, column = 1, sticky = "w", 
+    tkgrid(buttonhybridzone, row = 5, column = 1, sticky = "we", 
         padx = 10)
-    tkgrid(buttonsimfmodel, row = 8, column = 1, sticky = "we", 
+    tkgrid(buttonplot, row = 6, column = 1, sticky = "we", padx = 10)
+    tkgrid(labelspace, row = 7, column = 1, sticky = "w", padx = 10)
+    tkgrid(labelsimulation, row = 8, column = 1, sticky = "w", 
+        padx = 10)
+    tkgrid(buttonsimfmodel, row = 9, column = 1, sticky = "we", 
         padx = 10)
     tkgrid(buttonplot2, row = 10, column = 1, sticky = "we", 
         padx = 10)
@@ -4074,6 +4327,7 @@ function (lib.loc = NULL)
         tkgrid.remove(ttrun)
         tkgrid.remove(ttpost)
         tkgrid.remove(ttplot)
+        tkgrid.remove(tthybzone)
         tkgrid(ttconf, row = 1, column = 2, sticky = "we")
     })
     blink <- function() {

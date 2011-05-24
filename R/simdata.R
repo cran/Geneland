@@ -65,6 +65,9 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
         nearest.nucleus[iindiv] <- k
     }
     nearest.nucleus.indiv <- nearest.nucleus[1:nindiv]
+    if (give.freq.grid | give.tess.grid) {
+        nearest.nucleus.grid <- nearest.nucleus[-(1:nindiv)]
+    }
     if (sim.gen) {
         nloc <- length(allele.numbers)
         if (!missing(seed.freq)) 
@@ -130,9 +133,6 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
             gf.grid <- array(data = e[, -(1:nindiv), , ], dim = c(npop, 
                 prod(npix), nloc, max(allele.numbers)))
         }
-        if (give.freq.grid | give.tess.grid) {
-            nearest.nucleus.grid <- nearest.nucleus[-(1:nindiv)]
-        }
         Fst <- Fis <- NA
         if (comp.Fst) {
             print("Computing Fstat")
@@ -171,7 +171,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
         if (comp.diff) {
             pop.mbrshp = color.nuclei[nearest.nucleus.indiv]
             if (plot.pairs.borders) {
-                get(getOption("device"))()
+                dev.new()
                 plot(t(coord.indiv), type = "n")
             }
             for (ipop1 in 1:(npop - 1)) {
