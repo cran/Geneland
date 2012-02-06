@@ -128,19 +128,19 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
     use.ql <- nindivql > 0
     print("defining dummy data arrays")
     if (nindiv.geno1 == 0) {
-        geno1 <- matrix(nr = nindiv, nc = 1, data = NA)
+        geno1 <- matrix(nrow = nindiv, ncol = 1, data = NA)
     }
     if (nindiv.geno2 == 0) {
-        geno2 <- matrix(nr = nindiv, nc = 2, data = NA)
+        geno2 <- matrix(nrow = nindiv, ncol = 2, data = NA)
     }
     if (nindivqtc == 0) {
-        qtc <- matrix(nc = nindiv, nr = nqtc, data = NA)
+        qtc <- matrix(nrow = nindiv, ncol = nqtc, data = NA)
     }
     if (nindivqtd == 0) {
-        qtd <- matrix(nc = nindiv, nr = nqtd, data = NA)
+        qtd <- matrix(nrow = nindiv, ncol = nqtd, data = NA)
     }
     if (nindivql == 0) {
-        ql <- matrix(nc = nindiv, nr = nql, data = NA)
+        ql <- matrix(nrow = nindiv, ncol = nql, data = NA)
     }
     print("defining dummy coordinates if coord are missing")
     if (is.null(coordinates)) {
@@ -151,8 +151,8 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
             n.int <- ceiling(sqrt(nindiv))
             x <- rep(seq(from = 0, to = 1, length = n.int), n.int)
             y <- rep(seq(from = 0, to = 1, length = n.int), n.int)
-            y <- as.vector(t(matrix(nr = n.int, nc = n.int, y, 
-                byrow = FALSE)))
+            y <- as.vector(t(matrix(nrow = n.int, ncol = n.int, 
+                y, byrow = FALSE)))
             coordinates <- cbind(x, y)[1:nindiv, ]
         }
     }
@@ -171,7 +171,8 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         coordinates <- as.matrix(coordinates)
     print("defining dummy matrix indicating genuinely missing data in geno2")
     if (is.null(miss.loc)) {
-        miss.loc <- matrix(nr = nindiv, nc = ncol(geno2)/2, data = 0)
+        miss.loc <- matrix(nrow = nindiv, ncol = ncol(geno2)/2, 
+            data = 0)
     }
     if (missing(rate.max)) 
         rate.max <- nindiv
@@ -239,12 +240,12 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
     nalt <- c(allele.numbers.geno2, allele.numbers.geno1, allele.numbers.ql)
     nalmax <- max(1, max(nalt))
     print("Defining working arrays for parameters of spatial model...")
-    u <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
-    utemp <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
+    u <- matrix(nrow = 2, ncol = nb.nuclei.max, data = -999)
+    utemp <- matrix(nrow = 2, ncol = nb.nuclei.max, data = -999)
     c <- rep(times = nb.nuclei.max, -999)
     ctemp <- rep(times = nb.nuclei.max, -999)
-    t <- matrix(nr = 2, nc = nindiv, data = -999)
-    ttemp <- matrix(nr = 2, nc = nindiv, data = -999)
+    t <- matrix(nrow = 2, ncol = nindiv, data = -999)
+    ttemp <- matrix(nrow = 2, ncol = nindiv, data = -999)
     indcell <- rep(times = nindiv, -999)
     indcelltemp <- rep(times = nindiv, -999)
     distcell <- rep(times = nindiv, -999)
@@ -265,11 +266,11 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
     listcell <- rep(times = nb.nuclei.max, -999)
     fmodel <- ifelse(freq.model == "Correlated", 1, 0)
     kfix <- 1 - as.integer(varnpop)
-    full.cond.y <- matrix(nr = nalmax, nc = 2, 0)
+    full.cond.y <- matrix(nrow = nalmax, ncol = 2, 0)
     print("Defining working arrays for parameters of quantitative variables...")
-    meanqtc <- sdqtc <- meanqtctmp <- sdqtctmp <- matrix(nr = npopmax, 
-        nc = nqtc, data = -999)
-    nnqtc <- sqtc <- ssqtc <- matrix(nr = npopmax, nc = nqtc, 
+    meanqtc <- sdqtc <- meanqtctmp <- sdqtctmp <- matrix(nrow = npopmax, 
+        ncol = nqtc, data = -999)
+    nnqtc <- sqtc <- ssqtc <- matrix(nrow = npopmax, ncol = nqtc, 
         data = -999)
     ksiqtc <- kappaqtc <- alphaqtc <- betaqtc <- gbeta <- hbeta <- rep(-999, 
         nqtc)
@@ -297,7 +298,7 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
     qtd.999[is.na(qtd.999)] <- -999
     ql.999 <- ql
     ql.999[is.na(ql.999)] <- -999
-    true.geno <- cbind(geno2.999, matrix(nr = nindiv, nc = nloc.geno1 * 
+    true.geno <- cbind(geno2.999, matrix(nrow = nindiv, ncol = nloc.geno1 * 
         2, data = -999))
     sub <- seq(nloc.geno2 * 2 + 1, nloc.geno2 * 2 + nloc.geno1 * 
         2 - 1, 2)
@@ -371,13 +372,13 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         param <- c(param, paste("nql :", nql))
     }
     write.table(param, file = paste(path.mcmc, "parameters.txt", 
-        sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
+        sep = ""), quote = FALSE, row.names = FALSE, col.names = FALSE)
     write.table(allele.numbers.geno1, file = paste(path.mcmc, 
         "allele.numbers.geno1.txt", sep = ""), quote = FALSE, 
-        row.name = FALSE, col.name = FALSE)
+        row.names = FALSE, col.names = FALSE)
     write.table(allele.numbers.geno2, file = paste(path.mcmc, 
         "allele.numbers.geno2.txt", sep = ""), quote = FALSE, 
-        row.name = FALSE, col.name = FALSE)
+        row.names = FALSE, col.names = FALSE)
     write.table(allele.numbers.ql, file = paste(path.mcmc, "number.levels.ql.txt", 
-        sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
+        sep = ""), quote = FALSE, row.names = FALSE, col.names = FALSE)
 }

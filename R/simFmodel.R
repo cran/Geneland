@@ -38,7 +38,7 @@ function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei,
         if (missing(drift)) {
             drift <- rbeta(shape1 = 2, shape2 = 20, n = npop)
         }
-        fa <- matrix(nr = nloc, nc = max(nall), data = -999)
+        fa <- matrix(nrow = nloc, ncol = max(nall), data = -999)
         for (iloc in 1:nloc) {
             fa[iloc, 1:nall[iloc]] <- rexp(n = nall[iloc])
             fa[iloc, 1:nall[iloc]] <- fa[iloc, 1:nall[iloc]]/sum(fa[iloc, 
@@ -65,7 +65,7 @@ function (nindiv, coordinates, coord.lim = c(0, 1, 0, 1), number.nuclei,
             }
         }
     }
-    z <- matrix(nr = nindiv, nc = nloc * 2)
+    z <- matrix(nrow = nindiv, ncol = nloc * 2)
     for (iclass in 1:npop) {
         subclass <- (1:nindiv)[color.nuclei[ppvois] == iclass]
         for (iloc in 1:nloc) {

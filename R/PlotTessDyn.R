@@ -19,10 +19,10 @@ function (coordinates = NULL, path.mcmc, nxgrid, nygrid)
         "coord.nuclei.txt", sep = "")))
     indgrid <- rep(-999, nxgrid * nygrid)
     distgrid <- rep(-999, nxgrid * nygrid)
-    coorddom <- matrix(nr = 2, nc = nxgrid * nygrid, -999)
-    dom <- matrix(nr = nxgrid * nygrid, nc = npopmax, -999)
+    coorddom <- matrix(nrow = 2, ncol = nxgrid * nygrid, -999)
+    dom <- matrix(nrow = nxgrid * nygrid, ncol = npopmax, -999)
     ccur <- rep(-999, nppmax)
-    ucur <- matrix(nr = 2, nc = nppmax, data = -999)
+    ucur <- matrix(nrow = 2, ncol = nppmax, data = -999)
     if (is.null(coordinates)) {
         if (spatial) {
             stop("Please give spatial coordinates of individuals or set argument spatial to FALSE")
@@ -31,8 +31,8 @@ function (coordinates = NULL, path.mcmc, nxgrid, nygrid)
             n.int <- ceiling(sqrt(nindiv))
             x <- rep(seq(from = 0, to = 1, length = n.int), n.int)
             y <- rep(seq(from = 0, to = 1, length = n.int), n.int)
-            y <- as.vector(t(matrix(nr = n.int, nc = n.int, y, 
-                byrow = FALSE)))
+            y <- as.vector(t(matrix(nrow = n.int, ncol = n.int, 
+                y, byrow = FALSE)))
             coordinates <- cbind(x, y)[1:nindiv, ]
         }
     }

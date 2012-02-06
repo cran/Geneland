@@ -2440,6 +2440,7 @@ c      write(*,*) 'end udcf'
      &     a(nalmax),ptmp(nalmax),qtc(nindiv,nqtc),
      &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
      &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
+     &     ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc), 
      &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
      &     ssqtc(npopmax,nqtc)
       integer ipop,ipp,ipop1,ipop2,iloc,ial,iqtc,iipp,n1,n2,ntmp1,
@@ -2606,7 +2607,7 @@ c      write(*,*) 'end udcf'
 
 c      write(*,*) 'begin udcfallvar2'
 c      write(*,*) 'npop =',npop
-      write(*,*) 'npp=',npp
+c      write(*,*) 'npp=',npp
 
 *     init. tmp. vector of population membership
       do ipp=1,npp
@@ -2739,24 +2740,24 @@ c$$$  &           lratiogq(yy,f,c,ctmp,indcell,indcell,
 c$$$  &           npopmax,nlocmax,nalmax,nindiv,nloc,nlocmax2,
 c$$$  &           nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
 c$$$  &           meanqtctmp,sdqtctmp,0,useqtc)
-               write(*,*) 'c=',c(1),c(2)
-               write(*,*) 'ctmp=',ctmp(1),ctmp(2)
-               write(*,*) 'in ucdcfparvq lratio=',lratio
+c               write(*,*) 'c=',c(1),c(2)
+c               write(*,*) 'ctmp=',ctmp(1),ctmp(2)
+c               write(*,*) 'in ucdcfparvq lratio=',lratio
                lratio = lratio + lrallvar2(yy,z,ql,
      &              f,c,ctmp,indcell,indcell,
      &              npopmax,nlocd,nloch,nql,ncolt,nalmax,nindiv,
      &              nppmax,qtc,nqtc,meanqtc,sdqtc,meanqtctmp,sdqtctmp,
      &              0,0,0,useqtc,ploidy)
-                write(*,*) 'in ucdcfparvq lratio=',lratio
+c                write(*,*) 'in ucdcfparvq lratio=',lratio
 c     write(*,*) 'in ucdcfparvq lratio=',lratio-junk      
                lratio = lratio + contriblr 
-               write(*,*) 'in ucdcfparvq lratio=',lratio
+c               write(*,*) 'in ucdcfparvq lratio=',lratio
             endif
 c      write(*,*) 'in udcf lratio=',lratio
             lratio = dmin1(0.d0,lratio)
             ratio = dexp(lratio)
             bern = ggrbinom(1.d0,ratio)
-            write(*,*) 'in udcf ratio=',ratio
+c            write(*,*) 'in udcf ratio=',ratio
          endif
          
          
@@ -3193,7 +3194,7 @@ c      write(*,*) 'end udcfallvar3'
      &              0,0,0,useqtc,ploidy)
       endif
        if(lratio .gt. 0) then 
-          write(*,*) 'lratio=',lratio
+c          write(*,*) 'lratio=',lratio
        endif
       lratio = dmin1(0.d0,lratio)
      
@@ -3326,129 +3327,129 @@ c         write(*,*) 'bern=',bern
 
 
 
-
-***********************************************************************
-*     joint update of c, f (under the CFM) 
-*     and mean, variance of quant. variables
-*     single component update of c
-*     new f is proposed according to full conditional pi(f*|c*,zz)
-      subroutine udcf2parvq(npop,npopmax,f,fa,drift,
-     &     nloc,nlocmax,nlocmax2,
-     &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,nqtc,qtc,
-     &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,
-     &     a,ptmp,ftmp,zz,n,ntmp,ploidy,nudcel,usegeno2,useqtc)
-      implicit none
-      integer npop,npopmax,nloc,nlocmax,nal(nlocmax),
-     &     nalmax,nindiv,npp,nppmax,indcell(nindiv),
-     &     nlocmax2,c(nppmax),ctmp(nppmax),zz(nindiv,nlocmax2),
-     &     n(npopmax,nloc,nalmax),ntmp(npopmax,nloc,nalmax),
-     &     ploidy,nudcel,nnqtc,nqtc,usegeno2,useqtc
-      double precision f,drift,ftmp,a,ptmp,fa,qtc,
-     &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
-      dimension f(npopmax,nlocmax,nalmax),drift(npopmax),
-     &      ftmp(npopmax,nlocmax,nalmax),
-     &     a(nalmax),ptmp(nalmax),fa(nlocmax,nalmax),
-     &     qtc(nindiv,nqtc),meanqtc(npopmax,nqtc),
-     &     sdqtc(npopmax,nqtc),
-     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
-     &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
-     &     ssqtc(npopmax,nqtc)
-      integer ipop,ipp,ipop1,ipop2,iloc,ial,iud,iqtc
-      double precision alpha,ggrunif,lratio,lTf,contriblr,bern,ggrbinom,
-     &     lratiogq
-
-*     init. tmp. vector of population membership
-      do ipp=1,npp
-          ctmp(ipp) = c(ipp)
-      enddo
-      if(nppmax .gt. npp) then
-         do ipp=npp+1,nppmax
-            ctmp(ipp) = -999
-         enddo
-      endif
-
-      do iud=1,nudcel
-      ipp = 1 + idint(dint(dble(npp)*ggrunif(0.d0,1.d0)))
-c         write(*,*) 'ipp=',ipp
-*     propose new labeling of a tile
-         ctmp(ipp) = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-         ipop1 = c(ipp)
-         ipop2 = ctmp(ipp)
-         bern = 0
-         if(ipop1 .ne. ipop2) then 
-            lratio = 0
-            if(usegeno2 .eq. 1) then
-*     counting alleles for both states of c
-            call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &           nppmax,nal,nalmax,zz,n,indcell,c,ploidy)
-            call countn(nindiv,nlocmax,nlocmax2,npopmax,
-     &           nppmax,nal,nalmax,zz,ntmp,indcell,ctmp,ploidy)
-               lratio = lratio + 
-     &              lTf(ipop1,ntmp,fa,drift,npopmax,nloc,nal,nalmax)
-     &              + lTf(ipop2,ntmp,fa,drift,npopmax,nloc,nal,nalmax)
-     &              - lTf(ipop1,n,fa,drift,npopmax,nloc,nal,nalmax)
-     &              - lTf(ipop2,n,fa,drift,npopmax,nloc,nal,nalmax)
-            endif
-            if(useqtc .eq. 1) then 
-*     propose means and variances 
-               call propparqvudc(qtc,nindiv,nqtc,indcell,c,ctmp,
-     &           meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
-     &              sqtc,ssqtc,npop,npopmax,nppmax,
-     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipop1,ipop2,
-     &              contriblr)
-*     contrib likelihood
-*     argument usegeno2 is passed as 0 to ignore genotypes 
-*     hence avoid having likelihood ratio of genotypes twice 
-               lratio = lratio + 
-     &              lratiogq(zz,f,c,ctmp,indcell,indcell,
-     &              npopmax,nlocmax,nalmax,nindiv,nloc,nlocmax2,
-     &              nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
-     &              meanqtctmp,sdqtctmp,0,useqtc)
-               
-               lratio = lratio + contriblr 
-            endif
-            lratio = dmin1(0.d0,lratio)
-            alpha = dexp(lratio)
-            bern = ggrbinom(1.d0,alpha)
-         endif
-            
-c     write(*,*) 'bern=',bern
-            
-         if(bern .eq. 1) then
-            c(ipp) = ctmp(ipp)
-            if(usegeno2 .eq. 1) then 
-               call samplef2(npop,npopmax,nloc,nlocmax,
-     &              nal,nalmax,ipop1,ipop2,f,ftmp,
-     &              fa,drift,a,ptmp,ntmp)
-               do iloc=1,nloc
-                  do ial=1,nal(iloc)
-                     f(ipop1,iloc,ial) = ftmp(ipop1,iloc,ial)
-                     f(ipop2,iloc,ial) = ftmp(ipop2,iloc,ial)
-                  enddo
-               enddo
-            endif
-            if(useqtc .eq. 1) then 
-               do iqtc = 1,nqtc
-                  do ipop = 1,npop
-                     meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
-                     sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
-                  enddo
-               enddo
-            endif
-         else 
-            ctmp(ipp) = c(ipp)
-c$$$  do iloc=1,nloc
-c$$$  do ial=1,nal(iloc)
-c$$$  ftmp(ipop1,iloc,ial) = f(ipop1,iloc,ial)
-c$$$  ftmp(ipop2,iloc,ial) = f(ipop2,iloc,ial)
-c$$$  enddo
-c$$$  enddo
-         endif        
-      enddo
-      end subroutine udcf2parvq
-***********************************************************************
+c$$$
+c$$$***********************************************************************
+c$$$*     joint update of c, f (under the CFM) 
+c$$$*     and mean, variance of quant. variables
+c$$$*     single component update of c
+c$$$*     new f is proposed according to full conditional pi(f*|c*,zz)
+c$$$      subroutine udcf2parvq(npop,npopmax,f,fa,drift,
+c$$$     &     nloc,nlocmax,nlocmax2,
+c$$$     &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,nqtc,qtc,
+c$$$     &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,
+c$$$     &     a,ptmp,ftmp,zz,n,ntmp,ploidy,nudcel,usegeno2,useqtc)
+c$$$      implicit none
+c$$$      integer npop,npopmax,nloc,nlocmax,nal(nlocmax),
+c$$$     &     nalmax,nindiv,npp,nppmax,indcell(nindiv),
+c$$$     &     nlocmax2,c(nppmax),ctmp(nppmax),zz(nindiv,nlocmax2),
+c$$$     &     n(npopmax,nloc,nalmax),ntmp(npopmax,nloc,nalmax),
+c$$$     &     ploidy,nudcel,nnqtc,nqtc,usegeno2,useqtc
+c$$$      double precision f,drift,ftmp,a,ptmp,fa,qtc,
+c$$$     &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,sqtc,ssqtc,
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
+c$$$      dimension f(npopmax,nlocmax,nalmax),drift(npopmax),
+c$$$     &      ftmp(npopmax,nlocmax,nalmax),
+c$$$     &     a(nalmax),ptmp(nalmax),fa(nlocmax,nalmax),
+c$$$     &     qtc(nindiv,nqtc),meanqtc(npopmax,nqtc),
+c$$$     &     sdqtc(npopmax,nqtc),ksiqtc(nqtc),
+c$$$     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
+c$$$     &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
+c$$$     &     ssqtc(npopmax,nqtc)
+c$$$      integer ipop,ipp,ipop1,ipop2,iloc,ial,iud,iqtc
+c$$$      double precision alpha,ggrunif,lratio,lTf,contriblr,bern,ggrbinom,
+c$$$     &     lratiogq
+c$$$
+c$$$*     init. tmp. vector of population membership
+c$$$      do ipp=1,npp
+c$$$          ctmp(ipp) = c(ipp)
+c$$$      enddo
+c$$$      if(nppmax .gt. npp) then
+c$$$         do ipp=npp+1,nppmax
+c$$$            ctmp(ipp) = -999
+c$$$         enddo
+c$$$      endif
+c$$$
+c$$$      do iud=1,nudcel
+c$$$      ipp = 1 + idint(dint(dble(npp)*ggrunif(0.d0,1.d0)))
+c$$$c         write(*,*) 'ipp=',ipp
+c$$$*     propose new labeling of a tile
+c$$$         ctmp(ipp) = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$         ipop1 = c(ipp)
+c$$$         ipop2 = ctmp(ipp)
+c$$$         bern = 0
+c$$$         if(ipop1 .ne. ipop2) then 
+c$$$            lratio = 0
+c$$$            if(usegeno2 .eq. 1) then
+c$$$*     counting alleles for both states of c
+c$$$            call countn(nindiv,nlocmax,nlocmax2,npopmax,
+c$$$     &           nppmax,nal,nalmax,zz,n,indcell,c,ploidy)
+c$$$            call countn(nindiv,nlocmax,nlocmax2,npopmax,
+c$$$     &           nppmax,nal,nalmax,zz,ntmp,indcell,ctmp,ploidy)
+c$$$               lratio = lratio + 
+c$$$     &              lTf(ipop1,ntmp,fa,drift,npopmax,nloc,nal,nalmax)
+c$$$     &              + lTf(ipop2,ntmp,fa,drift,npopmax,nloc,nal,nalmax)
+c$$$     &              - lTf(ipop1,n,fa,drift,npopmax,nloc,nal,nalmax)
+c$$$     &              - lTf(ipop2,n,fa,drift,npopmax,nloc,nal,nalmax)
+c$$$            endif
+c$$$            if(useqtc .eq. 1) then 
+c$$$*     propose means and variances 
+c$$$               call propparqvudc(qtc,nindiv,nqtc,indcell,c,ctmp,
+c$$$     &           meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
+c$$$     &              sqtc,ssqtc,npop,npopmax,nppmax,
+c$$$     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipop1,ipop2,
+c$$$     &              contriblr)
+c$$$*     contrib likelihood
+c$$$*     argument usegeno2 is passed as 0 to ignore genotypes 
+c$$$*     hence avoid having likelihood ratio of genotypes twice 
+c$$$               lratio = lratio + 
+c$$$     &              lratiogq(zz,f,c,ctmp,indcell,indcell,
+c$$$     &              npopmax,nlocmax,nalmax,nindiv,nloc,nlocmax2,
+c$$$     &              nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
+c$$$     &              meanqtctmp,sdqtctmp,0,useqtc)
+c$$$               
+c$$$               lratio = lratio + contriblr 
+c$$$            endif
+c$$$            lratio = dmin1(0.d0,lratio)
+c$$$            alpha = dexp(lratio)
+c$$$            bern = ggrbinom(1.d0,alpha)
+c$$$         endif
+c$$$            
+c$$$c     write(*,*) 'bern=',bern
+c$$$            
+c$$$         if(bern .eq. 1) then
+c$$$            c(ipp) = ctmp(ipp)
+c$$$            if(usegeno2 .eq. 1) then 
+c$$$               call samplef2(npop,npopmax,nloc,nlocmax,
+c$$$     &              nal,nalmax,ipop1,ipop2,f,ftmp,
+c$$$     &              fa,drift,a,ptmp,ntmp)
+c$$$               do iloc=1,nloc
+c$$$                  do ial=1,nal(iloc)
+c$$$                     f(ipop1,iloc,ial) = ftmp(ipop1,iloc,ial)
+c$$$                     f(ipop2,iloc,ial) = ftmp(ipop2,iloc,ial)
+c$$$                  enddo
+c$$$               enddo
+c$$$            endif
+c$$$            if(useqtc .eq. 1) then 
+c$$$               do iqtc = 1,nqtc
+c$$$                  do ipop = 1,npop
+c$$$                     meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
+c$$$                     sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
+c$$$                  enddo
+c$$$               enddo
+c$$$            endif
+c$$$         else 
+c$$$            ctmp(ipp) = c(ipp)
+c$$$c$$$  do iloc=1,nloc
+c$$$c$$$  do ial=1,nal(iloc)
+c$$$c$$$  ftmp(ipop1,iloc,ial) = f(ipop1,iloc,ial)
+c$$$c$$$  ftmp(ipop2,iloc,ial) = f(ipop2,iloc,ial)
+c$$$c$$$  enddo
+c$$$c$$$  enddo
+c$$$         endif        
+c$$$      enddo
+c$$$      end subroutine udcf2parvq
+c$$$***********************************************************************
 
 
 
@@ -7329,100 +7330,100 @@ c$$$      write(*,*) 'ftmp(',ipophost,2,2,')=',ftmp(ipophost,2,2)
 ************************************************************************
 
 
-************************************************************************
-*     log de la proba a posteriori du vecteur de parametres
-      double precision function lppgq(lambdamax,lambda,zz,npop,npp,
-     &     drift,f,fa,c,nppmax,
-     &     nindiv,nlocmax2,npopmax,nlocmax,nalmax,indcell,nal,
-     &     fmodel,xlim,ylim,shape1,shape2,ploidy,
-     &     qtc,nqtc,meanqtc,sdqtc,usegeno2,useqtc,
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc)
-      implicit none
-      integer nindiv,nlocmax2,npop,npopmax,nlocmax,nalmax,
-     &     npp,nppmax,zz(nindiv,nlocmax2),indcell(nindiv),
-     &     c(nppmax),nal(nlocmax),fmodel,ploidy,nqtc,usegeno2,useqtc
-      double precision drift(npopmax),f(npopmax,nlocmax,nalmax),
-     &     fa(nlocmax,nalmax),lambdamax,lambda,xlim(2),ylim(2),
-     &     qtc(nindiv,nqtc),
-     &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
-      integer ipp,ipop,iloc,ial,iqtc
-      double precision gglgamfn,shape1,shape2,llgq,lg,ggdnorm,ggdgamma
-*     contrib npop
-      lppgq = lppgq - dlog(dble(npopmax))
-*     contrib lambda
-      lppgq = - dlog(lambdamax)
-*     contrib npp
-      lppgq = lppgq - lambda + dble(npp)*dlog(lambda) - 
-     &     gglgamfn(dble(npp+1))
-*     contrib c
-      lppgq = lppgq - dble(npp)*dlog(dble(npop))
-*     contrib u
-      lppgq = lppgq - npp*dlog((xlim(2)-xlim(1))*(ylim(2)-ylim(1)))
-      if(usegeno2 .eq. 1) then 
-*     contrib freq
-         if(fmodel .eq. 0) then
-            lg = 0
-            do iloc = 1,nlocmax
-               lg = lg + gglgamfn(dble(nal(iloc)))
-            enddo
-            lppgq= lppgq + dble(npop) * lg
-         endif
-         if(fmodel .eq. 1) then
-*     contrib ancestral freq
-            lg = 0
-            do iloc = 1,nlocmax
-               lg = lg + gglgamfn(dble(nal(iloc)))
-            enddo
-            lppgq= lppgq + lg
-*     contrib drifts
-            do ipop = 1,npop
-               lppgq = lppgq + 
-     &              gglgamfn(shape1+shape2) - gglgamfn(shape1) 
-     &              - gglgamfn(shape2) + (shape1-1)*dlog(drift(ipop)) + 
-     &              (shape2-1)*dlog(1-drift(ipop))
-            enddo
-*     contrib freq
-            do ipop = 1,npop
-               do iloc = 1,nlocmax
-                  lppgq = lppgq + gglgamfn((1-drift(ipop))/drift(ipop))
-                  do ial=1,nal(iloc)
-                     lppgq = lppgq -gglgamfn(fa(iloc,ial)*
-     &                    (1-drift(ipop))/drift(ipop)) + 
-     &                    (fa(iloc,ial)* 
-     &                    (1-drift(ipop))/drift(ipop)-1)*
-     &                    dlog(f(ipop,iloc,ial))
-                  enddo
-               enddo
-            enddo
-         endif
-      endif
-      if(useqtc .eq. 1) then
-*     contrib mean of quantit. variables
-         do iqtc = 1,nqtc
-            do ipop = 1,npop
-               lppgq = lppgq + 
-     &            ggdnorm(meanqtc(ipop,iqtc),ksiqtc,
-     &              dsqrt(1/kappaqtc),1)
-            enddo
-         enddo
-*     contrib precision of quantit. variables
-         do iqtc = 1,nqtc
-            do ipop = 1,npop
-               lppgq = lppgq + 
-     &              ggdgamma(1/sdqtc(ipop,iqtc)**2,
-     &              alphaqtc,1/betaqtc,1)
-            enddo
-         enddo
-      endif
-      
-*     contrib likelihood
-      lppgq = lppgq + llgq(zz,nindiv,nlocmax,nlocmax2,npopmax,
-     &     nalmax,nppmax,c,f,indcell,ploidy,
-     &     qtc,nqtc,meanqtc,sdqtc,usegeno2,useqtc)
-      end function lppgq
-************************************************************************
-
+c$$$************************************************************************
+c$$$*     log de la proba a posteriori du vecteur de parametres
+c$$$      double precision function lppgq(lambdamax,lambda,zz,npop,npp,
+c$$$     &     drift,f,fa,c,nppmax,
+c$$$     &     nindiv,nlocmax2,npopmax,nlocmax,nalmax,indcell,nal,
+c$$$     &     fmodel,xlim,ylim,shape1,shape2,ploidy,
+c$$$     &     qtc,nqtc,meanqtc,sdqtc,usegeno2,useqtc,
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc)
+c$$$      implicit none
+c$$$      integer nindiv,nlocmax2,npop,npopmax,nlocmax,nalmax,
+c$$$     &     npp,nppmax,zz(nindiv,nlocmax2),indcell(nindiv),
+c$$$     &     c(nppmax),nal(nlocmax),fmodel,ploidy,nqtc,usegeno2,useqtc
+c$$$      double precision drift(npopmax),f(npopmax,nlocmax,nalmax),
+c$$$     &     fa(nlocmax,nalmax),lambdamax,lambda,xlim(2),ylim(2),
+c$$$     &     qtc(nindiv,nqtc),
+c$$$     &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
+c$$$      integer ipp,ipop,iloc,ial,iqtc
+c$$$      double precision gglgamfn,shape1,shape2,llgq,lg,ggdnorm,ggdgamma
+c$$$*     contrib npop
+c$$$      lppgq = lppgq - dlog(dble(npopmax))
+c$$$*     contrib lambda
+c$$$      lppgq = - dlog(lambdamax)
+c$$$*     contrib npp
+c$$$      lppgq = lppgq - lambda + dble(npp)*dlog(lambda) - 
+c$$$     &     gglgamfn(dble(npp+1))
+c$$$*     contrib c
+c$$$      lppgq = lppgq - dble(npp)*dlog(dble(npop))
+c$$$*     contrib u
+c$$$      lppgq = lppgq - npp*dlog((xlim(2)-xlim(1))*(ylim(2)-ylim(1)))
+c$$$      if(usegeno2 .eq. 1) then 
+c$$$*     contrib freq
+c$$$         if(fmodel .eq. 0) then
+c$$$            lg = 0
+c$$$            do iloc = 1,nlocmax
+c$$$               lg = lg + gglgamfn(dble(nal(iloc)))
+c$$$            enddo
+c$$$            lppgq= lppgq + dble(npop) * lg
+c$$$         endif
+c$$$         if(fmodel .eq. 1) then
+c$$$*     contrib ancestral freq
+c$$$            lg = 0
+c$$$            do iloc = 1,nlocmax
+c$$$               lg = lg + gglgamfn(dble(nal(iloc)))
+c$$$            enddo
+c$$$            lppgq= lppgq + lg
+c$$$*     contrib drifts
+c$$$            do ipop = 1,npop
+c$$$               lppgq = lppgq + 
+c$$$     &              gglgamfn(shape1+shape2) - gglgamfn(shape1) 
+c$$$     &              - gglgamfn(shape2) + (shape1-1)*dlog(drift(ipop)) + 
+c$$$     &              (shape2-1)*dlog(1-drift(ipop))
+c$$$            enddo
+c$$$*     contrib freq
+c$$$            do ipop = 1,npop
+c$$$               do iloc = 1,nlocmax
+c$$$                  lppgq = lppgq + gglgamfn((1-drift(ipop))/drift(ipop))
+c$$$                  do ial=1,nal(iloc)
+c$$$                     lppgq = lppgq -gglgamfn(fa(iloc,ial)*
+c$$$     &                    (1-drift(ipop))/drift(ipop)) + 
+c$$$     &                    (fa(iloc,ial)* 
+c$$$     &                    (1-drift(ipop))/drift(ipop)-1)*
+c$$$     &                    dlog(f(ipop,iloc,ial))
+c$$$                  enddo
+c$$$               enddo
+c$$$            enddo
+c$$$         endif
+c$$$      endif
+c$$$      if(useqtc .eq. 1) then
+c$$$*     contrib mean of quantit. variables
+c$$$         do iqtc = 1,nqtc
+c$$$            do ipop = 1,npop
+c$$$               lppgq = lppgq + 
+c$$$     &            ggdnorm(meanqtc(ipop,iqtc),ksiqtc,
+c$$$     &              dsqrt(1/kappaqtc),1)
+c$$$            enddo
+c$$$         enddo
+c$$$*     contrib precision of quantit. variables
+c$$$         do iqtc = 1,nqtc
+c$$$            do ipop = 1,npop
+c$$$               lppgq = lppgq + 
+c$$$     &              ggdgamma(1/sdqtc(ipop,iqtc)**2,
+c$$$     &              alphaqtc,1/betaqtc,1)
+c$$$            enddo
+c$$$         enddo
+c$$$      endif
+c$$$      
+c$$$*     contrib likelihood
+c$$$      lppgq = lppgq + llgq(zz,nindiv,nlocmax,nlocmax2,npopmax,
+c$$$     &     nalmax,nppmax,c,f,indcell,ploidy,
+c$$$     &     qtc,nqtc,meanqtc,sdqtc,usegeno2,useqtc)
+c$$$      end function lppgq
+c$$$************************************************************************
+c$$$
 
 
 
@@ -8323,277 +8324,277 @@ c       write(*,*) 'fin smd'
 
 
 
-
-
-************************************************************************
-*     split and merge of populations 
-*     D-model for allele frequencies
-*     MH ratio does not depend on proposed frequencies
-*     extended for quantitative variables 
-      subroutine smdgq(npop,npopmin,npopmax,f,fa,drift,
-     &     nloc,nloc2,
-     &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,
-     &     a,ptmp,ftmp,drifttmp,zz,cellpop,listcell,
-     &     cellpophost,n,ntmp,ploidy,qtc,nqtc,meanqtc,sdqtc,
-     &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,usegeno2,useqtc)
-      implicit none 
-      integer npop,npopmin,npopmax,nloc,nal(nloc),
-     &     nalmax,nindiv,npp,nppmax,indcell(nindiv),
-     &     nloc2,c(nppmax),ctmp(nppmax),zz(nindiv,nloc2),
-     &     n(npopmax,nloc,nalmax),ntmp(npopmax,nloc,nalmax),
-     &     ploidy,nqtc,nnqtc,usegeno2,useqtc
-      double precision f(npopmax,nloc,nalmax),drift(npopmax),
-     &      ftmp(npopmax,nloc,nalmax),drifttmp(npopmax),
-     &     a(nalmax),ptmp(nalmax),fa(nloc,nalmax),qtc(nindiv,nqtc),
-     &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
-     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
-     &     sqtc(npopmax,nqtc),ssqtc(npopmax,nqtc),
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
-      integer ipoprem,ipp,isplit,
-     &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
-     &     ipophost,ncellpophost,cellpophost(nppmax),ii
-      double precision alpha,ggrunif,lbico,lratio,lTfd
-      integer iloc,iqtc,ipop,ipoptmp,iindiv
-      double precision llr6,termf9bis,gglgamfn,bern,ggrbinom,ggdnorm,
-     &     ggdgamma,lratiogq,contriblr,junk,b
-      
-c      write(*,*) 'debut smd' 
-c      write(*,*) 'npop =',npop
-
-      do ipp=1,nppmax
-         cellpop(ipp) = -999
-         listcell(ipp) = -999
-      enddo
-*     naissance ou mort ?
-      b = ggrbinom(1.d0,0.5d0)
-      if(b .eq. 1) then
-         if(npop .lt. npopmax) then 
-c     write(*,*) 'naissance'
-c     write(*,*) 'npop=',npop           
-*     split
-*     choix de la pop qui split
-            isplit = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-*     recherche des cellules affectees a cette pop
-            call who(c,isplit,npp,nppmax,cellpop,ncellpop)
-            if(ncellpop .gt. 0) then
-*     tirage du nombre de cellules reallouees
-C     ligne suivante corrigee le 17/01/08
-C     nu = idint(dint(dble(ncellpop)*ggrunif(0.d0,1.d0)))
-               nu = idint(dint(dble(ncellpop+1)*ggrunif(0.d0,1.d0)))
-c     write(*,*) 'nu=',nu
-               if(nu .gt. 0) then
-*     tirage des cellules reallouees
-                  call sample2(cellpop,nppmax,nu,ncellpop,listcell)
-c                   write(*,*) 'listcell=',listcell
-*     proposition de reallocation dans la pop npop+1
-                  call split(npop+1,c,ctmp,nppmax,nu,listcell)
-               else 
-                  do ipp = 1,nppmax
-                     ctmp(ipp) = c(ipp)
-                  enddo
-               endif
-            else
-               nu = 0
-               do ipp = 1,nppmax
-                  ctmp(ipp) = c(ipp)
-               enddo
-            endif
-
-            if(usegeno2 .eq. 1) then 
-*     comptage des alleles sur chaque locus pour c puis ctmp
-               call countn(nindiv,nloc,nloc2,npopmax,
-     &              nppmax,nal,nalmax,zz,n,indcell,c,ploidy)
-               call countn(nindiv,nloc,nloc2,npopmax,
-     &              nppmax,nal,nalmax,zz,ntmp,indcell,ctmp,ploidy)
-            endif
-
-*     calcul du log du ratio
-*     terme des proposal sur c
-            lratio = dlog(2*dble(ncellpop+1)) + 
-     &           lbico(ncellpop,nu) - dlog(dble(npop+1)) 
-            
-*     terme des priors sur c
-            lratio = lratio + dble(npp)*(dlog(dble(npop)) - 
-     &           dlog(dble(npop+1)))
-            
-c            write(*,*) 'in smdgq   c= ',c(1),c(2),c(3),c(4)
-c            write(*,*) '        ctmp= ',ctmp(1),ctmp(2),ctmp(3),ctmp(4)
-c            write(*,*) '       Rc=',lratio 
-            
-            if(usegeno2 .eq. 1) then 
-*     contribition of frequencies, this term includes likelihood ratio
-               lratio = lratio +
-     &              lTfd(isplit,ntmp,npopmax,nloc,nal,nalmax)  +
-     &              lTfd(npop+1,ntmp,npopmax,nloc,nal,nalmax) -
-     &              lTfd(isplit,n,npopmax,nloc,nal,nalmax) 
-c     write(*,*) 'in smd Tf=',
-c     &           lTfd(isplit,ntmp,npopmax,nloc,nal,nalmax)  
-c     &           + lTfd(npop+1,ntmp,npopmax,nloc,nal,nalmax) 
-c     &           - lTfd(isplit,n,npopmax,nloc,nal,nalmax) 
-c     write(*,*) 'in smd lratio=',lratio 
-            endif
-            
-            
-            if(useqtc .eq. 1) then 
-*     propose mean and variance of quantitative variables
-               call propparqvsplit(qtc,nindiv,nqtc,indcell,c,ctmp,
-     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
-     &              ssqtc,npop,npopmax,nppmax,
-     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,isplit,contriblr)
-*     contrib prior and proposal 
-               lratio = lratio + contriblr
-*     contrib likelihood quant. variable
-*     argument usegeno2 is passed as 0 to ignore genotypes 
-*     hence avoid having likelihood ratio of genotypes twice 
-               junk = lratio
-c      write(*,*) 'in smdgq lratiogq c=',c
-c      write(*,*) 'in smdgq ctmp=',ctmp
-               lratio = lratio + 
-     &              lratiogq(zz,f,c,ctmp,indcell,indcell,
-     &              npopmax,nloc,nalmax,nindiv,nloc,nloc2,
-     &              nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
-     &              meanqtctmp,sdqtctmp,0,useqtc)
-c               write(*,*) 'likelihood ratio=',lratio-junk
-            endif
-
-c            write(*,*) 'lratio for spit=',lratio
-            lratio = dmin1(0.d0,lratio)
-            alpha = dexp(lratio)
-            bern = ggrbinom(1.d0,alpha)
-             
-            if(bern .eq. 1) then
-               if(usegeno2 .eq. 1) then 
-*     proposition nouvelle freq et derive 
-                  call addfreq7bis(npop,npopmax,nloc,nloc,
-     &                 nal,nalmax,isplit,
-     &                 f,ftmp,fa,drift,drifttmp,a,ptmp,ntmp)
-               endif
-               if(useqtc .eq. 1) then 
-                  do iqtc = 1,nqtc
-                     do ipop = 1,npopmax
-                        meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
-                        sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
-                     enddo
-                  enddo
-               endif
-               call accept5(nppmax,npopmax,nloc,
-     &              nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
-               npop = npop + 1
-            endif
-         endif
-*     merge
-      else
-         if(npop .gt. npopmin) then 
-c      write(*,*) 'mort'
-c      write(*,*) 'npop=',npop
-*     tirage de la pop qui meurt
-            ipoprem = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-            
-*     tirage de la pop hote
-            ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-            do while(ipophost .eq. ipoprem)
-               ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-            enddo
-            
-*     on range dans la pop d'indice le plus petit
-            if(ipophost .gt. ipoprem) then
-               ii = ipophost
-               ipophost = ipoprem
-               ipoprem = ii
-            endif
-            
-*     recherche des cellules qui vont etre reallouees
-            call who(c,ipoprem,npp,nppmax,cellpop,ncellpop)
-            
-*     recherche des cellules de la pop hote
-            call who(c,ipophost,npp,nppmax,cellpophost,
-     &           ncellpophost)
-            
-*     proposition de reallocation dans la pop ipophost
-            call merging(ipoprem,ipophost,c,ctmp,nppmax,
-     &           ncellpop,cellpop)
-            
-            if(usegeno2 .eq. 1) then 
-*     comptage des alleles sur chaque locus pour c puis ctmp
-               call countn(nindiv,nloc,nloc2,npopmax,
-     &              nppmax,nal,nalmax,zz,n,indcell,c,ploidy)
-               call countn(nindiv,nloc,nloc2,npopmax,
-     &              nppmax,nal,nalmax,zz,ntmp,indcell,ctmp,ploidy)
-            endif
-            
-*     calcul du log du ratio  
-*     terme des proposal sur c
-            lratio = dlog(dble(npop)) - 
-     &           dlog(2*dble(ncellpop+ncellpophost+1)) -
-     &           lbico(ncellpop+ncellpophost,ncellpop) 
-*     terme des priors sur c
-            lratio = lratio + 
-     &           dble(npp)*(dlog(dble(npop)) - 
-     &           dlog(dble(npop-1)))
-c     write(*,*) 'terme en c lratio =',lratio
-            if(usegeno2 .eq. 1) then 
-*     term des freq
-               lratio = lratio + 
-     &              lTfd(ipophost,ntmp,npopmax,nloc,nal,nalmax) -  
-     &              lTfd(ipophost,n,npopmax,nloc,nal,nalmax) - 
-     &              lTfd(ipoprem,n,npopmax,nloc,nal,nalmax) 
-c     write(*,*) 'terme en f=',
-c     &           lTfd(ipophost,ntmp,npopmax,nloc,nal,nalmax)  
-c     &           - lTfd(ipophost,n,npopmax,nloc,nal,nalmax) 
-c     &           - lTfd(ipoprem,n,npopmax,nloc,nal,nalmax) 
-c     write(*,*) 'lratio =',lratio
-            endif
-            
-            if(useqtc .eq. 1) then 
-*     propose mean and variance of quantitative variables
-               call propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
-     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
-     &              ssqtc,npop,npopmax,nppmax,
-     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,ipoprem,
-     &              contriblr)
-*     contrib prior and proposal 
-               lratio = lratio + contriblr   
-*     contrib likelihood quant. variable
-*     argument usegeno2 is passed as 0 to ignore genotypes 
-*     hence avoid having likelihood ratio of genotypes twice 
-               lratio = lratio + 
-     &              lratiogq(zz,f,c,ctmp,indcell,indcell,
-     &              npopmax,nloc,nalmax,nindiv,nloc,nloc2,
-     &              nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
-     &              meanqtctmp,sdqtctmp,0,useqtc)    
-        
-            endif
-
-           lratio = dmin1(0.d0,lratio)
-           alpha  = dexp(lratio)
-           bern = ggrbinom(1.d0,alpha)      
-                          
-           if(bern .eq. 1) then
-              if(usegeno2 .eq. 1) then 
-*     propostion du nouveau tableau de freq et de derives
-                 call remfreq7bis(ipoprem,ipophost,
-     &                npop,npopmax,nloc,nloc,nal,
-     &                nalmax,f,ftmp,drift,drifttmp,fa,a,ptmp,ntmp)
-              endif
-              if(useqtc .eq. 1) then 
-                 do iqtc = 1,nqtc
-                    do ipop = 1,npopmax
-                       meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
-                       sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
-                    enddo
-                 enddo
-              endif
-              call accept5(nppmax,npopmax,nloc,
-     &             nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
-              npop = npop - 1
-           endif
-        endif
-      endif
-
-c       write(*,*) 'fin smd' 
-      end subroutine smdgq
-************************************************************************
+c$$$
+c$$$
+c$$$************************************************************************
+c$$$*     split and merge of populations 
+c$$$*     D-model for allele frequencies
+c$$$*     MH ratio does not depend on proposed frequencies
+c$$$*     extended for quantitative variables 
+c$$$      subroutine smdgq(npop,npopmin,npopmax,f,fa,drift,
+c$$$     &     nloc,nloc2,
+c$$$     &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,
+c$$$     &     a,ptmp,ftmp,drifttmp,zz,cellpop,listcell,
+c$$$     &     cellpophost,n,ntmp,ploidy,qtc,nqtc,meanqtc,sdqtc,
+c$$$     &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,usegeno2,useqtc)
+c$$$      implicit none 
+c$$$      integer npop,npopmin,npopmax,nloc,nal(nloc),
+c$$$     &     nalmax,nindiv,npp,nppmax,indcell(nindiv),
+c$$$     &     nloc2,c(nppmax),ctmp(nppmax),zz(nindiv,nloc2),
+c$$$     &     n(npopmax,nloc,nalmax),ntmp(npopmax,nloc,nalmax),
+c$$$     &     ploidy,nqtc,nnqtc,usegeno2,useqtc
+c$$$      double precision f(npopmax,nloc,nalmax),drift(npopmax),
+c$$$     &      ftmp(npopmax,nloc,nalmax),drifttmp(npopmax),
+c$$$     &     a(nalmax),ptmp(nalmax),fa(nloc,nalmax),qtc(nindiv,nqtc),
+c$$$     &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
+c$$$     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
+c$$$     &     sqtc(npopmax,nqtc),ssqtc(npopmax,nqtc),
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
+c$$$      integer ipoprem,ipp,isplit,
+c$$$     &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
+c$$$     &     ipophost,ncellpophost,cellpophost(nppmax),ii
+c$$$      double precision alpha,ggrunif,lbico,lratio,lTfd
+c$$$      integer iloc,iqtc,ipop,ipoptmp,iindiv
+c$$$      double precision llr6,termf9bis,gglgamfn,bern,ggrbinom,ggdnorm,
+c$$$     &     ggdgamma,lratiogq,contriblr,junk,b
+c$$$      
+c$$$c      write(*,*) 'debut smd' 
+c$$$c      write(*,*) 'npop =',npop
+c$$$
+c$$$      do ipp=1,nppmax
+c$$$         cellpop(ipp) = -999
+c$$$         listcell(ipp) = -999
+c$$$      enddo
+c$$$*     naissance ou mort ?
+c$$$      b = ggrbinom(1.d0,0.5d0)
+c$$$      if(b .eq. 1) then
+c$$$         if(npop .lt. npopmax) then 
+c$$$c     write(*,*) 'naissance'
+c$$$c     write(*,*) 'npop=',npop           
+c$$$*     split
+c$$$*     choix de la pop qui split
+c$$$            isplit = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$*     recherche des cellules affectees a cette pop
+c$$$            call who(c,isplit,npp,nppmax,cellpop,ncellpop)
+c$$$            if(ncellpop .gt. 0) then
+c$$$*     tirage du nombre de cellules reallouees
+c$$$C     ligne suivante corrigee le 17/01/08
+c$$$C     nu = idint(dint(dble(ncellpop)*ggrunif(0.d0,1.d0)))
+c$$$               nu = idint(dint(dble(ncellpop+1)*ggrunif(0.d0,1.d0)))
+c$$$c     write(*,*) 'nu=',nu
+c$$$               if(nu .gt. 0) then
+c$$$*     tirage des cellules reallouees
+c$$$                  call sample2(cellpop,nppmax,nu,ncellpop,listcell)
+c$$$c                   write(*,*) 'listcell=',listcell
+c$$$*     proposition de reallocation dans la pop npop+1
+c$$$                  call split(npop+1,c,ctmp,nppmax,nu,listcell)
+c$$$               else 
+c$$$                  do ipp = 1,nppmax
+c$$$                     ctmp(ipp) = c(ipp)
+c$$$                  enddo
+c$$$               endif
+c$$$            else
+c$$$               nu = 0
+c$$$               do ipp = 1,nppmax
+c$$$                  ctmp(ipp) = c(ipp)
+c$$$               enddo
+c$$$            endif
+c$$$
+c$$$            if(usegeno2 .eq. 1) then 
+c$$$*     comptage des alleles sur chaque locus pour c puis ctmp
+c$$$               call countn(nindiv,nloc,nloc2,npopmax,
+c$$$     &              nppmax,nal,nalmax,zz,n,indcell,c,ploidy)
+c$$$               call countn(nindiv,nloc,nloc2,npopmax,
+c$$$     &              nppmax,nal,nalmax,zz,ntmp,indcell,ctmp,ploidy)
+c$$$            endif
+c$$$
+c$$$*     calcul du log du ratio
+c$$$*     terme des proposal sur c
+c$$$            lratio = dlog(2*dble(ncellpop+1)) + 
+c$$$     &           lbico(ncellpop,nu) - dlog(dble(npop+1)) 
+c$$$            
+c$$$*     terme des priors sur c
+c$$$            lratio = lratio + dble(npp)*(dlog(dble(npop)) - 
+c$$$     &           dlog(dble(npop+1)))
+c$$$            
+c$$$c            write(*,*) 'in smdgq   c= ',c(1),c(2),c(3),c(4)
+c$$$c            write(*,*) '        ctmp= ',ctmp(1),ctmp(2),ctmp(3),ctmp(4)
+c$$$c            write(*,*) '       Rc=',lratio 
+c$$$            
+c$$$            if(usegeno2 .eq. 1) then 
+c$$$*     contribition of frequencies, this term includes likelihood ratio
+c$$$               lratio = lratio +
+c$$$     &              lTfd(isplit,ntmp,npopmax,nloc,nal,nalmax)  +
+c$$$     &              lTfd(npop+1,ntmp,npopmax,nloc,nal,nalmax) -
+c$$$     &              lTfd(isplit,n,npopmax,nloc,nal,nalmax) 
+c$$$c     write(*,*) 'in smd Tf=',
+c$$$c     &           lTfd(isplit,ntmp,npopmax,nloc,nal,nalmax)  
+c$$$c     &           + lTfd(npop+1,ntmp,npopmax,nloc,nal,nalmax) 
+c$$$c     &           - lTfd(isplit,n,npopmax,nloc,nal,nalmax) 
+c$$$c     write(*,*) 'in smd lratio=',lratio 
+c$$$            endif
+c$$$            
+c$$$            
+c$$$            if(useqtc .eq. 1) then 
+c$$$*     propose mean and variance of quantitative variables
+c$$$               call propparqvsplit(qtc,nindiv,nqtc,indcell,c,ctmp,
+c$$$     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
+c$$$     &              ssqtc,npop,npopmax,nppmax,
+c$$$     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,isplit,contriblr)
+c$$$*     contrib prior and proposal 
+c$$$               lratio = lratio + contriblr
+c$$$*     contrib likelihood quant. variable
+c$$$*     argument usegeno2 is passed as 0 to ignore genotypes 
+c$$$*     hence avoid having likelihood ratio of genotypes twice 
+c$$$               junk = lratio
+c$$$c      write(*,*) 'in smdgq lratiogq c=',c
+c$$$c      write(*,*) 'in smdgq ctmp=',ctmp
+c$$$               lratio = lratio + 
+c$$$     &              lratiogq(zz,f,c,ctmp,indcell,indcell,
+c$$$     &              npopmax,nloc,nalmax,nindiv,nloc,nloc2,
+c$$$     &              nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
+c$$$     &              meanqtctmp,sdqtctmp,0,useqtc)
+c$$$c               write(*,*) 'likelihood ratio=',lratio-junk
+c$$$            endif
+c$$$
+c$$$c            write(*,*) 'lratio for spit=',lratio
+c$$$            lratio = dmin1(0.d0,lratio)
+c$$$            alpha = dexp(lratio)
+c$$$            bern = ggrbinom(1.d0,alpha)
+c$$$             
+c$$$            if(bern .eq. 1) then
+c$$$               if(usegeno2 .eq. 1) then 
+c$$$*     proposition nouvelle freq et derive 
+c$$$                  call addfreq7bis(npop,npopmax,nloc,nloc,
+c$$$     &                 nal,nalmax,isplit,
+c$$$     &                 f,ftmp,fa,drift,drifttmp,a,ptmp,ntmp)
+c$$$               endif
+c$$$               if(useqtc .eq. 1) then 
+c$$$                  do iqtc = 1,nqtc
+c$$$                     do ipop = 1,npopmax
+c$$$                        meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
+c$$$                        sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               endif
+c$$$               call accept5(nppmax,npopmax,nloc,
+c$$$     &              nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
+c$$$               npop = npop + 1
+c$$$            endif
+c$$$         endif
+c$$$*     merge
+c$$$      else
+c$$$         if(npop .gt. npopmin) then 
+c$$$c      write(*,*) 'mort'
+c$$$c      write(*,*) 'npop=',npop
+c$$$*     tirage de la pop qui meurt
+c$$$            ipoprem = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$            
+c$$$*     tirage de la pop hote
+c$$$            ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$            do while(ipophost .eq. ipoprem)
+c$$$               ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$            enddo
+c$$$            
+c$$$*     on range dans la pop d'indice le plus petit
+c$$$            if(ipophost .gt. ipoprem) then
+c$$$               ii = ipophost
+c$$$               ipophost = ipoprem
+c$$$               ipoprem = ii
+c$$$            endif
+c$$$            
+c$$$*     recherche des cellules qui vont etre reallouees
+c$$$            call who(c,ipoprem,npp,nppmax,cellpop,ncellpop)
+c$$$            
+c$$$*     recherche des cellules de la pop hote
+c$$$            call who(c,ipophost,npp,nppmax,cellpophost,
+c$$$     &           ncellpophost)
+c$$$            
+c$$$*     proposition de reallocation dans la pop ipophost
+c$$$            call merging(ipoprem,ipophost,c,ctmp,nppmax,
+c$$$     &           ncellpop,cellpop)
+c$$$            
+c$$$            if(usegeno2 .eq. 1) then 
+c$$$*     comptage des alleles sur chaque locus pour c puis ctmp
+c$$$               call countn(nindiv,nloc,nloc2,npopmax,
+c$$$     &              nppmax,nal,nalmax,zz,n,indcell,c,ploidy)
+c$$$               call countn(nindiv,nloc,nloc2,npopmax,
+c$$$     &              nppmax,nal,nalmax,zz,ntmp,indcell,ctmp,ploidy)
+c$$$            endif
+c$$$            
+c$$$*     calcul du log du ratio  
+c$$$*     terme des proposal sur c
+c$$$            lratio = dlog(dble(npop)) - 
+c$$$     &           dlog(2*dble(ncellpop+ncellpophost+1)) -
+c$$$     &           lbico(ncellpop+ncellpophost,ncellpop) 
+c$$$*     terme des priors sur c
+c$$$            lratio = lratio + 
+c$$$     &           dble(npp)*(dlog(dble(npop)) - 
+c$$$     &           dlog(dble(npop-1)))
+c$$$c     write(*,*) 'terme en c lratio =',lratio
+c$$$            if(usegeno2 .eq. 1) then 
+c$$$*     term des freq
+c$$$               lratio = lratio + 
+c$$$     &              lTfd(ipophost,ntmp,npopmax,nloc,nal,nalmax) -  
+c$$$     &              lTfd(ipophost,n,npopmax,nloc,nal,nalmax) - 
+c$$$     &              lTfd(ipoprem,n,npopmax,nloc,nal,nalmax) 
+c$$$c     write(*,*) 'terme en f=',
+c$$$c     &           lTfd(ipophost,ntmp,npopmax,nloc,nal,nalmax)  
+c$$$c     &           - lTfd(ipophost,n,npopmax,nloc,nal,nalmax) 
+c$$$c     &           - lTfd(ipoprem,n,npopmax,nloc,nal,nalmax) 
+c$$$c     write(*,*) 'lratio =',lratio
+c$$$            endif
+c$$$            
+c$$$            if(useqtc .eq. 1) then 
+c$$$*     propose mean and variance of quantitative variables
+c$$$               call propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
+c$$$     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
+c$$$     &              ssqtc,npop,npopmax,nppmax,
+c$$$     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,ipoprem,
+c$$$     &              contriblr)
+c$$$*     contrib prior and proposal 
+c$$$               lratio = lratio + contriblr   
+c$$$*     contrib likelihood quant. variable
+c$$$*     argument usegeno2 is passed as 0 to ignore genotypes 
+c$$$*     hence avoid having likelihood ratio of genotypes twice 
+c$$$               lratio = lratio + 
+c$$$     &              lratiogq(zz,f,c,ctmp,indcell,indcell,
+c$$$     &              npopmax,nloc,nalmax,nindiv,nloc,nloc2,
+c$$$     &              nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
+c$$$     &              meanqtctmp,sdqtctmp,0,useqtc)    
+c$$$        
+c$$$            endif
+c$$$
+c$$$           lratio = dmin1(0.d0,lratio)
+c$$$           alpha  = dexp(lratio)
+c$$$           bern = ggrbinom(1.d0,alpha)      
+c$$$                          
+c$$$           if(bern .eq. 1) then
+c$$$              if(usegeno2 .eq. 1) then 
+c$$$*     propostion du nouveau tableau de freq et de derives
+c$$$                 call remfreq7bis(ipoprem,ipophost,
+c$$$     &                npop,npopmax,nloc,nloc,nal,
+c$$$     &                nalmax,f,ftmp,drift,drifttmp,fa,a,ptmp,ntmp)
+c$$$              endif
+c$$$              if(useqtc .eq. 1) then 
+c$$$                 do iqtc = 1,nqtc
+c$$$                    do ipop = 1,npopmax
+c$$$                       meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
+c$$$                       sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
+c$$$                    enddo
+c$$$                 enddo
+c$$$              endif
+c$$$              call accept5(nppmax,npopmax,nloc,
+c$$$     &             nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
+c$$$              npop = npop - 1
+c$$$           endif
+c$$$        endif
+c$$$      endif
+c$$$
+c$$$c       write(*,*) 'fin smd' 
+c$$$      end subroutine smdgq
+c$$$************************************************************************
 
 
 
@@ -8618,7 +8619,8 @@ c       write(*,*) 'fin smd'
      &     nloch,nql,c(nppmax),ctmp(nppmax),yy(nindiv,2*nlocd+2*nloch),
      &     z(nindiv,nloch),ql(nindiv,nql),
      &     n(npopmax,ncolt,nalmax),ntmp(npopmax,ncolt,nalmax),
-     &     nqtc,nnqtc,usegeno2,usegeno1,useql,useqtc,ploidy
+     &     nqtc,nnqtc(npopmax,nqtc),usegeno2,usegeno1,useql,useqtc,
+     &     ploidy
       double precision f(npopmax,ncolt,nalmax),drift(npopmax),
      &      ftmp(npopmax,ncolt,nalmax),drifttmp(npopmax),
      &     a(nalmax),ptmp(nalmax),fa(ncolt,nalmax),qtc(nindiv,nqtc),
@@ -8959,335 +8961,335 @@ c       write(*,*) 'fin smdallvar3'
 ************************************************************************
 
 
-
-************************************************************************
-*     split and merge of populations 
-*     uncorrelated model for frequencies
-*     MH ratio does not depend on proposed frequencies
-*     extended for quantitative variables 
-      subroutine smdallvar2(npop,npopmin,npopmax,f,fa,drift,
-     &     nlocd,nloch,ncolt,nql,
-     &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,
-     &     a,ptmp,ftmp,drifttmp,yy,z,ql,cellpop,listcell,
-     &     cellpophost,n,ntmp,qtc,nqtc,meanqtc,sdqtc,
-     &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,
-     &     usegeno2,usegeno1,useql,useqtc,ploidy)
-      implicit none 
-      integer npop,npopmin,npopmax,ncolt,nal(ncolt),
-     &     nalmax,nindiv,npp,nppmax,indcell(nindiv),nlocd,nlocd2,
-     &     nloch,nql,c(nppmax),ctmp(nppmax),yy(nindiv,2*nlocd+2*nloch),
-     &     z(nindiv,nloch),ql(nindiv,nql),
-     &     n(npopmax,ncolt,nalmax),ntmp(npopmax,ncolt,nalmax),
-     &     nqtc,nnqtc,usegeno2,usegeno1,useql,useqtc,ploidy
-      double precision f(npopmax,ncolt,nalmax),drift(npopmax),
-     &      ftmp(npopmax,ncolt,nalmax),drifttmp(npopmax),
-     &     a(nalmax),ptmp(nalmax),fa(ncolt,nalmax),qtc(nindiv,nqtc),
-     &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
-     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
-     &     sqtc(npopmax,nqtc),ssqtc(npopmax,nqtc),
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
-      integer ipoprem,ipp,isplit,
-     &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
-     &     ipophost,ncellpophost,cellpophost(nppmax),ii
-      double precision alpha,ggrunif,lbico,lratio,lTfdallvar
-      integer b,iloc,iqtc,ipop,ipoptmp,iindiv
-      double precision llr6,termf9bis,gglgamfn,bern,ggrbinom,ggdnorm,
-     &     ggdgamma,lrallvar2,contriblr,junk
-      dimension ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc)
-      
-c      write(*,*) 'debut smdallvar2' 
-c      write(*,*) 'npop =',npop
-
-
-      do ipp=1,nppmax
-         cellpop(ipp) = -999
-         listcell(ipp) = -999
-      enddo
-*     naissance ou mort ?
-      b = ggrbinom(1.d0,0.5d0)
-      if(b .eq. 1) then
-         if(npop .lt. npopmax) then 
-c            write(*,*) 'naissance'
-c            write(*,*) 'npop=',npop       
-c             write(*,*) 'npp=',npp       
-*     split
-*     choix de la pop qui split
-            isplit = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-*     recherche des cellules affectees a cette pop
-            call who(c,isplit,npp,nppmax,cellpop,ncellpop)
-            if(ncellpop .gt. 0) then
-*     tirage du nombre de cellules reallouees
-               nu = idint(dint(dble(ncellpop+1)*ggrunif(0.d0,1.d0)))
-c               write(*,*) 'nu=',nu
-               if(nu .gt. 0) then
-*     tirage des cellules reallouees
-                  call sample2(cellpop,nppmax,nu,ncellpop,listcell)
-c                   write(*,*) 'listcell=',listcell
-*     proposition de reallocation dans la pop npop+1
-                  call split(npop+1,c,ctmp,nppmax,nu,listcell)
-               else 
-                  do ipp = 1,nppmax
-                     ctmp(ipp) = c(ipp)
-                  enddo
-               endif
-            else
-               nu = 0
-               do ipp = 1,nppmax
-                  ctmp(ipp) = c(ipp)
-               enddo
-            endif
-c            write(*,*) 'c=',c(1),c(2),c(3),c(4)
-c            write(*,*) 'ctmp=',ctmp(1),ctmp(2),ctmp(3),ctmp(4)
-
-            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &           useql .eq. 1) then
-*     comptage des alleles sur chaque locus pour c puis ctmp
-               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
-     &              nppmax,nal,nalmax,yy,z,ql,n,indcell,c,npopmax,
-     &              usegeno2,usegeno1,useql,ploidy)
-               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
-     &              nppmax,nal,nalmax,yy,z,ql,ntmp,indcell,ctmp,npopmax,
-     &              usegeno2,usegeno1,useql,ploidy)
-            endif
-
-*     calcul du log du ratio
-*     terme des proposal sur c
-            lratio = dlog(2*dble(ncellpop+1)) + 
-     &           lbico(ncellpop,nu) - dlog(dble(npop+1)) 
-c            write(6,*) 'split apres proposal c lratio=',lratio 
-            
-            
-*     terme des priors sur c
-            lratio = lratio + dble(npp)*(dlog(dble(npop)) - 
-     &           dlog(dble(npop+1)))
-c            write(6,*) 'split apres prior c lratio=',lratio 
-c            write(*,*) 'in smdgq   c= ',c(1),c(2),c(3),c(4)
-c            write(*,*) '        ctmp= ',ctmp(1),ctmp(2),ctmp(3),ctmp(4)
-c            write(*,*) '       Rc=',lratio 
-            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &           useql .eq. 1) then
-c               write(*,*) 'avant appel lTfdallvar'
-*     contribition of frequencies, this term includes likelihood ratio
-c$$$               lratio = lratio +
-c$$$     &              lTfd(isplit,ntmp,npopmax,nloc,nal,nalmax)  +
-c$$$     &              lTfd(npop+1,ntmp,npopmax,nloc,nal,nalmax) -
-c$$$     &              lTfd(isplit,n,npopmax,nloc,nal,nalmax) 
-               lratio = lratio + 
-     &              lTfdallvar(isplit,ntmp,npopmax,nlocd,nloch,
-     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql) + 
-     &              lTfdallvar(npop+1,ntmp,npopmax,nlocd,nloch,
-     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql) - 
-     &              lTfdallvar(isplit,n,npopmax,nlocd,nloch,
-     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql)
-c               write(*,*) 'apres appel lTfdallvar'
-c               write(6,*) 'split apres prior contrib freq =',lratio 
-            endif
-            
-            
-            if(useqtc .eq. 1) then 
-*     propose mean and variance of quantitative variables
-               call propparqvsplit(qtc,nindiv,nqtc,indcell,c,ctmp,
-     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
-     &              ssqtc,npop,npopmax,nppmax,
-     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,isplit,contriblr)
-*     contrib prior and proposal 
-               lratio = lratio + contriblr
-*     contrib likelihood quant. variable
-*     argument usegeno2 is passed as 0 to ignore genotypes 
-*     hence avoid having likelihood ratio of genotypes twice 
-c               junk = lratio
-c      write(*,*) 'in smdgq lratiogq c=',c
-c      write(*,*) 'in smdgq ctmp=',ctmp
+c$$$
+c$$$************************************************************************
+c$$$*     split and merge of populations 
+c$$$*     uncorrelated model for frequencies
+c$$$*     MH ratio does not depend on proposed frequencies
+c$$$*     extended for quantitative variables 
+c$$$      subroutine smdallvar2(npop,npopmin,npopmax,f,fa,drift,
+c$$$     &     nlocd,nloch,ncolt,nql,
+c$$$     &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,
+c$$$     &     a,ptmp,ftmp,drifttmp,yy,z,ql,cellpop,listcell,
+c$$$     &     cellpophost,n,ntmp,qtc,nqtc,meanqtc,sdqtc,
+c$$$     &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,
+c$$$     &     usegeno2,usegeno1,useql,useqtc,ploidy)
+c$$$      implicit none 
+c$$$      integer npop,npopmin,npopmax,ncolt,nal(ncolt),
+c$$$     &     nalmax,nindiv,npp,nppmax,indcell(nindiv),nlocd,nlocd2,
+c$$$     &     nloch,nql,c(nppmax),ctmp(nppmax),yy(nindiv,2*nlocd+2*nloch),
+c$$$     &     z(nindiv,nloch),ql(nindiv,nql),
+c$$$     &     n(npopmax,ncolt,nalmax),ntmp(npopmax,ncolt,nalmax),
+c$$$     &     nqtc,nnqtc,usegeno2,usegeno1,useql,useqtc,ploidy
+c$$$      double precision f(npopmax,ncolt,nalmax),drift(npopmax),
+c$$$     &      ftmp(npopmax,ncolt,nalmax),drifttmp(npopmax),
+c$$$     &     a(nalmax),ptmp(nalmax),fa(ncolt,nalmax),qtc(nindiv,nqtc),
+c$$$     &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
+c$$$     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
+c$$$     &     sqtc(npopmax,nqtc),ssqtc(npopmax,nqtc),
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
+c$$$      integer ipoprem,ipp,isplit,
+c$$$     &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
+c$$$     &     ipophost,ncellpophost,cellpophost(nppmax),ii
+c$$$      double precision alpha,ggrunif,lbico,lratio,lTfdallvar
+c$$$      integer b,iloc,iqtc,ipop,ipoptmp,iindiv
+c$$$      double precision llr6,termf9bis,gglgamfn,bern,ggrbinom,ggdnorm,
+c$$$     &     ggdgamma,lrallvar2,contriblr,junk
+c$$$      dimension ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc)
+c$$$      
+c$$$c      write(*,*) 'debut smdallvar2' 
+c$$$c      write(*,*) 'npop =',npop
+c$$$
+c$$$
+c$$$      do ipp=1,nppmax
+c$$$         cellpop(ipp) = -999
+c$$$         listcell(ipp) = -999
+c$$$      enddo
+c$$$*     naissance ou mort ?
+c$$$      b = ggrbinom(1.d0,0.5d0)
+c$$$      if(b .eq. 1) then
+c$$$         if(npop .lt. npopmax) then 
+c$$$c            write(*,*) 'naissance'
+c$$$c            write(*,*) 'npop=',npop       
+c$$$c             write(*,*) 'npp=',npp       
+c$$$*     split
+c$$$*     choix de la pop qui split
+c$$$            isplit = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$*     recherche des cellules affectees a cette pop
+c$$$            call who(c,isplit,npp,nppmax,cellpop,ncellpop)
+c$$$            if(ncellpop .gt. 0) then
+c$$$*     tirage du nombre de cellules reallouees
+c$$$               nu = idint(dint(dble(ncellpop+1)*ggrunif(0.d0,1.d0)))
+c$$$c               write(*,*) 'nu=',nu
+c$$$               if(nu .gt. 0) then
+c$$$*     tirage des cellules reallouees
+c$$$                  call sample2(cellpop,nppmax,nu,ncellpop,listcell)
+c$$$c                   write(*,*) 'listcell=',listcell
+c$$$*     proposition de reallocation dans la pop npop+1
+c$$$                  call split(npop+1,c,ctmp,nppmax,nu,listcell)
+c$$$               else 
+c$$$                  do ipp = 1,nppmax
+c$$$                     ctmp(ipp) = c(ipp)
+c$$$                  enddo
+c$$$               endif
+c$$$            else
+c$$$               nu = 0
+c$$$               do ipp = 1,nppmax
+c$$$                  ctmp(ipp) = c(ipp)
+c$$$               enddo
+c$$$            endif
+c$$$c            write(*,*) 'c=',c(1),c(2),c(3),c(4)
+c$$$c            write(*,*) 'ctmp=',ctmp(1),ctmp(2),ctmp(3),ctmp(4)
+c$$$
+c$$$            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &           useql .eq. 1) then
+c$$$*     comptage des alleles sur chaque locus pour c puis ctmp
+c$$$               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
+c$$$     &              nppmax,nal,nalmax,yy,z,ql,n,indcell,c,npopmax,
+c$$$     &              usegeno2,usegeno1,useql,ploidy)
+c$$$               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
+c$$$     &              nppmax,nal,nalmax,yy,z,ql,ntmp,indcell,ctmp,npopmax,
+c$$$     &              usegeno2,usegeno1,useql,ploidy)
+c$$$            endif
+c$$$
+c$$$*     calcul du log du ratio
+c$$$*     terme des proposal sur c
+c$$$            lratio = dlog(2*dble(ncellpop+1)) + 
+c$$$     &           lbico(ncellpop,nu) - dlog(dble(npop+1)) 
+c$$$c            write(6,*) 'split apres proposal c lratio=',lratio 
+c$$$            
+c$$$            
+c$$$*     terme des priors sur c
+c$$$            lratio = lratio + dble(npp)*(dlog(dble(npop)) - 
+c$$$     &           dlog(dble(npop+1)))
+c$$$c            write(6,*) 'split apres prior c lratio=',lratio 
+c$$$c            write(*,*) 'in smdgq   c= ',c(1),c(2),c(3),c(4)
+c$$$c            write(*,*) '        ctmp= ',ctmp(1),ctmp(2),ctmp(3),ctmp(4)
+c$$$c            write(*,*) '       Rc=',lratio 
+c$$$            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &           useql .eq. 1) then
+c$$$c               write(*,*) 'avant appel lTfdallvar'
+c$$$*     contribition of frequencies, this term includes likelihood ratio
+c$$$c$$$               lratio = lratio +
+c$$$c$$$     &              lTfd(isplit,ntmp,npopmax,nloc,nal,nalmax)  +
+c$$$c$$$     &              lTfd(npop+1,ntmp,npopmax,nloc,nal,nalmax) -
+c$$$c$$$     &              lTfd(isplit,n,npopmax,nloc,nal,nalmax) 
 c$$$               lratio = lratio + 
-c$$$     &              lratiogq(yy,f,c,ctmp,indcell,indcell,
-c$$$     &              npopmax,nloc,nalmax,nindiv,nloc,nloc2,
-c$$$     &              nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
-c$$$     &              meanqtctmp,sdqtctmp,0,useqtc)
-               lratio = lratio + lrallvar2(yy,z,ql,
-     &              f,c,ctmp,indcell,indcell,
-     &              npopmax,nlocd,nloch,nql,ncolt,nalmax,nindiv,
-     &              nppmax,qtc,nqtc,meanqtc,sdqtc,meanqtctmp,sdqtctmp,
-     &              0,0,0,useqtc,ploidy)
-c               write(6,*) 'split apres llhood=',lratio 
-            endif
-
-c            write(*,*) 'lratio for split=',lratio
-            lratio = dmin1(0.d0,lratio)
-            alpha = dexp(lratio)
-            bern = ggrbinom(1.d0,alpha)
-             
-            if(bern .eq. 1) then
-               if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &              useql .eq. 1) then
-*     proposition nouvelle freq et derive 
-                  call addfallbis(npop,npopmax,nlocd,nlocd2,nloch,nql,
-     &                 ncolt,nal,nalmax,isplit,f,ftmp,fa,drift,drifttmp,
-     &                 a,ptmp,ntmp,usegeno2,usegeno1,useql)
-               endif
-               if(useqtc .eq. 1) then 
-                  do iqtc = 1,nqtc
-                     do ipop = 1,npopmax
-                        meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
-                        sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
-                     enddo
-                  enddo
-               endif
-               call accept5(nppmax,npopmax,ncolt,
-     &              nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
-               npop = npop + 1
-            endif
-         endif
-*     merge
-      else
-         if(npop .gt. npopmin) then 
-c      write(*,*) 'mort'
-c      write(*,*) 'npop=',npop
-*     tirage de la pop qui meurt
-            ipoprem = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-            
-*     tirage de la pop hote
-            ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-            do while(ipophost .eq. ipoprem)
-               ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-            enddo
-            
-*     on range dans la pop d'indice le plus petit
-            if(ipophost .gt. ipoprem) then
-               ii = ipophost
-               ipophost = ipoprem
-               ipoprem = ii
-            endif
-            
-*     recherche des cellules qui vont etre reallouees
-            call who(c,ipoprem,npp,nppmax,cellpop,ncellpop)
-            
-*     recherche des cellules de la pop hote
-            call who(c,ipophost,npp,nppmax,cellpophost,
-     &           ncellpophost)
-            
-*     proposition de reallocation dans la pop ipophost
-            call merging(ipoprem,ipophost,c,ctmp,nppmax,
-     &           ncellpop,cellpop)
-c            write(*,*) 'c=',c(1),c(2),c(3),c(4)
-c            write(*,*) 'ctmp=',ctmp(1),ctmp(2),ctmp(3),ctmp(4)   
-            
-            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &           useql .eq. 1) then
-*     comptage des alleles sur chaque locus pour c puis ctmp
-c     write(*,*) 'avant appel countnallvar'
-               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
-     &              nppmax,nal,nalmax,yy,z,ql,n,indcell,c,npopmax,
-     &              usegeno2, usegeno1,useql,ploidy)
-               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
-     &              nppmax,nal,nalmax,yy,z,ql,ntmp,indcell,ctmp,npopmax,
-     &              usegeno2, usegeno1,useql,ploidy)
-c     write(*,*) 'apres appel countnallvar'
-            endif
-        
-
-*     calcul du log du ratio  
-*     terme des proposal sur c
-            lratio = dlog(dble(npop)) - 
-     &           dlog(2*dble(ncellpop+ncellpophost+1)) -
-     &           lbico(ncellpop+ncellpophost,ncellpop) 
-c            write(6,*) 'merge apres proposal c lratio=',lratio 
-*     terme des priors sur c
-            lratio = lratio + 
-     &           dble(npp)*(dlog(dble(npop)) - 
-     &           dlog(dble(npop-1)))
-c            write(6,*) 'merge apres prior c lratio=',lratio 
-c     write(*,*) 'terme en c lratio =',lratio
-            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &           useql .eq. 1) then
-*     term des freq
-c$$$  lratio = lratio + 
-c$$$     &              lTfd(ipophost,ntmp,npopmax,nloc,nal,nalmax) -  
-c$$$  &              lTfd(ipophost,n,npopmax,nloc,nal,nalmax) - 
-c$$$  &              lTfd(ipoprem,n,npopmax,nloc,nal,nalmax) 
-c               write(*,*) 'avant appel lTfdallvar'
-               lratio = lratio + 
-     &              lTfdallvar(ipophost,ntmp,npopmax,nlocd,nloch,
-     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql) -
-     &              lTfdallvar(ipophost,n,npopmax,nlocd,nloch,
-     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql) - 
-     &              lTfdallvar(ipoprem,n,npopmax,nlocd,nloch,
-     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql)
-c               write(*,*) 'apres appel lTfdallvar'
-c               write(6,*) 'merge apres prior contrib freq =',lratio 
-            endif
-            
-            if(useqtc .eq. 1) then 
-*     propose mean and variance of quantitative variables
-               call propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
-     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
-     &              ssqtc,npop,npopmax,nppmax,
-     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,ipoprem,
-     &              contriblr)
-*     contrib prior and proposal 
-               lratio = lratio + contriblr   
-*     contrib likelihood quant. variable
-*     argument usegeno2 is passed as 0 to ignore genotypes 
-*     hence avoid having likelihood ratio of genotypes twice 
-c$$$  lratio = lratio + 
-c$$$  &              lratiogq(yy,f,c,ctmp,indcell,indcell,
-c$$$     &              npopmax,nloc,nalmax,nindiv,nloc,nloc2,
-c$$$  &              nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
-c$$$  &              meanqtctmp,sdqtctmp,0,useqtc)    
-               lratio = lratio + lrallvar2(yy,z,ql,
-     &              f,c,ctmp,indcell,indcell,
-     &              npopmax,nlocd,nloch,nql,ncolt,nalmax,nindiv,
-     &              nppmax,qtc,nqtc,meanqtc,sdqtc,meanqtctmp,sdqtctmp,
-     &              0,0,0,useqtc,ploidy)   
-c               write(6,*) 'merge apres llhood=',lratio 
-            endif
-c            write(*,*) 'lratio for merge=',lratio
-
-            lratio = dmin1(0.d0,lratio)
-            alpha  = dexp(lratio)
-            bern = ggrbinom(1.d0,alpha)      
-            
-            if(bern .eq. 1) then
-               if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &              useql .eq. 1) then
-*     propostion du nouveau tableau de freq et de derives
-c$$$  call remfreq7bis(ipoprem,ipophost,
-c$$$  &                  npop,npopmax,nloc,nal,
-c$$$  &                  nalmax,f,ftmp,drift,drifttmp,fa,a,ptmp,ntmp)
-                  call  remfallbis(ipoprem,ipophost,
-     &                 npop,npopmax,nlocd,nlocd2,nloch,nql,ncolt,nal,
-     &                 nalmax,f,ftmp,drift,drifttmp,fa,a,ptmp,ntmp,
-     &                 usegeno2,usegeno1,useql)
-               endif
-               if(useqtc .eq. 1) then 
-                  do iqtc = 1,nqtc
-                     do ipop = 1,npopmax
-                        meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
-                        sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
-                     enddo
-                  enddo
-               endif
-               call accept5(nppmax,npopmax,ncolt,
-     &              nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
-               npop = npop - 1
-            endif
-         endif
-      endif
-
-c$$$      write(*,*) 'z =', z
-c$$$      write(*,*) 'yy =', yy
-c$$$      write(*,*) 'ql =', ql
-c$$$      write(*,*) 'c =', c
-c$$$      write(*,*) 'ctmp =',ctmp 
-c$$$      write(*,*) 'f =', f  
-c$$$      write(*,*) 'ftmp =', ftmp
-c$$$      write(*,*) 'qtc=',qtc
-c$$$      write(*,*) 'meanqtc=',meanqtc
-c$$$      write(*,*) 'sdqtc=',sdqtc
-c$$$      write(*,*) 'nnqtc=',nnqtc
-c       write(*,*) 'fin smdallvar2' 
-      end subroutine smdallvar2
-************************************************************************
+c$$$     &              lTfdallvar(isplit,ntmp,npopmax,nlocd,nloch,
+c$$$     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql) + 
+c$$$     &              lTfdallvar(npop+1,ntmp,npopmax,nlocd,nloch,
+c$$$     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql) - 
+c$$$     &              lTfdallvar(isplit,n,npopmax,nlocd,nloch,
+c$$$     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql)
+c$$$c               write(*,*) 'apres appel lTfdallvar'
+c$$$c               write(6,*) 'split apres prior contrib freq =',lratio 
+c$$$            endif
+c$$$            
+c$$$            
+c$$$            if(useqtc .eq. 1) then 
+c$$$*     propose mean and variance of quantitative variables
+c$$$               call propparqvsplit(qtc,nindiv,nqtc,indcell,c,ctmp,
+c$$$     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
+c$$$     &              ssqtc,npop,npopmax,nppmax,
+c$$$     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,isplit,contriblr)
+c$$$*     contrib prior and proposal 
+c$$$               lratio = lratio + contriblr
+c$$$*     contrib likelihood quant. variable
+c$$$*     argument usegeno2 is passed as 0 to ignore genotypes 
+c$$$*     hence avoid having likelihood ratio of genotypes twice 
+c$$$c               junk = lratio
+c$$$c      write(*,*) 'in smdgq lratiogq c=',c
+c$$$c      write(*,*) 'in smdgq ctmp=',ctmp
+c$$$c$$$               lratio = lratio + 
+c$$$c$$$     &              lratiogq(yy,f,c,ctmp,indcell,indcell,
+c$$$c$$$     &              npopmax,nloc,nalmax,nindiv,nloc,nloc2,
+c$$$c$$$     &              nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
+c$$$c$$$     &              meanqtctmp,sdqtctmp,0,useqtc)
+c$$$               lratio = lratio + lrallvar2(yy,z,ql,
+c$$$     &              f,c,ctmp,indcell,indcell,
+c$$$     &              npopmax,nlocd,nloch,nql,ncolt,nalmax,nindiv,
+c$$$     &              nppmax,qtc,nqtc,meanqtc,sdqtc,meanqtctmp,sdqtctmp,
+c$$$     &              0,0,0,useqtc,ploidy)
+c$$$c               write(6,*) 'split apres llhood=',lratio 
+c$$$            endif
+c$$$
+c$$$c            write(*,*) 'lratio for split=',lratio
+c$$$            lratio = dmin1(0.d0,lratio)
+c$$$            alpha = dexp(lratio)
+c$$$            bern = ggrbinom(1.d0,alpha)
+c$$$             
+c$$$            if(bern .eq. 1) then
+c$$$               if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &              useql .eq. 1) then
+c$$$*     proposition nouvelle freq et derive 
+c$$$                  call addfallbis(npop,npopmax,nlocd,nlocd2,nloch,nql,
+c$$$     &                 ncolt,nal,nalmax,isplit,f,ftmp,fa,drift,drifttmp,
+c$$$     &                 a,ptmp,ntmp,usegeno2,usegeno1,useql)
+c$$$               endif
+c$$$               if(useqtc .eq. 1) then 
+c$$$                  do iqtc = 1,nqtc
+c$$$                     do ipop = 1,npopmax
+c$$$                        meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
+c$$$                        sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               endif
+c$$$               call accept5(nppmax,npopmax,ncolt,
+c$$$     &              nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
+c$$$               npop = npop + 1
+c$$$            endif
+c$$$         endif
+c$$$*     merge
+c$$$      else
+c$$$         if(npop .gt. npopmin) then 
+c$$$c      write(*,*) 'mort'
+c$$$c      write(*,*) 'npop=',npop
+c$$$*     tirage de la pop qui meurt
+c$$$            ipoprem = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$            
+c$$$*     tirage de la pop hote
+c$$$            ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$            do while(ipophost .eq. ipoprem)
+c$$$               ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$            enddo
+c$$$            
+c$$$*     on range dans la pop d'indice le plus petit
+c$$$            if(ipophost .gt. ipoprem) then
+c$$$               ii = ipophost
+c$$$               ipophost = ipoprem
+c$$$               ipoprem = ii
+c$$$            endif
+c$$$            
+c$$$*     recherche des cellules qui vont etre reallouees
+c$$$            call who(c,ipoprem,npp,nppmax,cellpop,ncellpop)
+c$$$            
+c$$$*     recherche des cellules de la pop hote
+c$$$            call who(c,ipophost,npp,nppmax,cellpophost,
+c$$$     &           ncellpophost)
+c$$$            
+c$$$*     proposition de reallocation dans la pop ipophost
+c$$$            call merging(ipoprem,ipophost,c,ctmp,nppmax,
+c$$$     &           ncellpop,cellpop)
+c$$$c            write(*,*) 'c=',c(1),c(2),c(3),c(4)
+c$$$c            write(*,*) 'ctmp=',ctmp(1),ctmp(2),ctmp(3),ctmp(4)   
+c$$$            
+c$$$            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &           useql .eq. 1) then
+c$$$*     comptage des alleles sur chaque locus pour c puis ctmp
+c$$$c     write(*,*) 'avant appel countnallvar'
+c$$$               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
+c$$$     &              nppmax,nal,nalmax,yy,z,ql,n,indcell,c,npopmax,
+c$$$     &              usegeno2, usegeno1,useql,ploidy)
+c$$$               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
+c$$$     &              nppmax,nal,nalmax,yy,z,ql,ntmp,indcell,ctmp,npopmax,
+c$$$     &              usegeno2, usegeno1,useql,ploidy)
+c$$$c     write(*,*) 'apres appel countnallvar'
+c$$$            endif
+c$$$        
+c$$$
+c$$$*     calcul du log du ratio  
+c$$$*     terme des proposal sur c
+c$$$            lratio = dlog(dble(npop)) - 
+c$$$     &           dlog(2*dble(ncellpop+ncellpophost+1)) -
+c$$$     &           lbico(ncellpop+ncellpophost,ncellpop) 
+c$$$c            write(6,*) 'merge apres proposal c lratio=',lratio 
+c$$$*     terme des priors sur c
+c$$$            lratio = lratio + 
+c$$$     &           dble(npp)*(dlog(dble(npop)) - 
+c$$$     &           dlog(dble(npop-1)))
+c$$$c            write(6,*) 'merge apres prior c lratio=',lratio 
+c$$$c     write(*,*) 'terme en c lratio =',lratio
+c$$$            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &           useql .eq. 1) then
+c$$$*     term des freq
+c$$$c$$$  lratio = lratio + 
+c$$$c$$$     &              lTfd(ipophost,ntmp,npopmax,nloc,nal,nalmax) -  
+c$$$c$$$  &              lTfd(ipophost,n,npopmax,nloc,nal,nalmax) - 
+c$$$c$$$  &              lTfd(ipoprem,n,npopmax,nloc,nal,nalmax) 
+c$$$c               write(*,*) 'avant appel lTfdallvar'
+c$$$               lratio = lratio + 
+c$$$     &              lTfdallvar(ipophost,ntmp,npopmax,nlocd,nloch,
+c$$$     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql) -
+c$$$     &              lTfdallvar(ipophost,n,npopmax,nlocd,nloch,
+c$$$     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql) - 
+c$$$     &              lTfdallvar(ipoprem,n,npopmax,nlocd,nloch,
+c$$$     &              nql,ncolt,nal,nalmax,usegeno2,usegeno1,useql)
+c$$$c               write(*,*) 'apres appel lTfdallvar'
+c$$$c               write(6,*) 'merge apres prior contrib freq =',lratio 
+c$$$            endif
+c$$$            
+c$$$            if(useqtc .eq. 1) then 
+c$$$*     propose mean and variance of quantitative variables
+c$$$               call propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
+c$$$     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
+c$$$     &              ssqtc,npop,npopmax,nppmax,
+c$$$     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,ipoprem,
+c$$$     &              contriblr)
+c$$$*     contrib prior and proposal 
+c$$$               lratio = lratio + contriblr   
+c$$$*     contrib likelihood quant. variable
+c$$$*     argument usegeno2 is passed as 0 to ignore genotypes 
+c$$$*     hence avoid having likelihood ratio of genotypes twice 
+c$$$c$$$  lratio = lratio + 
+c$$$c$$$  &              lratiogq(yy,f,c,ctmp,indcell,indcell,
+c$$$c$$$     &              npopmax,nloc,nalmax,nindiv,nloc,nloc2,
+c$$$c$$$  &              nppmax,ploidy,qtc,nqtc,meanqtc,sdqtc,
+c$$$c$$$  &              meanqtctmp,sdqtctmp,0,useqtc)    
+c$$$               lratio = lratio + lrallvar2(yy,z,ql,
+c$$$     &              f,c,ctmp,indcell,indcell,
+c$$$     &              npopmax,nlocd,nloch,nql,ncolt,nalmax,nindiv,
+c$$$     &              nppmax,qtc,nqtc,meanqtc,sdqtc,meanqtctmp,sdqtctmp,
+c$$$     &              0,0,0,useqtc,ploidy)   
+c$$$c               write(6,*) 'merge apres llhood=',lratio 
+c$$$            endif
+c$$$c            write(*,*) 'lratio for merge=',lratio
+c$$$
+c$$$            lratio = dmin1(0.d0,lratio)
+c$$$            alpha  = dexp(lratio)
+c$$$            bern = ggrbinom(1.d0,alpha)      
+c$$$            
+c$$$            if(bern .eq. 1) then
+c$$$               if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &              useql .eq. 1) then
+c$$$*     propostion du nouveau tableau de freq et de derives
+c$$$c$$$  call remfreq7bis(ipoprem,ipophost,
+c$$$c$$$  &                  npop,npopmax,nloc,nal,
+c$$$c$$$  &                  nalmax,f,ftmp,drift,drifttmp,fa,a,ptmp,ntmp)
+c$$$                  call  remfallbis(ipoprem,ipophost,
+c$$$     &                 npop,npopmax,nlocd,nlocd2,nloch,nql,ncolt,nal,
+c$$$     &                 nalmax,f,ftmp,drift,drifttmp,fa,a,ptmp,ntmp,
+c$$$     &                 usegeno2,usegeno1,useql)
+c$$$               endif
+c$$$               if(useqtc .eq. 1) then 
+c$$$                  do iqtc = 1,nqtc
+c$$$                     do ipop = 1,npopmax
+c$$$                        meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
+c$$$                        sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               endif
+c$$$               call accept5(nppmax,npopmax,ncolt,
+c$$$     &              nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
+c$$$               npop = npop - 1
+c$$$            endif
+c$$$         endif
+c$$$      endif
+c$$$
+c$$$c$$$      write(*,*) 'z =', z
+c$$$c$$$      write(*,*) 'yy =', yy
+c$$$c$$$      write(*,*) 'ql =', ql
+c$$$c$$$      write(*,*) 'c =', c
+c$$$c$$$      write(*,*) 'ctmp =',ctmp 
+c$$$c$$$      write(*,*) 'f =', f  
+c$$$c$$$      write(*,*) 'ftmp =', ftmp
+c$$$c$$$      write(*,*) 'qtc=',qtc
+c$$$c$$$      write(*,*) 'meanqtc=',meanqtc
+c$$$c$$$      write(*,*) 'sdqtc=',sdqtc
+c$$$c$$$      write(*,*) 'nnqtc=',nnqtc
+c$$$c       write(*,*) 'fin smdallvar2' 
+c$$$      end subroutine smdallvar2
+c$$$************************************************************************
 
 
 
@@ -9348,15 +9350,15 @@ c       write(*,*) 'fin smdallvar2'
          vv = 1 / (nnqtc(ipop1,iqtc)+kappaqtc(iqtc))
          contriblr = contriblr +
      &        ggdnorm(meanqtc(ipop1,iqtc),xx,dsqrt(vv),1)
-         write(*,*) 'ggdnorm(meanqtc(ipop1,iqtc),xx,dsqrt(vv),1)', 
-     &        ggdnorm(meanqtc(ipop1,iqtc),xx,dsqrt(vv),1)   
+c         write(*,*) 'ggdnorm(meanqtc(ipop1,iqtc),xx,dsqrt(vv),1)', 
+c     &        ggdnorm(meanqtc(ipop1,iqtc),xx,dsqrt(vv),1)   
          xx = (sqtc(ipop2,iqtc)+ksiqtc(iqtc)*kappaqtc(iqtc))/
      &        (nnqtc(ipop2,iqtc)+kappaqtc(iqtc))
          vv = 1 / (nnqtc(ipop2,iqtc)+kappaqtc(iqtc))
          contriblr = contriblr +
      &        ggdnorm(meanqtc(ipop2,iqtc),xx,dsqrt(vv),1)
-         write(*,*) 'ggdnorm(meanqtc(ipop2,iqtc),xx,dsqrt(vv),1)', 
-     &        ggdnorm(meanqtc(ipop2,iqtc),xx,dsqrt(vv),1)          
+c        write(*,*) 'ggdnorm(meanqtc(ipop2,iqtc),xx,dsqrt(vv),1)', 
+c    &        ggdnorm(meanqtc(ipop2,iqtc),xx,dsqrt(vv),1)          
 *     variance
          ap = alphaqtc(iqtc) + 0.5*nnqtc(ipop1,iqtc)
          bp = betaqtc(iqtc) + 0.5*(ssqtc(ipop1,iqtc) - 
@@ -9364,18 +9366,18 @@ c       write(*,*) 'fin smdallvar2'
      &        nnqtc(ipop1,iqtc)*meanqtc(ipop1,iqtc)**2)
          contriblr = contriblr + 
      &        ggdgamma(1/sdqtc(ipop1,iqtc)**2,ap,1/bp,1)
-         write(*,*) 'ggdgamma(1/sdqtc(ipop1,iqtc)**2,ap,1/bp,1)',  
-     &        ggdgamma(1/sdqtc(ipop1,iqtc)**2,ap,1/bp,1)  
+c         write(*,*) 'ggdgamma(1/sdqtc(ipop1,iqtc)**2,ap,1/bp,1)',  
+c     &        ggdgamma(1/sdqtc(ipop1,iqtc)**2,ap,1/bp,1)  
          ap = alphaqtc(iqtc) + 0.5*nnqtc(ipop2,iqtc)
          bp = betaqtc(iqtc) + 0.5*(ssqtc(ipop2,iqtc) - 
      &        2*sqtc(ipop2,iqtc)*meanqtc(ipop2,iqtc) + 
      &        nnqtc(ipop2,iqtc)*meanqtc(ipop2,iqtc)**2)
          contriblr = contriblr + 
      &        ggdgamma(1/sdqtc(ipop2,iqtc)**2,ap,1/bp,1)
-         write(*,*) 'ggdgamma(1/sdqtc(ipop2,iqtc)**2,ap,1/bp,1)',  
-     &        ggdgamma(1/sdqtc(ipop2,iqtc)**2,ap,1/bp,1)
+c        write(*,*) 'ggdgamma(1/sdqtc(ipop2,iqtc)**2,ap,1/bp,1)',  
+c     &        ggdgamma(1/sdqtc(ipop2,iqtc)**2,ap,1/bp,1)
       enddo
-      write(*,*) 'contrib proposal  reverse move=',contriblr
+c      write(*,*) 'contrib proposal  reverse move=',contriblr
       junk = contriblr
 
 *     compute empirical  sums  and sums of squares of quant. variables
@@ -9413,8 +9415,8 @@ c       write(*,*) 'fin smdallvar2'
          meanqtctmp(ipop1,iqtc) = ggrnorm(xx,dsqrt(vv))
          contriblr = contriblr - 
      &        ggdnorm(meanqtctmp(ipop1,iqtc),xx,dsqrt(vv),1)
-         write(*,*) ' ggdnorm(meanqtctmp(ipop1,iqtc),xx,dsqrt(vv),1)',
-     &        ggdnorm(meanqtctmp(ipop1,iqtc),xx,dsqrt(vv),1)
+c         write(*,*) ' ggdnorm(meanqtctmp(ipop1,iqtc),xx,dsqrt(vv),1)',
+c     &        ggdnorm(meanqtctmp(ipop1,iqtc),xx,dsqrt(vv),1)
 *     propose mean pop ipop2 direct move 
 *     and compute contrib proposal to log ratio
          xx = (sqtc(ipop2,iqtc)+ksiqtc(iqtc)*kappaqtc(iqtc))/
@@ -9423,8 +9425,8 @@ c       write(*,*) 'fin smdallvar2'
          meanqtctmp(ipop2,iqtc) = ggrnorm(xx,dsqrt(vv))
          contriblr = contriblr - 
      &        ggdnorm(meanqtctmp(ipop2,iqtc),xx,dsqrt(vv),1)
-         write(*,*) ' ggdnorm(meanqtctmp(ipop2,iqtc),xx,dsqrt(vv),1) ',
-     &     ggdnorm(meanqtctmp(ipop2,iqtc),xx,dsqrt(vv),1)
+c         write(*,*) ' ggdnorm(meanqtctmp(ipop2,iqtc),xx,dsqrt(vv),1) ',
+c     &     ggdnorm(meanqtctmp(ipop2,iqtc),xx,dsqrt(vv),1)
 *     propose variance pop ipop1 direct move 
 *     and compute contrib proposal to log ratio
 *     sample variance from full conditional
@@ -9435,8 +9437,8 @@ c       write(*,*) 'fin smdallvar2'
          sdqtctmp(ipop1,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
          contriblr = contriblr - 
      &        ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,ap,1/bp,1)
-         write(*,*) 'ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,ap,1/bp,1) ',
-     &     ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,ap,1/bp,1)
+c         write(*,*) 'ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,ap,1/bp,1) ',
+c     &     ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,ap,1/bp,1)
 *     propose variance pop ipop2 direct move 
 *     and compute contrib proposal to log ratio
 *     sample variance from full conditional
@@ -9447,10 +9449,10 @@ c       write(*,*) 'fin smdallvar2'
          sdqtctmp(ipop2,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
          contriblr = contriblr - 
      &        ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,ap,1/bp,1)
-         write(*,*) 'ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,ap,1/bp,1) ',
-     &     ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,ap,1/bp,1)
+c         write(*,*) 'ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,ap,1/bp,1) ',
+c     &     ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,ap,1/bp,1)
       enddo 
-      write(*,*) 'contrib proposal  direct move=',contriblr-junk
+c      write(*,*) 'contrib proposal  direct move=',contriblr-junk
       junk = contriblr
 
       do iqtc = 1,nqtc
@@ -9465,7 +9467,7 @@ c       write(*,*) 'fin smdallvar2'
      &        ggdnorm(meanqtc(ipop2,iqtc),
      &        ksiqtc(iqtc),1/dsqrt(kappaqtc(iqtc)),1) 
       enddo
-      write(*,*) 'contrib prior means=',contriblr-junk
+c      write(*,*) 'contrib prior means=',contriblr-junk
       junk = contriblr
       do iqtc = 1,nqtc
 *     contrib prior of variances to log ratio
@@ -9478,39 +9480,39 @@ c       write(*,*) 'fin smdallvar2'
      &        alphaqtc(iqtc),1/betaqtc(iqtc),1) -
      &        ggdgamma(1/sdqtc(ipop2,iqtc)**2,
      &        alphaqtc(iqtc),1/betaqtc(iqtc),1)
-         write(*,*) 'contrib prior variances:'
-         write(*,*) 'ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,
-     & alphaqtc(iqtc),1/betaqtc(iqtc),1=',
-     &     ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,
-     &        alphaqtc(iqtc),1/betaqtc(iqtc),1)
-         write(*,*) 'ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,
-     & alphaqtc(iqtc),1/betaqtc(iqtc),1)=',
-     &        ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,
-     &        alphaqtc(iqtc),1/betaqtc(iqtc),1)
-      write(*,*) 'ggdgamma(1/sdqtc(ipop1,iqtc)**2,
-     & alphaqtc(iqtc),1/betaqtc(iqtc),1)=',
-     &        ggdgamma(1/sdqtc(ipop1,iqtc)**2,
-     &        alphaqtc(iqtc),1/betaqtc(iqtc),1)
-      write(*,*) 'ggdgamma(1/sdqtc(ipop2,iqtc)**2,
-     & alphaqtc(iqtc),1/betaqtc(iqtc),1)=',
-     &     ggdgamma(1/sdqtc(ipop2,iqtc)**2,
-     &     alphaqtc(iqtc),1/betaqtc(iqtc),1)
-      write(*,*) 'global contrib prior variances=',contriblr-junk
+c$$$         write(*,*) 'contrib prior variances:'
+c$$$         write(*,*) 'ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,
+c$$$     & alphaqtc(iqtc),1/betaqtc(iqtc),1=',
+c$$$     &     ggdgamma(1/sdqtctmp(ipop1,iqtc)**2,
+c$$$     &        alphaqtc(iqtc),1/betaqtc(iqtc),1)
+c$$$         write(*,*) 'ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,
+c$$$     & alphaqtc(iqtc),1/betaqtc(iqtc),1)=',
+c$$$     &        ggdgamma(1/sdqtctmp(ipop2,iqtc)**2,
+c$$$     &        alphaqtc(iqtc),1/betaqtc(iqtc),1)
+c$$$      write(*,*) 'ggdgamma(1/sdqtc(ipop1,iqtc)**2,
+c$$$     & alphaqtc(iqtc),1/betaqtc(iqtc),1)=',
+c$$$     &        ggdgamma(1/sdqtc(ipop1,iqtc)**2,
+c$$$     &        alphaqtc(iqtc),1/betaqtc(iqtc),1)
+c$$$      write(*,*) 'ggdgamma(1/sdqtc(ipop2,iqtc)**2,
+c$$$     & alphaqtc(iqtc),1/betaqtc(iqtc),1)=',
+c$$$     &     ggdgamma(1/sdqtc(ipop2,iqtc)**2,
+c$$$     &     alphaqtc(iqtc),1/betaqtc(iqtc),1)
+c$$$      write(*,*) 'global contrib prior variances=',contriblr-junk
       enddo
 
-      write(*,*) 'in propparqvudc, meanqtc='
-      write(*,*) (meanqtc(1,iqtc), iqtc=1,3)
-      write(*,*) (meanqtc(2,iqtc), iqtc=1,3)
-      write(*,*) 'in propparqvudc, sdqtc='
-      write(*,*) (sdqtc(1,iqtc), iqtc=1,3)
-      write(*,*) (sdqtc(2,iqtc), iqtc=1,3)
-      write(*,*) 'in propparqvudc, meanqtctmp='
-      write(*,*) (meanqtctmp(1,iqtc), iqtc=1,3)
-      write(*,*) (meanqtctmp(2,iqtc), iqtc=1,3)
-      write(*,*) 'in propparqvudc, sdqtctmp='
-      write(*,*) (sdqtctmp(1,iqtc), iqtc=1,3)
-      write(*,*) (sdqtctmp(2,iqtc), iqtc=1,3)
-      write(*,*) 'contriblr=',contriblr
+c$$$      write(*,*) 'in propparqvudc, meanqtc='
+c$$$      write(*,*) (meanqtc(1,iqtc), iqtc=1,3)
+c$$$      write(*,*) (meanqtc(2,iqtc), iqtc=1,3)
+c$$$      write(*,*) 'in propparqvudc, sdqtc='
+c$$$      write(*,*) (sdqtc(1,iqtc), iqtc=1,3)
+c$$$      write(*,*) (sdqtc(2,iqtc), iqtc=1,3)
+c$$$      write(*,*) 'in propparqvudc, meanqtctmp='
+c$$$      write(*,*) (meanqtctmp(1,iqtc), iqtc=1,3)
+c$$$      write(*,*) (meanqtctmp(2,iqtc), iqtc=1,3)
+c$$$      write(*,*) 'in propparqvudc, sdqtctmp='
+c$$$      write(*,*) (sdqtctmp(1,iqtc), iqtc=1,3)
+c$$$      write(*,*) (sdqtctmp(2,iqtc), iqtc=1,3)
+c$$$      write(*,*) 'contriblr=',contriblr
 
       end subroutine propparqvudc
 
@@ -10533,165 +10535,165 @@ c$$$      write(*,*) 'contriblr=',contriblr
       enddo
       end subroutine propparqvsplit
 
-
-
-************************************************************************
-*     propose mean and variance of quantitative variables in a merge
-*     and returns contrib of prior and proposal to log ratio
-      subroutine propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
-     &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
-     &     sqtc,ssqtc,npop,npopmax,nppmax,
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,ipoprem,contriblr)
-      implicit none
-      integer nindiv,nqtc,indcell,c,ctmp,nnqtc,npop,npopmax,nppmax,
-     &     ipophost,ipoprem
-      double precision qtc,meanqtc,sdqtc,
-     &     meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,contriblr
-      dimension qtc(nindiv,nqtc),indcell(nindiv),c(nppmax),
-     &     ctmp(nppmax),meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
-     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
-     &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
-     &     ssqtc(npopmax,nqtc)
-      integer ipop,iindiv,iqtc
-      double precision xx,vv,ap,bp,ggrnorm,ggrgam,ggdnorm,ggdgamma
-
-      contriblr = 0
-*     compute empirical  sums  and sums of squares of quant. variables
-*     for current state 
-      do iqtc = 1,nqtc
-         do ipop = 1,npopmax
-            nnqtc(ipop,iqtc) = 0
-            sqtc(ipop,iqtc) = 0
-            ssqtc(ipop,iqtc) = 0
-            meanqtctmp(ipop,iqtc) = meanqtc(ipop,iqtc)
-            sdqtctmp(ipop,iqtc) = sdqtc(ipop,iqtc)
-         enddo
-      enddo
-      do iqtc = 1,nqtc
-         do iindiv = 1,nindiv
-            ipop = c(indcell(iindiv))
-            if(qtc(iindiv,iqtc) .ne. -999) then
-               nnqtc(ipop,iqtc) = nnqtc(ipop,iqtc) + 1
-               sqtc(ipop,iqtc) = sqtc(ipop,iqtc) + 
-     &              qtc(iindiv,iqtc)
-               ssqtc(ipop,iqtc) = ssqtc(ipop,iqtc) + 
-     &              qtc(iindiv,iqtc)**2
-            endif
-         enddo
-      enddo
-
-      do iqtc = 1,nqtc
-*     contrib proposal pop ipophost to log ratio in reverse move 
-*     mean 
-         xx = (sqtc(ipophost,iqtc)+ksiqtc*kappaqtc)/
-     &        (nnqtc(ipophost,iqtc)+kappaqtc)
-         vv = 1 / (nnqtc(ipophost,iqtc)+kappaqtc)
-         contriblr = contriblr +
-     &        ggdnorm(meanqtc(ipophost,iqtc),xx,dsqrt(vv),1)
-*     variance
-         ap = alphaqtc + 0.5*nnqtc(ipophost,iqtc)
-         bp = betaqtc + 0.5*(ssqtc(ipophost,iqtc) - 
-     &        2*sqtc(ipophost,iqtc)*meanqtc(ipophost,iqtc) + 
-     &        nnqtc(ipophost,iqtc)*meanqtc(ipophost,iqtc)**2)
-         contriblr = contriblr + 
-     &        ggdgamma(1/sdqtc(ipophost,iqtc)**2,ap,1/bp,1)
-*     contrib proposal pop ipoprem to log ratio in reverse move 
-*     mean 
-         xx = (sqtc(ipoprem,iqtc)+ksiqtc*kappaqtc)/
-     &        (nnqtc(ipoprem,iqtc)+kappaqtc)
-         vv = 1 / (nnqtc(ipoprem,iqtc)+kappaqtc)
-         contriblr = contriblr +
-     &        ggdnorm(meanqtc(ipoprem,iqtc),xx,dsqrt(vv),1)
-*     variance
-         ap = alphaqtc + 0.5*nnqtc(ipoprem,iqtc)
-         bp = betaqtc + 0.5*(ssqtc(ipoprem,iqtc) - 
-     &        2*sqtc(ipoprem,iqtc)*meanqtc(ipoprem,iqtc) + 
-     &        nnqtc(ipoprem,iqtc)*meanqtc(ipoprem,iqtc)**2)
-         contriblr = contriblr + 
-     &        ggdgamma(1/sdqtc(ipoprem,iqtc)**2,ap,1/bp,1)
-      enddo
-
-
-*     compute empirical  sums  and sums of squares of quant. variables
-*     for proposed state
-      do iqtc = 1,nqtc
-         do ipop = 1,npopmax
-            nnqtc(ipop,iqtc) = 0
-            sqtc(ipop,iqtc) = 0
-            ssqtc(ipop,iqtc) = 0
-            meanqtctmp(ipop,iqtc) = meanqtc(ipop,iqtc)
-            sdqtctmp(ipop,iqtc) = sdqtc(ipop,iqtc)
-         enddo
-      enddo
-      do iqtc = 1,nqtc
-         do iindiv = 1,nindiv
-            ipop = ctmp(indcell(iindiv))
-            if(qtc(iindiv,iqtc) .ne. -999) then
-               nnqtc(ipop,iqtc) = nnqtc(ipop,iqtc) + 1
-               sqtc(ipop,iqtc) = sqtc(ipop,iqtc) + 
-     &              qtc(iindiv,iqtc)
-               ssqtc(ipop,iqtc) = ssqtc(ipop,iqtc) + 
-     &              qtc(iindiv,iqtc)**2
-            endif
-         enddo
-      enddo
-
-*     sample mean from the full conditional
-*     assuming current value for variance is 1
-      do iqtc = 1,nqtc
-*     propose mean pop ipophost direct move 
-*     and compute contrib proposal to log ratio
-         xx = (sqtc(ipophost,iqtc)+ksiqtc*kappaqtc)/
-     &        (nnqtc(ipophost,iqtc)+kappaqtc)
-         vv = 1 / (nnqtc(ipophost,iqtc)+kappaqtc)
-         meanqtctmp(ipophost,iqtc) = ggrnorm(xx,dsqrt(vv))
-         contriblr = contriblr - 
-     &        ggdnorm(meanqtctmp(ipophost,iqtc),xx,dsqrt(vv),1)
-*     propose variance pop ipophost direct move 
-*     and compute contrib proposal to log ratio
-*     sample variance from full conditional
-         ap = alphaqtc + 0.5*nnqtc(ipophost,iqtc)
-         bp = betaqtc + 0.5*(ssqtc(ipophost,iqtc) - 
-     &        2*sqtc(ipophost,iqtc)*meanqtctmp(ipophost,iqtc) + 
-     &        nnqtc(ipophost,iqtc)*meanqtctmp(ipophost,iqtc)**2)
-         sdqtctmp(ipophost,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
-         contriblr = contriblr - 
-     &        ggdgamma(1/sdqtctmp(ipophost,iqtc)**2,ap,1/bp,1)
-      enddo 
-*     arrange values for other populations
-      do iqtc = 1,nqtc
-         if(ipoprem .ne. npop) then
-            do ipop =ipoprem+1,npop
-               meanqtctmp(ipoprem-1,iqtc) = meanqtc(ipoprem,iqtc)
-               sdqtctmp(ipoprem-1,iqtc) = sdqtc(ipoprem,iqtc)
-            enddo
-         endif
-         do ipop = npop,npopmax
-            meanqtctmp(ipop,iqtc) = -999
-            sdqtctmp(ipop,iqtc) = -999
-         enddo
-      enddo 
-
-      do iqtc = 1,nqtc
-*     contrib prior of means to log ratio
-         contriblr = contriblr + 
-     &        ggdnorm(meanqtctmp(ipophost,iqtc),
-     &        ksiqtc,1/dsqrt(kappaqtc),1) -
-     &        ggdnorm(meanqtc(ipophost,iqtc),
-     &        ksiqtc,1/dsqrt(kappaqtc),1) -
-     &        ggdnorm(meanqtc(ipoprem,iqtc),
-     &        ksiqtc,1/dsqrt(kappaqtc),1) 
-*     contrib prior of variances to log ratio
-         contriblr = contriblr +
-     &        ggdgamma(1/sdqtctmp(ipophost,iqtc)**2,
-     &        alphaqtc,1/betaqtc,1) - 
-     &        ggdgamma(1/sdqtc(ipophost,iqtc)**2,
-     &        alphaqtc,1/betaqtc,1) - 
-     &        ggdgamma(1/sdqtc(ipoprem,iqtc)**2,
-     &        alphaqtc,1/betaqtc,1)
-      enddo
-      end subroutine propparqvmerge
+c$$$
+c$$$
+c$$$************************************************************************
+c$$$*     propose mean and variance of quantitative variables in a merge
+c$$$*     and returns contrib of prior and proposal to log ratio
+c$$$      subroutine propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
+c$$$     &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,
+c$$$     &     sqtc,ssqtc,npop,npopmax,nppmax,
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,ipoprem,contriblr)
+c$$$      implicit none
+c$$$      integer nindiv,nqtc,indcell,c,ctmp,nnqtc,npop,npopmax,nppmax,
+c$$$     &     ipophost,ipoprem
+c$$$      double precision qtc,meanqtc,sdqtc,
+c$$$     &     meanqtctmp,sdqtctmp,sqtc,ssqtc,
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,contriblr
+c$$$      dimension qtc(nindiv,nqtc),indcell(nindiv),c(nppmax),
+c$$$     &     ctmp(nppmax),meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
+c$$$     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
+c$$$     &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
+c$$$     &     ssqtc(npopmax,nqtc)
+c$$$      integer ipop,iindiv,iqtc
+c$$$      double precision xx,vv,ap,bp,ggrnorm,ggrgam,ggdnorm,ggdgamma
+c$$$
+c$$$      contriblr = 0
+c$$$*     compute empirical  sums  and sums of squares of quant. variables
+c$$$*     for current state 
+c$$$      do iqtc = 1,nqtc
+c$$$         do ipop = 1,npopmax
+c$$$            nnqtc(ipop,iqtc) = 0
+c$$$            sqtc(ipop,iqtc) = 0
+c$$$            ssqtc(ipop,iqtc) = 0
+c$$$            meanqtctmp(ipop,iqtc) = meanqtc(ipop,iqtc)
+c$$$            sdqtctmp(ipop,iqtc) = sdqtc(ipop,iqtc)
+c$$$         enddo
+c$$$      enddo
+c$$$      do iqtc = 1,nqtc
+c$$$         do iindiv = 1,nindiv
+c$$$            ipop = c(indcell(iindiv))
+c$$$            if(qtc(iindiv,iqtc) .ne. -999) then
+c$$$               nnqtc(ipop,iqtc) = nnqtc(ipop,iqtc) + 1
+c$$$               sqtc(ipop,iqtc) = sqtc(ipop,iqtc) + 
+c$$$     &              qtc(iindiv,iqtc)
+c$$$               ssqtc(ipop,iqtc) = ssqtc(ipop,iqtc) + 
+c$$$     &              qtc(iindiv,iqtc)**2
+c$$$            endif
+c$$$         enddo
+c$$$      enddo
+c$$$
+c$$$      do iqtc = 1,nqtc
+c$$$*     contrib proposal pop ipophost to log ratio in reverse move 
+c$$$*     mean 
+c$$$         xx = (sqtc(ipophost,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(ipophost,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(ipophost,iqtc)+kappaqtc)
+c$$$         contriblr = contriblr +
+c$$$     &        ggdnorm(meanqtc(ipophost,iqtc),xx,dsqrt(vv),1)
+c$$$*     variance
+c$$$         ap = alphaqtc + 0.5*nnqtc(ipophost,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(ipophost,iqtc) - 
+c$$$     &        2*sqtc(ipophost,iqtc)*meanqtc(ipophost,iqtc) + 
+c$$$     &        nnqtc(ipophost,iqtc)*meanqtc(ipophost,iqtc)**2)
+c$$$         contriblr = contriblr + 
+c$$$     &        ggdgamma(1/sdqtc(ipophost,iqtc)**2,ap,1/bp,1)
+c$$$*     contrib proposal pop ipoprem to log ratio in reverse move 
+c$$$*     mean 
+c$$$         xx = (sqtc(ipoprem,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(ipoprem,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(ipoprem,iqtc)+kappaqtc)
+c$$$         contriblr = contriblr +
+c$$$     &        ggdnorm(meanqtc(ipoprem,iqtc),xx,dsqrt(vv),1)
+c$$$*     variance
+c$$$         ap = alphaqtc + 0.5*nnqtc(ipoprem,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(ipoprem,iqtc) - 
+c$$$     &        2*sqtc(ipoprem,iqtc)*meanqtc(ipoprem,iqtc) + 
+c$$$     &        nnqtc(ipoprem,iqtc)*meanqtc(ipoprem,iqtc)**2)
+c$$$         contriblr = contriblr + 
+c$$$     &        ggdgamma(1/sdqtc(ipoprem,iqtc)**2,ap,1/bp,1)
+c$$$      enddo
+c$$$
+c$$$
+c$$$*     compute empirical  sums  and sums of squares of quant. variables
+c$$$*     for proposed state
+c$$$      do iqtc = 1,nqtc
+c$$$         do ipop = 1,npopmax
+c$$$            nnqtc(ipop,iqtc) = 0
+c$$$            sqtc(ipop,iqtc) = 0
+c$$$            ssqtc(ipop,iqtc) = 0
+c$$$            meanqtctmp(ipop,iqtc) = meanqtc(ipop,iqtc)
+c$$$            sdqtctmp(ipop,iqtc) = sdqtc(ipop,iqtc)
+c$$$         enddo
+c$$$      enddo
+c$$$      do iqtc = 1,nqtc
+c$$$         do iindiv = 1,nindiv
+c$$$            ipop = ctmp(indcell(iindiv))
+c$$$            if(qtc(iindiv,iqtc) .ne. -999) then
+c$$$               nnqtc(ipop,iqtc) = nnqtc(ipop,iqtc) + 1
+c$$$               sqtc(ipop,iqtc) = sqtc(ipop,iqtc) + 
+c$$$     &              qtc(iindiv,iqtc)
+c$$$               ssqtc(ipop,iqtc) = ssqtc(ipop,iqtc) + 
+c$$$     &              qtc(iindiv,iqtc)**2
+c$$$            endif
+c$$$         enddo
+c$$$      enddo
+c$$$
+c$$$*     sample mean from the full conditional
+c$$$*     assuming current value for variance is 1
+c$$$      do iqtc = 1,nqtc
+c$$$*     propose mean pop ipophost direct move 
+c$$$*     and compute contrib proposal to log ratio
+c$$$         xx = (sqtc(ipophost,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(ipophost,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(ipophost,iqtc)+kappaqtc)
+c$$$         meanqtctmp(ipophost,iqtc) = ggrnorm(xx,dsqrt(vv))
+c$$$         contriblr = contriblr - 
+c$$$     &        ggdnorm(meanqtctmp(ipophost,iqtc),xx,dsqrt(vv),1)
+c$$$*     propose variance pop ipophost direct move 
+c$$$*     and compute contrib proposal to log ratio
+c$$$*     sample variance from full conditional
+c$$$         ap = alphaqtc + 0.5*nnqtc(ipophost,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(ipophost,iqtc) - 
+c$$$     &        2*sqtc(ipophost,iqtc)*meanqtctmp(ipophost,iqtc) + 
+c$$$     &        nnqtc(ipophost,iqtc)*meanqtctmp(ipophost,iqtc)**2)
+c$$$         sdqtctmp(ipophost,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
+c$$$         contriblr = contriblr - 
+c$$$     &        ggdgamma(1/sdqtctmp(ipophost,iqtc)**2,ap,1/bp,1)
+c$$$      enddo 
+c$$$*     arrange values for other populations
+c$$$      do iqtc = 1,nqtc
+c$$$         if(ipoprem .ne. npop) then
+c$$$            do ipop =ipoprem+1,npop
+c$$$               meanqtctmp(ipoprem-1,iqtc) = meanqtc(ipoprem,iqtc)
+c$$$               sdqtctmp(ipoprem-1,iqtc) = sdqtc(ipoprem,iqtc)
+c$$$            enddo
+c$$$         endif
+c$$$         do ipop = npop,npopmax
+c$$$            meanqtctmp(ipop,iqtc) = -999
+c$$$            sdqtctmp(ipop,iqtc) = -999
+c$$$         enddo
+c$$$      enddo 
+c$$$
+c$$$      do iqtc = 1,nqtc
+c$$$*     contrib prior of means to log ratio
+c$$$         contriblr = contriblr + 
+c$$$     &        ggdnorm(meanqtctmp(ipophost,iqtc),
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1) -
+c$$$     &        ggdnorm(meanqtc(ipophost,iqtc),
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1) -
+c$$$     &        ggdnorm(meanqtc(ipoprem,iqtc),
+c$$$     &        ksiqtc,1/dsqrt(kappaqtc),1) 
+c$$$*     contrib prior of variances to log ratio
+c$$$         contriblr = contriblr +
+c$$$     &        ggdgamma(1/sdqtctmp(ipophost,iqtc)**2,
+c$$$     &        alphaqtc,1/betaqtc,1) - 
+c$$$     &        ggdgamma(1/sdqtc(ipophost,iqtc)**2,
+c$$$     &        alphaqtc,1/betaqtc,1) - 
+c$$$     &        ggdgamma(1/sdqtc(ipoprem,iqtc)**2,
+c$$$     &        alphaqtc,1/betaqtc,1)
+c$$$      enddo
+c$$$      end subroutine propparqvmerge
 
 
 
@@ -10905,56 +10907,56 @@ c$$$      write(*,*) 'contriblr=',contriblr
       end subroutine propqvmrg3
 
 
-
-************************************************************************
-*     propose mean and variance of quantitative variables in a merge
-      subroutine propparqvmrg(qtc,nindiv,nqtc,indcell,ctmp,
-     &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,npop,npopmax,
-     &     nppmax,ksiqtc,kappaqtc,alphaqtc,betaqtc,ihost)
-      implicit none
-      integer nindiv,nqtc,indcell,ctmp,nnqtc,npop,npopmax,nppmax,
-     &     ihost
-      double precision qtc,meanqtctmp,sdqtctmp,sqtc,ssqtc,
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
-      dimension qtc(nindiv,nqtc),indcell(nindiv),ctmp(nppmax),
-     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
-     &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
-     &     ssqtc(npopmax,nqtc)
-      integer ipop,iindiv,iqtc
-      double precision xx,vv,ap,bp,ggrnorm,ggrgam
-*     compute empirical  sums  and sums of squares for quant. variables
-      do iqtc = 1,nqtc
-            nnqtc(ihost,iqtc) = 0
-            sqtc(ihost,iqtc) = 0
-            ssqtc(ihost,iqtc) = 0
-      enddo
-      do iqtc = 1,nqtc
-         do iindiv = 1,nindiv
-            ipop = ctmp(indcell(iindiv))
-            if(qtc(iindiv,iqtc) .ne. -999) then
-               nnqtc(ipop,iqtc) = nnqtc(ipop,iqtc) + 1
-               sqtc(ipop,iqtc) = sqtc(ipop,iqtc) + 
-     &              qtc(iindiv,iqtc)
-               ssqtc(ipop,iqtc) = ssqtc(ipop,iqtc) + 
-     &              qtc(iindiv,iqtc)**2
-            endif
-         enddo
-      enddo
-*     sample mean from the full conditional
-*     assuming current value for variance is 1
-      do iqtc = 1,nqtc
-         xx = (sqtc(ihost,iqtc)+ksiqtc*kappaqtc)/
-     &        (nnqtc(ihost,iqtc)+kappaqtc)
-         vv = 1 / (nnqtc(ihost,iqtc)+kappaqtc)
-         meanqtctmp(ihost,iqtc) = ggrnorm(xx,dsqrt(vv))
-*     sample variance from full conditional
-         ap = alphaqtc + 0.5*nnqtc(ihost,iqtc)
-         bp = betaqtc + 0.5*(ssqtc(ihost,iqtc) - 
-     &        2*sqtc(ihost,iqtc)*meanqtctmp(ihost,iqtc) + 
-     &        nnqtc(ihost,iqtc)*meanqtctmp(ihost,iqtc)**2)
-         sdqtctmp(ihost,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
-      enddo 
-      end subroutine propparqvmrg
+c$$$
+c$$$************************************************************************
+c$$$*     propose mean and variance of quantitative variables in a merge
+c$$$      subroutine propparqvmrg(qtc,nindiv,nqtc,indcell,ctmp,
+c$$$     &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,npop,npopmax,
+c$$$     &     nppmax,ksiqtc,kappaqtc,alphaqtc,betaqtc,ihost)
+c$$$      implicit none
+c$$$      integer nindiv,nqtc,indcell,ctmp,nnqtc,npop,npopmax,nppmax,
+c$$$     &     ihost
+c$$$      double precision qtc,meanqtctmp,sdqtctmp,sqtc,ssqtc,
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc
+c$$$      dimension qtc(nindiv,nqtc),indcell(nindiv),ctmp(nppmax),
+c$$$     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
+c$$$     &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
+c$$$     &     ssqtc(npopmax,nqtc)
+c$$$      integer ipop,iindiv,iqtc
+c$$$      double precision xx,vv,ap,bp,ggrnorm,ggrgam
+c$$$*     compute empirical  sums  and sums of squares for quant. variables
+c$$$      do iqtc = 1,nqtc
+c$$$            nnqtc(ihost,iqtc) = 0
+c$$$            sqtc(ihost,iqtc) = 0
+c$$$            ssqtc(ihost,iqtc) = 0
+c$$$      enddo
+c$$$      do iqtc = 1,nqtc
+c$$$         do iindiv = 1,nindiv
+c$$$            ipop = ctmp(indcell(iindiv))
+c$$$            if(qtc(iindiv,iqtc) .ne. -999) then
+c$$$               nnqtc(ipop,iqtc) = nnqtc(ipop,iqtc) + 1
+c$$$               sqtc(ipop,iqtc) = sqtc(ipop,iqtc) + 
+c$$$     &              qtc(iindiv,iqtc)
+c$$$               ssqtc(ipop,iqtc) = ssqtc(ipop,iqtc) + 
+c$$$     &              qtc(iindiv,iqtc)**2
+c$$$            endif
+c$$$         enddo
+c$$$      enddo
+c$$$*     sample mean from the full conditional
+c$$$*     assuming current value for variance is 1
+c$$$      do iqtc = 1,nqtc
+c$$$         xx = (sqtc(ihost,iqtc)+ksiqtc*kappaqtc)/
+c$$$     &        (nnqtc(ihost,iqtc)+kappaqtc)
+c$$$         vv = 1 / (nnqtc(ihost,iqtc)+kappaqtc)
+c$$$         meanqtctmp(ihost,iqtc) = ggrnorm(xx,dsqrt(vv))
+c$$$*     sample variance from full conditional
+c$$$         ap = alphaqtc + 0.5*nnqtc(ihost,iqtc)
+c$$$         bp = betaqtc + 0.5*(ssqtc(ihost,iqtc) - 
+c$$$     &        2*sqtc(ihost,iqtc)*meanqtctmp(ihost,iqtc) + 
+c$$$     &        nnqtc(ihost,iqtc)*meanqtctmp(ihost,iqtc)**2)
+c$$$         sdqtctmp(ihost,iqtc) = 1/dsqrt(ggrgam(ap,1/bp))
+c$$$      enddo 
+c$$$      end subroutine propparqvmrg
 
 ************************************************************************
 *     split and merge of populations with acceptance according to MH ratio
@@ -11372,7 +11374,8 @@ c$$$               write(*,*) 'term en c lratio =',lratio
      &     nloch,nql,c(nppmax),ctmp(nppmax),yy(nindiv,2*nlocd+2*nloch),
      &     z(nindiv,nloch),ql(nindiv,nql),
      &     n(npopmax,ncolt,nalmax),ntmp(npopmax,ncolt,nalmax),
-     &     nqtc,nnqtc,usegeno2,usegeno1,useql,useqtc,ploidy
+     &     nqtc,nnqtc(npopmax,nqtc),usegeno2,usegeno1,useql,useqtc,
+     &     ploidy
       double precision f(npopmax,ncolt,nalmax),drift(npopmax),
      &      ftmp(npopmax,ncolt,nalmax),drifttmp(npopmax),
      &     a(nalmax),ptmp(nalmax),fa(ncolt,nalmax),qtc(nindiv,nqtc),
@@ -11707,360 +11710,360 @@ c            write(*,*) 'lratio for merge=',lratio
 
 
 
-
-************************************************************************
-*     split and merge of populations with acceptance according to MH ratio
-*     CFM
-*     (d1*,d2*) = d1-u,d2+u
-*     MH ratio does not depend on proposed frequencies
-*     extended for quantitative variables 
-      subroutine smfallvar2(npop,npopmin,npopmax,f,fa,drift,
-     &     nlocd,nloch,ncolt,nql,
-     &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,
-     &     a,ptmp,ftmp,drifttmp,yy,z,ql,cellpop,listcell,
-     &     cellpophost,n,ntmp,qtc,nqtc,meanqtc,sdqtc,
-     &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,shape1,shape2,
-     &     usegeno2,usegeno1,useql,useqtc,ploidy)
-      implicit none 
-      integer npop,npopmin,npopmax,ncolt,nal(ncolt),
-     &     nalmax,nindiv,npp,nppmax,indcell(nindiv),nlocd,nlocd2,
-     &     nloch,nql,c(nppmax),ctmp(nppmax),yy(nindiv,2*nlocd+2*nloch),
-     &     z(nindiv,nloch),ql(nindiv,nql),
-     &     n(npopmax,ncolt,nalmax),ntmp(npopmax,ncolt,nalmax),
-     &     nqtc,nnqtc,usegeno2,usegeno1,useql,useqtc,ploidy
-      double precision f(npopmax,ncolt,nalmax),drift(npopmax),
-     &      ftmp(npopmax,ncolt,nalmax),drifttmp(npopmax),
-     &     a(nalmax),ptmp(nalmax),fa(ncolt,nalmax),qtc(nindiv,nqtc),
-     &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
-     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
-     &     sqtc(npopmax,nqtc),ssqtc(npopmax,nqtc),
-     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,shape1,shape2
-      integer ipoprem,ipp,isplit,
-     &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
-     &     ipophost,ncellpophost,cellpophost(nppmax),ii
-      double precision alpha,ggrunif,lbico,lratio,lTfallvar
-      integer iloc,iqtc,ipop,ipoptmp,iindiv
-      double precision llr6,termf9bis,gglgamfn,bern,b,ggrbinom,ggdnorm,
-     &     ggdgamma,ggrnorm,lrallvar2,contriblr,deltad,rr,junk
-      dimension ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc)
- 
-      deltad = shape1/(shape1+shape2)
-
-c         write(*,*) 'debut sm' 
-      do ipp=1,nppmax
-         cellpop(ipp) = -999
-         listcell(ipp) = -999
-      enddo
-*     naissance ou mort ?
-      b = ggrbinom(1.d0,0.5d0)
-      if(b .eq. 1) then
-         if(npop .lt. npopmax) then 
-c            write(*,*) 'naissance'
-c            write(*,*) 'npop=',npop    
-*     split
-*     choix de la pop qui split
-            isplit = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-*     recherche des cellules affectees a cette pop
-            call who(c,isplit,npp,nppmax,cellpop,ncellpop)
-            if(ncellpop .gt. 0) then
-*     tirage du nombre de cellules reallouees
-               nu = idint(dint(dble(ncellpop+1)*ggrunif(0.d0,1.d0)))
-               if(nu .gt. 0) then
-*     tirage des cellules reallouees
-                  call sample2(cellpop,nppmax,nu,ncellpop,listcell)
-*     proposition de reallocation dans la pop npop+1
-                  call split(npop+1,c,ctmp,nppmax,nu,listcell)
-               else 
-                  do ipp = 1,nppmax
-                     ctmp(ipp) = c(ipp)
-                  enddo
-               endif
-            else
-               nu = 0
-               do ipp = 1,nppmax
-                  ctmp(ipp) = c(ipp)
-               enddo
-            endif
-c            write(*,*) 'c=',c(1),c(2),c(3),c(4)
-c            write(*,*) 'ctmp=',ctmp(1),ctmp(2),ctmp(3),ctmp(4)
-
-            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &           useql .eq. 1) then
-*     comptage des alleles sur chaque locus pour c puis ctmp
-c               write(*,*) 'dans smfallvar usegeno2=',usegeno2
-               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
-     &              nppmax,nal,nalmax,yy,z,ql,n,indcell,c,npopmax,
-     &              usegeno2,usegeno1,useql,ploidy)
-               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
-     &              nppmax,nal,nalmax,yy,z,ql,ntmp,indcell,ctmp,npopmax,
-     &              usegeno2,usegeno1,useql,ploidy)
-c               write(*,*) 'n(',isplit,',1,1)=',n(isplit,1,1)
-c               write(*,*) 'ntmp(',isplit,',1,1)=',ntmp(isplit,1,1)
-c               write(*,*) 'ntmp(',npop+1,',1,1)=',ntmp(npop+1,1,1)
-*     nouvelles derives      
-               do ipop = 1,npop
-                  drifttmp(ipop) = drift(ipop)
-               enddo
-               rr = ggrnorm(0.d0,1.d0)*deltad
-               drifttmp(isplit) = drift(isplit) - rr
-               drifttmp(npop+1) = drift(isplit) + rr
-            endif
-c            write(*,*) 'drift = ',drift
-c            write(*,*) 'drifttmp = ',drifttmp
-            if(((drifttmp(isplit)   .gt. 1d-300) .and. 
-     &           (1-drifttmp(isplit) .gt. 1d-300)).and.
-     &           ((drifttmp(npop+1)   .gt. 1d-300) .and. 
-     &           (1-drifttmp(npop+1) .gt. 1d-300))) then
-               
-*     terme des proposal sur c
-               lratio = dlog(2*dble(ncellpop+1)) + 
-     &              lbico(ncellpop,nu) - dlog(dble(npop+1)) 
-c               write(6,*) 'split apres proposal c lratio=',lratio 
-*     terme des priors sur c
-               lratio = lratio + dble(npp)*(dlog(dble(npop)) - 
-     &              dlog(dble(npop+1)))
-c               write(6,*) 'split apres prior c lratio=',lratio 
-c               write(*,*) 'term en c lratio =',lratio               
-               if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &              useql .eq. 1) then
-*     contribition of frequencies, this term includes likelihood ratio
-                  lratio = lratio + 
-     &                 lTfallvar(isplit,ntmp,fa,drifttmp,npopmax,nlocd,
-     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
-     &                 useql) + 
-     &                 lTfallvar(npop+1,ntmp,fa,drifttmp,npopmax,nlocd,
-     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
-     &                 useql) - 
-     &                 lTfallvar(isplit,n,fa,drift,npopmax,nlocd,
-     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
-     &                 useql)
-c$$$         write(*,*) lTfallvar(isplit,ntmp,fa,drifttmp,npopmax,nlocd,
+c$$$
+c$$$************************************************************************
+c$$$*     split and merge of populations with acceptance according to MH ratio
+c$$$*     CFM
+c$$$*     (d1*,d2*) = d1-u,d2+u
+c$$$*     MH ratio does not depend on proposed frequencies
+c$$$*     extended for quantitative variables 
+c$$$      subroutine smfallvar2(npop,npopmin,npopmax,f,fa,drift,
+c$$$     &     nlocd,nloch,ncolt,nql,
+c$$$     &     nal,nalmax,indcell,nindiv,npp,nppmax,c,ctmp,
+c$$$     &     a,ptmp,ftmp,drifttmp,yy,z,ql,cellpop,listcell,
+c$$$     &     cellpophost,n,ntmp,qtc,nqtc,meanqtc,sdqtc,
+c$$$     &     meanqtctmp,sdqtctmp,nnqtc,sqtc,ssqtc,
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,shape1,shape2,
+c$$$     &     usegeno2,usegeno1,useql,useqtc,ploidy)
+c$$$      implicit none 
+c$$$      integer npop,npopmin,npopmax,ncolt,nal(ncolt),
+c$$$     &     nalmax,nindiv,npp,nppmax,indcell(nindiv),nlocd,nlocd2,
+c$$$     &     nloch,nql,c(nppmax),ctmp(nppmax),yy(nindiv,2*nlocd+2*nloch),
+c$$$     &     z(nindiv,nloch),ql(nindiv,nql),
+c$$$     &     n(npopmax,ncolt,nalmax),ntmp(npopmax,ncolt,nalmax),
+c$$$     &     nqtc,nnqtc,usegeno2,usegeno1,useql,useqtc,ploidy
+c$$$      double precision f(npopmax,ncolt,nalmax),drift(npopmax),
+c$$$     &      ftmp(npopmax,ncolt,nalmax),drifttmp(npopmax),
+c$$$     &     a(nalmax),ptmp(nalmax),fa(ncolt,nalmax),qtc(nindiv,nqtc),
+c$$$     &     meanqtc(npopmax,nqtc),sdqtc(npopmax,nqtc),
+c$$$     &     meanqtctmp(npopmax,nqtc),sdqtctmp(npopmax,nqtc),
+c$$$     &     sqtc(npopmax,nqtc),ssqtc(npopmax,nqtc),
+c$$$     &     ksiqtc,kappaqtc,alphaqtc,betaqtc,shape1,shape2
+c$$$      integer ipoprem,ipp,isplit,
+c$$$     &     cellpop(nppmax),ncellpop,nu,listcell(nppmax),
+c$$$     &     ipophost,ncellpophost,cellpophost(nppmax),ii
+c$$$      double precision alpha,ggrunif,lbico,lratio,lTfallvar
+c$$$      integer iloc,iqtc,ipop,ipoptmp,iindiv
+c$$$      double precision llr6,termf9bis,gglgamfn,bern,b,ggrbinom,ggdnorm,
+c$$$     &     ggdgamma,ggrnorm,lrallvar2,contriblr,deltad,rr,junk
+c$$$      dimension ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc)
+c$$$ 
+c$$$      deltad = shape1/(shape1+shape2)
+c$$$
+c$$$c         write(*,*) 'debut sm' 
+c$$$      do ipp=1,nppmax
+c$$$         cellpop(ipp) = -999
+c$$$         listcell(ipp) = -999
+c$$$      enddo
+c$$$*     naissance ou mort ?
+c$$$      b = ggrbinom(1.d0,0.5d0)
+c$$$      if(b .eq. 1) then
+c$$$         if(npop .lt. npopmax) then 
+c$$$c            write(*,*) 'naissance'
+c$$$c            write(*,*) 'npop=',npop    
+c$$$*     split
+c$$$*     choix de la pop qui split
+c$$$            isplit = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$*     recherche des cellules affectees a cette pop
+c$$$            call who(c,isplit,npp,nppmax,cellpop,ncellpop)
+c$$$            if(ncellpop .gt. 0) then
+c$$$*     tirage du nombre de cellules reallouees
+c$$$               nu = idint(dint(dble(ncellpop+1)*ggrunif(0.d0,1.d0)))
+c$$$               if(nu .gt. 0) then
+c$$$*     tirage des cellules reallouees
+c$$$                  call sample2(cellpop,nppmax,nu,ncellpop,listcell)
+c$$$*     proposition de reallocation dans la pop npop+1
+c$$$                  call split(npop+1,c,ctmp,nppmax,nu,listcell)
+c$$$               else 
+c$$$                  do ipp = 1,nppmax
+c$$$                     ctmp(ipp) = c(ipp)
+c$$$                  enddo
+c$$$               endif
+c$$$            else
+c$$$               nu = 0
+c$$$               do ipp = 1,nppmax
+c$$$                  ctmp(ipp) = c(ipp)
+c$$$               enddo
+c$$$            endif
+c$$$c            write(*,*) 'c=',c(1),c(2),c(3),c(4)
+c$$$c            write(*,*) 'ctmp=',ctmp(1),ctmp(2),ctmp(3),ctmp(4)
+c$$$
+c$$$            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &           useql .eq. 1) then
+c$$$*     comptage des alleles sur chaque locus pour c puis ctmp
+c$$$c               write(*,*) 'dans smfallvar usegeno2=',usegeno2
+c$$$               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
+c$$$     &              nppmax,nal,nalmax,yy,z,ql,n,indcell,c,npopmax,
+c$$$     &              usegeno2,usegeno1,useql,ploidy)
+c$$$               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
+c$$$     &              nppmax,nal,nalmax,yy,z,ql,ntmp,indcell,ctmp,npopmax,
+c$$$     &              usegeno2,usegeno1,useql,ploidy)
+c$$$c               write(*,*) 'n(',isplit,',1,1)=',n(isplit,1,1)
+c$$$c               write(*,*) 'ntmp(',isplit,',1,1)=',ntmp(isplit,1,1)
+c$$$c               write(*,*) 'ntmp(',npop+1,',1,1)=',ntmp(npop+1,1,1)
+c$$$*     nouvelles derives      
+c$$$               do ipop = 1,npop
+c$$$                  drifttmp(ipop) = drift(ipop)
+c$$$               enddo
+c$$$               rr = ggrnorm(0.d0,1.d0)*deltad
+c$$$               drifttmp(isplit) = drift(isplit) - rr
+c$$$               drifttmp(npop+1) = drift(isplit) + rr
+c$$$            endif
+c$$$c            write(*,*) 'drift = ',drift
+c$$$c            write(*,*) 'drifttmp = ',drifttmp
+c$$$            if(((drifttmp(isplit)   .gt. 1d-300) .and. 
+c$$$     &           (1-drifttmp(isplit) .gt. 1d-300)).and.
+c$$$     &           ((drifttmp(npop+1)   .gt. 1d-300) .and. 
+c$$$     &           (1-drifttmp(npop+1) .gt. 1d-300))) then
+c$$$               
+c$$$*     terme des proposal sur c
+c$$$               lratio = dlog(2*dble(ncellpop+1)) + 
+c$$$     &              lbico(ncellpop,nu) - dlog(dble(npop+1)) 
+c$$$c               write(6,*) 'split apres proposal c lratio=',lratio 
+c$$$*     terme des priors sur c
+c$$$               lratio = lratio + dble(npp)*(dlog(dble(npop)) - 
+c$$$     &              dlog(dble(npop+1)))
+c$$$c               write(6,*) 'split apres prior c lratio=',lratio 
+c$$$c               write(*,*) 'term en c lratio =',lratio               
+c$$$               if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &              useql .eq. 1) then
+c$$$*     contribition of frequencies, this term includes likelihood ratio
+c$$$                  lratio = lratio + 
+c$$$     &                 lTfallvar(isplit,ntmp,fa,drifttmp,npopmax,nlocd,
+c$$$     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
+c$$$     &                 useql) + 
+c$$$     &                 lTfallvar(npop+1,ntmp,fa,drifttmp,npopmax,nlocd,
+c$$$     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
+c$$$     &                 useql) - 
+c$$$     &                 lTfallvar(isplit,n,fa,drift,npopmax,nlocd,
 c$$$     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
 c$$$     &                 useql)
-c$$$         write(*,*) lTfallvar(npop+1,ntmp,fa,drifttmp,npopmax,nlocd,
-c$$$     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
-c$$$     &                 useql)
-c$$$         write(*,*) -lTfallvar(isplit,n,fa,drift,npopmax,nlocd,
-c$$$     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
-c$$$     &                 useql)
-c$$$         write(*,*) 'apres Tf lratio =',lratio     
-c                  write(6,*) 'split apres prior contrib freq =',lratio 
-*     term proposal drift
-                  lratio = lratio + dlog(2*deltad) 
-     &                 + .5*rr**2 + dlog(dsqrt(2*3.141593d0))
-*     term prior drift
-                  lratio = lratio 
-     &                 + (shape1-1)*dlog(drifttmp(isplit))
-     &                 + (shape2-1)*dlog(1-drifttmp(isplit))
-     &                 + (shape1-1)*dlog(drifttmp(npop+1))
-     &                 + (shape2-1)*dlog(1-drifttmp(npop+1))
-     &                 - (shape1-1)*dlog(drift(isplit))
-     &                 - (shape2-1)*dlog(1-drift(isplit))
-     &                 + gglgamfn(shape1+shape2)
-     &                 - gglgamfn(shape1)-gglgamfn(shape2)
-c                  write(*,*) 'apres T drift lratio=',lratio
-c                  write(6,*) 'split apres prior contrib drift =',lratio 
-               endif
-
-               if(useqtc .eq. 1) then 
-*     propose mean and variance of quantitative variables
-                  call propparqvsplit(qtc,nindiv,nqtc,indcell,c,ctmp,
-     &                 meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
-     &                 ssqtc,npop,npopmax,nppmax,ksiqtc,kappaqtc,
-     &                 alphaqtc,betaqtc,isplit,contriblr)
-*     contrib prior and proposal 
-                  lratio = lratio + contriblr
-*     contrib likelihood quant. variable
-*     argument usegeno2 is passed as 0 to ignore genotypes 
-*     hence avoid having likelihood ratio of genotypes twice 
-                  lratio = lratio + lrallvar2(yy,z,ql,
-     &                 f,c,ctmp,indcell,indcell,npopmax,nlocd,
-     &                 nloch,nql,ncolt,nalmax,nindiv,nppmax,qtc,nqtc,
-     &                 meanqtc,sdqtc,meanqtctmp,sdqtctmp,0,0,0,useqtc,
-     &                 ploidy)
-               endif
-               lratio = dmin1(0.d0,lratio)
-               alpha = dexp(lratio)
-               bern = ggrbinom(1.d0,alpha)
-             
-               if(bern .eq. 1) then
-                  if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &                 useql .eq. 1) then
-*     proposition nouvelle freq 
-                     call addfall(npop,npopmax,nlocd,nlocd2,nloch,nql,
-     &                    ncolt,nal,nalmax,isplit,f,ftmp,fa,drift,
-     &                    drifttmp,a,ptmp,ntmp, 
-     &                    usegeno2,usegeno1,useql)
-                  endif
-                  if(useqtc .eq. 1) then 
-                     do iqtc = 1,nqtc
-                        do ipop = 1,npopmax
-                           meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
-                           sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
-                        enddo
-                     enddo
-                  endif
-                  call accept5(nppmax,npopmax,ncolt,
-     &                 nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
-                  npop = npop + 1
-               endif
-            endif
-         endif
-*     merge
-      else
-         if(npop .gt. npopmin) then 
-c      write(*,*) 'mort'
-c      write(*,*) 'npop=',npop
-*     tirage de la pop qui meurt
-            ipoprem = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-*     tirage de la pop hote
-            ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-            do while(ipophost .eq. ipoprem)
-               ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
-            enddo
-*     on range dans la pop d'indice le plus petit
-            if(ipophost .gt. ipoprem) then
-               ii = ipophost
-               ipophost = ipoprem
-               ipoprem = ii
-            endif
-*     recherche des cellules qui vont etre reallouees
-            call who(c,ipoprem,npp,nppmax,cellpop,ncellpop)
-*     recherche des cellules de la pop hote
-            call who(c,ipophost,npp,nppmax,cellpophost,
-     &           ncellpophost)
-*     proposition de reallocation dans la pop ipophost
-            call merging(ipoprem,ipophost,c,ctmp,nppmax,
-     &           ncellpop,cellpop)
-c            write(*,*) 'c=',c(1),c(2),c(3),c(4)
-c            write(*,*) 'ctmp=',ctmp(1),ctmp(2),ctmp(3),ctmp(4) 
-
-*     comptage des alleles sur chaque locus pour c puis ctmp
-            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &           useql .eq. 1) then
-c               write(*,*) 'dans smfallvar usegeno2=',usegeno2
-               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
-     &              nppmax,nal,nalmax,yy,z,ql,n,indcell,c,npopmax,
-     &              usegeno2, usegeno1,useql,ploidy)
-               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
-     &              nppmax,nal,nalmax,yy,z,ql,ntmp,indcell,ctmp,npopmax,
-     &              usegeno2, usegeno1,useql,ploidy)
-c               write(*,*) 'n(',ipoprem,',1,1)=',n(ipoprem,1,1)
-c               write(*,*) 'n(',ipophost,',1,1)=',n(ipophost,1,1)
-c               write(*,*) 'ntmp(',ipophost,',1,1)=',ntmp(ipophost,1,1)
-
-*     enleve une pop dans le tableau tmporaire des derives            
-               call remdrift2(ipoprem,ipophost,npop,npopmax,drift,
-     &              drifttmp)
-               rr = (drift(ipophost) - drift(ipoprem))/(2*deltad)
-c               write(*,*) 'drift=',drift
-c               write(*,*) 'drifttmp=',drifttmp
-            endif
-*     calcul du log du ratio  
-*     terme des proposal sur c
-            lratio = dlog(dble(npop)) - 
-     &           dlog(2*dble(ncellpop+ncellpophost+1)) -
-     &           lbico(ncellpop+ncellpophost,ncellpop) 
-c            write(6,*) 'merge apres proposal c lratio=',lratio 
-*     terme des priors sur c
-            lratio = lratio + 
-     &           dble(npp)*(dlog(dble(npop)) - 
-     &           dlog(dble(npop-1)))
-c            write(6,*) 'merge apres prior c lratio=',lratio 
-c           write(*,*) 'term en c lratio =',lratio
-            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &           useql .eq. 1) then
-*     term des freq
-c$$$  *     term des freq
-               lratio = lratio + 
-     &              lTfallvar(ipophost,ntmp,fa,drifttmp,npopmax,nlocd,
-     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
-     &              useql) -
-     &              lTfallvar(ipophost,n,fa,drift,npopmax,nlocd,
-     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
-     &              useql) - 
-     &              lTfallvar(ipoprem,n,fa,drift,npopmax,nlocd,
-     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
-     &              useql)
-c               write(6,*) 'merge apres prior contrib freq =',lratio 
-c$$$           write(*,*) lTfallvar(ipophost,ntmp,fa,drifttmp,npopmax,nlocd,
+c$$$c$$$         write(*,*) lTfallvar(isplit,ntmp,fa,drifttmp,npopmax,nlocd,
+c$$$c$$$     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
+c$$$c$$$     &                 useql)
+c$$$c$$$         write(*,*) lTfallvar(npop+1,ntmp,fa,drifttmp,npopmax,nlocd,
+c$$$c$$$     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
+c$$$c$$$     &                 useql)
+c$$$c$$$         write(*,*) -lTfallvar(isplit,n,fa,drift,npopmax,nlocd,
+c$$$c$$$     &                 nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
+c$$$c$$$     &                 useql)
+c$$$c$$$         write(*,*) 'apres Tf lratio =',lratio     
+c$$$c                  write(6,*) 'split apres prior contrib freq =',lratio 
+c$$$*     term proposal drift
+c$$$                  lratio = lratio + dlog(2*deltad) 
+c$$$     &                 + .5*rr**2 + dlog(dsqrt(2*3.141593d0))
+c$$$*     term prior drift
+c$$$                  lratio = lratio 
+c$$$     &                 + (shape1-1)*dlog(drifttmp(isplit))
+c$$$     &                 + (shape2-1)*dlog(1-drifttmp(isplit))
+c$$$     &                 + (shape1-1)*dlog(drifttmp(npop+1))
+c$$$     &                 + (shape2-1)*dlog(1-drifttmp(npop+1))
+c$$$     &                 - (shape1-1)*dlog(drift(isplit))
+c$$$     &                 - (shape2-1)*dlog(1-drift(isplit))
+c$$$     &                 + gglgamfn(shape1+shape2)
+c$$$     &                 - gglgamfn(shape1)-gglgamfn(shape2)
+c$$$c                  write(*,*) 'apres T drift lratio=',lratio
+c$$$c                  write(6,*) 'split apres prior contrib drift =',lratio 
+c$$$               endif
+c$$$
+c$$$               if(useqtc .eq. 1) then 
+c$$$*     propose mean and variance of quantitative variables
+c$$$                  call propparqvsplit(qtc,nindiv,nqtc,indcell,c,ctmp,
+c$$$     &                 meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
+c$$$     &                 ssqtc,npop,npopmax,nppmax,ksiqtc,kappaqtc,
+c$$$     &                 alphaqtc,betaqtc,isplit,contriblr)
+c$$$*     contrib prior and proposal 
+c$$$                  lratio = lratio + contriblr
+c$$$*     contrib likelihood quant. variable
+c$$$*     argument usegeno2 is passed as 0 to ignore genotypes 
+c$$$*     hence avoid having likelihood ratio of genotypes twice 
+c$$$                  lratio = lratio + lrallvar2(yy,z,ql,
+c$$$     &                 f,c,ctmp,indcell,indcell,npopmax,nlocd,
+c$$$     &                 nloch,nql,ncolt,nalmax,nindiv,nppmax,qtc,nqtc,
+c$$$     &                 meanqtc,sdqtc,meanqtctmp,sdqtctmp,0,0,0,useqtc,
+c$$$     &                 ploidy)
+c$$$               endif
+c$$$               lratio = dmin1(0.d0,lratio)
+c$$$               alpha = dexp(lratio)
+c$$$               bern = ggrbinom(1.d0,alpha)
+c$$$             
+c$$$               if(bern .eq. 1) then
+c$$$                  if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &                 useql .eq. 1) then
+c$$$*     proposition nouvelle freq 
+c$$$                     call addfall(npop,npopmax,nlocd,nlocd2,nloch,nql,
+c$$$     &                    ncolt,nal,nalmax,isplit,f,ftmp,fa,drift,
+c$$$     &                    drifttmp,a,ptmp,ntmp, 
+c$$$     &                    usegeno2,usegeno1,useql)
+c$$$                  endif
+c$$$                  if(useqtc .eq. 1) then 
+c$$$                     do iqtc = 1,nqtc
+c$$$                        do ipop = 1,npopmax
+c$$$                           meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
+c$$$                           sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
+c$$$                        enddo
+c$$$                     enddo
+c$$$                  endif
+c$$$                  call accept5(nppmax,npopmax,ncolt,
+c$$$     &                 nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
+c$$$                  npop = npop + 1
+c$$$               endif
+c$$$            endif
+c$$$         endif
+c$$$*     merge
+c$$$      else
+c$$$         if(npop .gt. npopmin) then 
+c$$$c      write(*,*) 'mort'
+c$$$c      write(*,*) 'npop=',npop
+c$$$*     tirage de la pop qui meurt
+c$$$            ipoprem = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$*     tirage de la pop hote
+c$$$            ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$            do while(ipophost .eq. ipoprem)
+c$$$               ipophost = 1 + idint(dint(dble(npop)*ggrunif(0.d0,1.d0)))
+c$$$            enddo
+c$$$*     on range dans la pop d'indice le plus petit
+c$$$            if(ipophost .gt. ipoprem) then
+c$$$               ii = ipophost
+c$$$               ipophost = ipoprem
+c$$$               ipoprem = ii
+c$$$            endif
+c$$$*     recherche des cellules qui vont etre reallouees
+c$$$            call who(c,ipoprem,npp,nppmax,cellpop,ncellpop)
+c$$$*     recherche des cellules de la pop hote
+c$$$            call who(c,ipophost,npp,nppmax,cellpophost,
+c$$$     &           ncellpophost)
+c$$$*     proposition de reallocation dans la pop ipophost
+c$$$            call merging(ipoprem,ipophost,c,ctmp,nppmax,
+c$$$     &           ncellpop,cellpop)
+c$$$c            write(*,*) 'c=',c(1),c(2),c(3),c(4)
+c$$$c            write(*,*) 'ctmp=',ctmp(1),ctmp(2),ctmp(3),ctmp(4) 
+c$$$
+c$$$*     comptage des alleles sur chaque locus pour c puis ctmp
+c$$$            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &           useql .eq. 1) then
+c$$$c               write(*,*) 'dans smfallvar usegeno2=',usegeno2
+c$$$               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
+c$$$     &              nppmax,nal,nalmax,yy,z,ql,n,indcell,c,npopmax,
+c$$$     &              usegeno2, usegeno1,useql,ploidy)
+c$$$               call countnallvar2(nindiv,nlocd,nloch,nql,ncolt,
+c$$$     &              nppmax,nal,nalmax,yy,z,ql,ntmp,indcell,ctmp,npopmax,
+c$$$     &              usegeno2, usegeno1,useql,ploidy)
+c$$$c               write(*,*) 'n(',ipoprem,',1,1)=',n(ipoprem,1,1)
+c$$$c               write(*,*) 'n(',ipophost,',1,1)=',n(ipophost,1,1)
+c$$$c               write(*,*) 'ntmp(',ipophost,',1,1)=',ntmp(ipophost,1,1)
+c$$$
+c$$$*     enleve une pop dans le tableau tmporaire des derives            
+c$$$               call remdrift2(ipoprem,ipophost,npop,npopmax,drift,
+c$$$     &              drifttmp)
+c$$$               rr = (drift(ipophost) - drift(ipoprem))/(2*deltad)
+c$$$c               write(*,*) 'drift=',drift
+c$$$c               write(*,*) 'drifttmp=',drifttmp
+c$$$            endif
+c$$$*     calcul du log du ratio  
+c$$$*     terme des proposal sur c
+c$$$            lratio = dlog(dble(npop)) - 
+c$$$     &           dlog(2*dble(ncellpop+ncellpophost+1)) -
+c$$$     &           lbico(ncellpop+ncellpophost,ncellpop) 
+c$$$c            write(6,*) 'merge apres proposal c lratio=',lratio 
+c$$$*     terme des priors sur c
+c$$$            lratio = lratio + 
+c$$$     &           dble(npp)*(dlog(dble(npop)) - 
+c$$$     &           dlog(dble(npop-1)))
+c$$$c            write(6,*) 'merge apres prior c lratio=',lratio 
+c$$$c           write(*,*) 'term en c lratio =',lratio
+c$$$            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &           useql .eq. 1) then
+c$$$*     term des freq
+c$$$c$$$  *     term des freq
+c$$$               lratio = lratio + 
+c$$$     &              lTfallvar(ipophost,ntmp,fa,drifttmp,npopmax,nlocd,
+c$$$     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
+c$$$     &              useql) -
+c$$$     &              lTfallvar(ipophost,n,fa,drift,npopmax,nlocd,
+c$$$     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
+c$$$     &              useql) - 
+c$$$     &              lTfallvar(ipoprem,n,fa,drift,npopmax,nlocd,
 c$$$     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
 c$$$     &              useql)
-c$$$           write(*,*) -lTfallvar(ipophost,n,fa,drift,npopmax,nlocd,
-c$$$     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
-c$$$     &              useql)
-c$$$           write(*,*) -lTfallvar(ipoprem,n,fa,drift,npopmax,nlocd,
-c$$$     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
-c$$$     &              useql)
-
-c          write(*,*) 'apres Tf lratio =',lratio 
-*     terme proposal d
-               lratio = lratio - dlog(2*deltad)
-     &              - .5*rr**2 - dlog(dsqrt(2*3.141593d0))
-*     term prior drift
-               lratio = lratio 
-     &              + (shape1-1)*dlog(drifttmp(ipophost)) 
-     &              + (shape2-1)*dlog(1-drifttmp(ipophost))
-     &              - (shape1-1)*dlog(drift(ipophost))
-     &              - (shape2-1)*dlog(1-drift(ipophost))
-     &              - (shape1-1)*dlog(drift(ipoprem))
-     &              - (shape2-1)*dlog(1-drift(ipoprem))
-     &              - gglgamfn(shape1+shape2)
-     &              + gglgamfn(shape1)+gglgamfn(shape2)  
-c               write(*,*) 'apres T drift lratio=',lratio
-c               write(6,*) 'merge apres prior contrib drift =',lratio 
-            endif
-
-            if(useqtc .eq. 1) then 
-*     propose mean and variance of quantitative variables
-               call propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
-     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
-     &              ssqtc,npop,npopmax,nppmax,
-     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,
-     &              ipoprem,contriblr)
-*     contrib prior and proposal 
-               lratio = lratio + contriblr   
-*     contrib likelihood quant. variable
-*     argument usegeno2 is passed as 0 to ignore genotypes 
-*     hence avoid having likelihood ratio of genotypes twice 
-               lratio = lratio + lrallvar2(yy,z,ql,
-     &              f,c,ctmp,indcell,indcell,npopmax,nlocd,
-     &              nloch,nql,ncolt,nalmax,nindiv,nppmax,qtc,nqtc,
-     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,0,0,0,useqtc,
-     &              ploidy)  
-            endif
-c            write(*,*) 'lratio for merge=',lratio
-            lratio = dmin1(0.d0,lratio)
-            alpha  = dexp(lratio)
-            bern = ggrbinom(1.d0,alpha)      
-            
-            if(bern .eq. 1) then
-               if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &              useql .eq. 1) then
-*     propostion du nouveau tableau de freq et de derives
-                  call  remfall(ipoprem,ipophost,
-     &                    npop,npopmax,nlocd,nloch,nql,ncolt,nal,
-     &                 nalmax,f,ftmp,drift,drifttmp,fa,a,ptmp,ntmp,
-     &                 usegeno2,usegeno1,useql)
-               endif
-               if(useqtc .eq. 1) then 
-                  do iqtc = 1,nqtc
-                     do ipop = 1,npopmax
-                        meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
-                        sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
-                     enddo
-                  enddo
-               endif
-               call accept5(nppmax,npopmax,ncolt,
-     &              nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
-               npop = npop - 1
-            endif
-         endif
-      endif
-      end subroutine smfallvar2
-***********************************************************************     
-
+c$$$c               write(6,*) 'merge apres prior contrib freq =',lratio 
+c$$$c$$$           write(*,*) lTfallvar(ipophost,ntmp,fa,drifttmp,npopmax,nlocd,
+c$$$c$$$     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
+c$$$c$$$     &              useql)
+c$$$c$$$           write(*,*) -lTfallvar(ipophost,n,fa,drift,npopmax,nlocd,
+c$$$c$$$     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
+c$$$c$$$     &              useql)
+c$$$c$$$           write(*,*) -lTfallvar(ipoprem,n,fa,drift,npopmax,nlocd,
+c$$$c$$$     &              nloch,nql,ncolt,nal,nalmax,usegeno2,usegeno1,
+c$$$c$$$     &              useql)
+c$$$
+c$$$c          write(*,*) 'apres Tf lratio =',lratio 
+c$$$*     terme proposal d
+c$$$               lratio = lratio - dlog(2*deltad)
+c$$$     &              - .5*rr**2 - dlog(dsqrt(2*3.141593d0))
+c$$$*     term prior drift
+c$$$               lratio = lratio 
+c$$$     &              + (shape1-1)*dlog(drifttmp(ipophost)) 
+c$$$     &              + (shape2-1)*dlog(1-drifttmp(ipophost))
+c$$$     &              - (shape1-1)*dlog(drift(ipophost))
+c$$$     &              - (shape2-1)*dlog(1-drift(ipophost))
+c$$$     &              - (shape1-1)*dlog(drift(ipoprem))
+c$$$     &              - (shape2-1)*dlog(1-drift(ipoprem))
+c$$$     &              - gglgamfn(shape1+shape2)
+c$$$     &              + gglgamfn(shape1)+gglgamfn(shape2)  
+c$$$c               write(*,*) 'apres T drift lratio=',lratio
+c$$$c               write(6,*) 'merge apres prior contrib drift =',lratio 
+c$$$            endif
+c$$$
+c$$$            if(useqtc .eq. 1) then 
+c$$$*     propose mean and variance of quantitative variables
+c$$$               call propparqvmerge(qtc,nindiv,nqtc,indcell,c,ctmp,
+c$$$     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,nnqtc,sqtc,
+c$$$     &              ssqtc,npop,npopmax,nppmax,
+c$$$     &              ksiqtc,kappaqtc,alphaqtc,betaqtc,ipophost,
+c$$$     &              ipoprem,contriblr)
+c$$$*     contrib prior and proposal 
+c$$$               lratio = lratio + contriblr   
+c$$$*     contrib likelihood quant. variable
+c$$$*     argument usegeno2 is passed as 0 to ignore genotypes 
+c$$$*     hence avoid having likelihood ratio of genotypes twice 
+c$$$               lratio = lratio + lrallvar2(yy,z,ql,
+c$$$     &              f,c,ctmp,indcell,indcell,npopmax,nlocd,
+c$$$     &              nloch,nql,ncolt,nalmax,nindiv,nppmax,qtc,nqtc,
+c$$$     &              meanqtc,sdqtc,meanqtctmp,sdqtctmp,0,0,0,useqtc,
+c$$$     &              ploidy)  
+c$$$            endif
+c$$$c            write(*,*) 'lratio for merge=',lratio
+c$$$            lratio = dmin1(0.d0,lratio)
+c$$$            alpha  = dexp(lratio)
+c$$$            bern = ggrbinom(1.d0,alpha)      
+c$$$            
+c$$$            if(bern .eq. 1) then
+c$$$               if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &              useql .eq. 1) then
+c$$$*     propostion du nouveau tableau de freq et de derives
+c$$$                  call  remfall(ipoprem,ipophost,
+c$$$     &                    npop,npopmax,nlocd,nloch,nql,ncolt,nal,
+c$$$     &                 nalmax,f,ftmp,drift,drifttmp,fa,a,ptmp,ntmp,
+c$$$     &                 usegeno2,usegeno1,useql)
+c$$$               endif
+c$$$               if(useqtc .eq. 1) then 
+c$$$                  do iqtc = 1,nqtc
+c$$$                     do ipop = 1,npopmax
+c$$$                        meanqtc(ipop,iqtc) =  meanqtctmp(ipop,iqtc)
+c$$$                        sdqtc(ipop,iqtc) =  sdqtctmp(ipop,iqtc)
+c$$$                     enddo
+c$$$                  enddo
+c$$$               endif
+c$$$               call accept5(nppmax,npopmax,ncolt,
+c$$$     &              nalmax,nal,c,ctmp,f,ftmp,drift,drifttmp)
+c$$$               npop = npop - 1
+c$$$            endif
+c$$$         endif
+c$$$      endif
+c$$$      end subroutine smfallvar2
+c$$$***********************************************************************     
+c$$$
 
 
 
@@ -13649,7 +13652,7 @@ c      CALL SUM(N,E)
       double precision dom,distgrid,coorddom,u,s
 
       integer iit,ipp,idom,ixdom,iydom,nppcur,ccur,ipop
-      double precision xlim(2),ylim(2),ucur,dt
+      double precision xlim(2),ylim(2),ucur,dt,pct
 
       dimension indgrid(nxgrid*nygrid),distgrid(nxgrid*nygrid),
      &     dom(nxgrid*nygrid,npopmax),coorddom(2,nxgrid*nygrid),
@@ -13681,7 +13684,9 @@ c            write(6,*) 'iydom=',iydom
 *     sequentially processes states of the chain
       do iit=1,nit
 10000    format(f7.3,' %')
-         write(6,10000)dble(iit)/dble(nit)*100.
+         pct = dble(iit)/dble(nit)*100.
+         call dblepr('                     ',-1,pct,1)
+c         write(6,10000)dble(iit)/dble(nit)*100.
          
          if((iit .gt. burnin) .and. (iit .le. nit-ninrub)) then
             nppcur = npp(iit)
@@ -13710,7 +13715,7 @@ c         write(*,*) 'apres calccell'
             enddo
          endif 
       enddo
-      
+       
 
       do idom=1,nxgrid*nygrid 
          do ipop=1,npopmax

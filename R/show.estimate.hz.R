@@ -19,7 +19,7 @@ function (coordinates, path.mcmc.adm, burnin, angle = 0, plot.distruct = TRUE,
             iline <- iline + 1
         }
     }
-    q.est <- matrix(nr = nindiv, nc = npop)
+    q.est <- matrix(nrow = nindiv, ncol = npop)
     for (iindiv in 1:nindiv) {
         q.est[iindiv, ] <- apply(q.mcmc[iindiv, , -(1:burnin)], 
             1, mean)
@@ -27,10 +27,10 @@ function (coordinates, path.mcmc.adm, burnin, angle = 0, plot.distruct = TRUE,
     if (plot.distruct) {
         nindiv <- nrow(coordinates)
         coord.proj <- numeric(nindiv)
-        u <- matrix(c(cos(angle), sin(angle)), nc = 1)
+        u <- matrix(c(cos(angle), sin(angle)), ncol = 1)
         P <- u %*% t(u)
         A <- matrix(c(cos(-angle), -sin(-angle), sin(-angle), 
-            cos(-angle)), byrow = TRUE, nc = 2)
+            cos(-angle)), byrow = TRUE, ncol = 2)
         coord.proj <- t(A %*% (P %*% t(coordinates)))[, 1]
         q.sort <- q.est[order(coord.proj), ]
         palette(terrain.colors(npop))

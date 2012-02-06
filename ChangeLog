@@ -1,23 +1,23 @@
 	-----------------------------------
-	Changes 3.2.4 to 3.3.0
+	Changes 3.3.0 to 3.3.1
 	-----------------------------------
 
 ******************************
+*   In doc
+******************************	
+
+All figures included in as jpeg files
+Latex source file included in doc directory	
+	
+******************************
 *   In R
 ******************************
-
+.onLoad instead of .First.lib in zzz.R
 	
-- function ProstProcessMultChain 
-	. take ploidy as  argument
-
-- new function HZ
-
-
-- new function  show.estimate.hz	
-
 
 	
 ************************************
 *   In Fortran
 ************************************
 
+main.f correction of dimension problems for nnqtc and ksiqtc

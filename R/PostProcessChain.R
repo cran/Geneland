@@ -72,7 +72,7 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
     }
     else {
         nqtc <- 1
-        qtc <- matrix(nr = nindiv, nc = nqtc, data = -999)
+        qtc <- matrix(nrow = nindiv, ncol = nqtc, data = -999)
     }
     nalt <- c(allele.numbers.geno2, allele.numbers.geno1, allele.numbers.ql)
     nalmax <- max(1, max(nalt))
@@ -84,8 +84,8 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
             n.int <- ceiling(sqrt(nindiv))
             x <- rep(seq(from = 0, to = 1, length = n.int), n.int)
             y <- rep(seq(from = 0, to = 1, length = n.int), n.int)
-            y <- as.vector(t(matrix(nr = n.int, nc = n.int, y, 
-                byrow = FALSE)))
+            y <- as.vector(t(matrix(nrow = n.int, ncol = n.int, 
+                y, byrow = FALSE)))
             coordinates <- cbind(x, y)[1:nindiv, ]
         }
     }
@@ -117,19 +117,19 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
     print(paste("Iteration with highest posterior density:", 
         pivot))
     ncolt <- nloc.geno2 + nloc.geno1 + nql
-    dom <- matrix(nr = nxdom * nydom, nc = npopmax, data = 0)
-    domperm <- matrix(nr = nxdom * nydom, nc = npopmax, data = 0)
-    coorddom <- matrix(nr = 2, nc = nxdom * nydom, data = -999)
+    dom <- matrix(nrow = nxdom * nydom, ncol = npopmax, data = 0)
+    domperm <- matrix(nrow = nxdom * nydom, ncol = npopmax, data = 0)
+    coorddom <- matrix(nrow = 2, ncol = nxdom * nydom, data = -999)
     indvois <- numeric(nxdom * nydom)
     distvois <- numeric(nxdom * nydom)
     orderf <- orderftmp <- 1:npopmax
-    u <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
+    u <- matrix(nrow = 2, ncol = nb.nuclei.max, data = -999)
     c <- rep(times = nb.nuclei.max, -999)
     xlim <- ylim <- rep(-999, 2)
     f <- fpiv <- fmean <- array(dim = c(npopmax, ncolt, nalmax), 
         -999)
     fmean[1:npop.est, , ] <- 0
-    meanqv <- meanqvpiv <- matrix(nr = npopmax, ncol = nqtc, 
+    meanqv <- meanqvpiv <- matrix(nrow = npopmax, ncol = nqtc, 
         -999)
     ninrub = 0
     print("Calling Fortran function postprocesschain2")
@@ -158,13 +158,13 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
         pmp[ipix] <- order(pmbr[ipix, ], decreasing = TRUE)[1]
     }
     write.table(cbind(coord.grid, pmp), file = paste(path.mcmc, 
-        "modal.pop.txt", sep = ""), quote = FALSE, row.name = FALSE, 
-        col.name = FALSE)
+        "modal.pop.txt", sep = ""), quote = FALSE, row.names = FALSE, 
+        col.names = FALSE)
     indvois <- numeric(nindiv)
     distvois <- numeric(nindiv)
-    u <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
+    u <- matrix(nrow = 2, ncol = nb.nuclei.max, data = -999)
     c <- rep(times = nb.nuclei.max, -999)
-    pmp <- matrix(nr = nindiv, nc = npopmax, data = 0)
+    pmp <- matrix(nrow = nindiv, ncol = npopmax, data = 0)
     out.res <- .Fortran(name = "pppmindiv2", PACKAGE = "Geneland", 
         as.integer(nindiv), as.double(t(coordinates)), as.integer(npopmax), 
         as.integer(nb.nuclei.max), as.integer(indvois), as.double(distvois), 
@@ -173,16 +173,16 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
         as.character(fileperm), as.integer(nit), as.integer(thinning), 
         as.integer(burnin), as.integer(orderf), as.integer(npop.est), 
         as.integer(pivot))
-    pmp <- matrix(nr = nindiv, nc = npopmax, data = out.res[[9]])
+    pmp <- matrix(nrow = nindiv, ncol = npopmax, data = out.res[[9]])
     mod.pop.indiv <- t(apply(pmp, 1, order))[, npopmax]
     write.table(cbind(coordinates, pmp), file = paste(path.mcmc, 
         "proba.pop.membership.indiv.txt", sep = ""), quote = FALSE, 
-        row.name = FALSE, col.name = FALSE)
+        row.names = FALSE, col.names = FALSE)
     write.table(cbind(coordinates, mod.pop.indiv), file = paste(path.mcmc, 
-        "modal.pop.indiv.txt", sep = ""), quote = FALSE, row.name = FALSE, 
-        col.name = FALSE)
+        "modal.pop.indiv.txt", sep = ""), quote = FALSE, row.names = FALSE, 
+        col.names = FALSE)
     param <- c(paste("nxdom :", nxdom), paste("nydom :", nydom), 
         paste("burnin :", burnin))
     write.table(param, file = paste(path.mcmc, "postprocess.parameters.txt", 
-        sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
+        sep = ""), quote = FALSE, row.names = FALSE, col.names = FALSE)
 }

@@ -33,8 +33,8 @@ function (coordinates = NULL, genotypes, ploidy, path.all, nrun,
             n.int <- ceiling(sqrt(nindiv))
             x <- rep(seq(from = 0, to = 1, length = n.int), n.int)
             y <- rep(seq(from = 0, to = 1, length = n.int), n.int)
-            y <- as.vector(t(matrix(nr = n.int, nc = n.int, y, 
-                byrow = FALSE)))
+            y <- as.vector(t(matrix(nrow = n.int, ncol = n.int, 
+                y, byrow = FALSE)))
             coordinates <- cbind(x, y)[1:nindiv, ]
         }
     }
@@ -78,14 +78,14 @@ function (coordinates = NULL, genotypes, ploidy, path.all, nrun,
     substr(tmp, 1, nchar(path.all)) <- path.all
     nchar.path.all <- nchar(path.all)
     nchar.irun.piv <- nchar(char.irun.piv)
-    dom <- matrix(nr = nxdom * nydom, nc = npopmax, data = 0)
-    domperm <- matrix(nr = nxdom * nydom, nc = npopmax, data = 0)
-    coorddom <- matrix(nr = 2, nc = nxdom * nydom, data = -999)
+    dom <- matrix(nrow = nxdom * nydom, ncol = npopmax, data = 0)
+    domperm <- matrix(nrow = nxdom * nydom, ncol = npopmax, data = 0)
+    coorddom <- matrix(nrow = 2, ncol = nxdom * nydom, data = -999)
     indvois <- numeric(nxdom * nydom)
     distvois <- numeric(nxdom * nydom)
     orderf <- orderftmp <- 1:npopmax
     nalmax <- max(allele.numbers)
-    u <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
+    u <- matrix(nrow = 2, ncol = nb.nuclei.max, data = -999)
     c <- rep(times = nb.nuclei.max, -999)
     xlim <- ylim <- rep(-999, 2)
     f <- fpiv <- array(dim = c(npopmax, nloc, nalmax), -999)
@@ -110,13 +110,13 @@ function (coordinates = NULL, genotypes, ploidy, path.all, nrun,
         pmp[ipix] <- order(pmbr[ipix, ], decreasing = TRUE)[1]
     }
     write.table(cbind(coord.grid, pmp), file = paste(path.mcmc, 
-        "modal.pop.txt", sep = ""), quote = FALSE, row.name = FALSE, 
-        col.name = FALSE)
+        "modal.pop.txt", sep = ""), quote = FALSE, row.names = FALSE, 
+        col.names = FALSE)
     indvois <- numeric(nindiv)
     distvois <- numeric(nindiv)
-    u <- matrix(nr = 2, nc = nb.nuclei.max, data = -999)
+    u <- matrix(nrow = 2, ncol = nb.nuclei.max, data = -999)
     c <- rep(times = nb.nuclei.max, -999)
-    pmp <- matrix(nr = nindiv, nc = npopmax, data = 0)
+    pmp <- matrix(nrow = nindiv, ncol = npopmax, data = 0)
     nchar.path.all <- nchar(path.all)
     out.res <- .Fortran(name = "pppmindivmultchain", PACKAGE = "Geneland", 
         as.integer(nindiv), as.double(t(coordinates)), as.integer(npopmax), 
@@ -125,21 +125,21 @@ function (coordinates = NULL, genotypes, ploidy, path.all, nrun,
         as.integer(nchar.path.all), as.integer(nrun), as.integer(nit), 
         as.integer(thinning), as.integer(burnin), as.integer(orderf), 
         as.integer(npop.est), as.integer(pivot))
-    pmp <- matrix(nr = nindiv, nc = npopmax, data = out.res[[9]])
+    pmp <- matrix(nrow = nindiv, ncol = npopmax, data = out.res[[9]])
     mod.pop.indiv <- numeric(nindiv)
     for (iindiv in 1:nindiv) {
         mod.pop.indiv[iindiv] <- order(pmp[iindiv, ], decreasing = TRUE)[1]
     }
     write.table(cbind(coordinates, pmp), file = paste(path.all, 
         "proba.pop.membership.indiv.txt", sep = ""), quote = FALSE, 
-        row.name = FALSE, col.name = FALSE)
+        row.names = FALSE, col.names = FALSE)
     write.table(cbind(coordinates, mod.pop.indiv), file = paste(path.all, 
-        "modal.pop.indiv.txt", sep = ""), quote = FALSE, row.name = FALSE, 
-        col.name = FALSE)
+        "modal.pop.indiv.txt", sep = ""), quote = FALSE, row.names = FALSE, 
+        col.names = FALSE)
     param <- rbind(param, paste("nrun :", nrun))
     write.table(param, file = paste(path.all, "parameters.txt", 
-        sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
+        sep = ""), quote = FALSE, row.names = FALSE, col.names = FALSE)
     param <- c(paste("nxdom :", nxdom), paste("nydom :", nydom))
     write.table(param, file = paste(path.all, "postprocess.parameters.txt", 
-        sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
+        sep = ""), quote = FALSE, row.names = FALSE, col.names = FALSE)
 }

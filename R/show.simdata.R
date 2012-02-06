@@ -35,7 +35,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
         image(seq(from = dataset$coord.lim[1], to = dataset$coord.lim[2], 
             length = dataset$npix[1]), seq(from = dataset$coord.lim[3], 
             to = dataset$coord.lim[4], length = dataset$npix[2]), 
-            matrix(nr = dataset$npix[1], nc = dataset$npix[2], 
+            matrix(nrow = dataset$npix[1], ncol = dataset$npix[2], 
                 dataset$color.nuclei[dataset$nearest.nucleus.grid], 
                 byrow = FALSE), xlab = "", ylab = "", col = terrain.colors(dataset$npop), 
             asp = 1)
@@ -64,7 +64,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
                 image(seq(from = dataset$coord.lim[1], to = dataset$coord.lim[2], 
                   length = dataset$npix[1]), seq(from = dataset$coord.lim[3], 
                   to = dataset$coord.lim[4], length = dataset$npix[2]), 
-                  matrix(nr = dataset$npix[1], nc = dataset$npix[2], 
+                  matrix(nrow = dataset$npix[1], ncol = dataset$npix[2], 
                     FF, byrow = FALSE), col = heat.colors(500), 
                   xlab = "", ylab = "", zlim = zlim.freq, asp = 1)
                 title(paste("Frequencies of allele #", iall, 
@@ -89,8 +89,7 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
                 else pdf(paste(substr(file.plot.freq.indiv, start = 1, 
                   stop = nchar(file.plot.freq.indiv) - 3), iall, 
                   ".ps", sep = ""))
-                look <- as.image(x = t(dataset$coord.indiv), 
-                  Z = FF)
+                look <- as.image(x = dataset$coord.indiv, Z = FF)
                 image.plot(look, main = paste("Field of frequencies for locus #", 
                   iloc, "allele #", iall), asp = 1)
                 points(dataset$coord.nuclei[1, ], dataset$coord.nuclei[2, 
@@ -108,16 +107,17 @@ function (dataset, plot.coord = FALSE, file.plot.coord = NA,
             }
             else pdf(paste(substr(file.plot.gen, start = 1, stop = nchar(file.plot.gen) - 
                 3), iloc, ".ps", sep = ""))
-            plot(dataset$coord.indiv[1, ], dataset$coord.indiv[2, 
-                ], type = "n", cex = 1, lwd = 1, xlab = "", ylab = "", 
-                asp = 1)
+            plot(dataset$coord.indiv[, 1], dataset$coord.indiv[, 
+                2], type = "n", cex = 1, lwd = 1, xlab = "", 
+                ylab = "", asp = 1)
             title(paste("Genotypes at locus #", iloc))
-            text(dataset$coord.indiv[1, ], dataset$coord.indiv[2, 
-                ], dataset$genotypes[, 2 * (iloc - 1) + 1], cex = 1, 
-                lwd = 2, pos = 2, adj = 0)
-            text(dataset$coord.indiv[1, ], dataset$coord.indiv[2, 
-                ], dataset$genotypes[, 2 * (iloc - 1) + 2], cex = 1, 
-                lwd = 2, pos = 4, col = 2, adj = 0.5, offset = -0.5)
+            text(dataset$coord.indiv[, 1], dataset$coord.indiv[, 
+                2], dataset$genotypes[, 2 * (iloc - 1) + 1], 
+                cex = 1, lwd = 2, pos = 2, adj = 0)
+            text(dataset$coord.indiv[, 1], dataset$coord.indiv[, 
+                2], dataset$genotypes[, 2 * (iloc - 1) + 2], 
+                cex = 1, lwd = 2, pos = 4, col = 2, adj = 0.5, 
+                offset = -0.5)
             if (!is.na(file.plot.gen)) 
                 dev.off()
         }

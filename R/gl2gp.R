@@ -4,18 +4,18 @@ function (coordinates, genotypes, file)
     genotypes[is.na(genotypes)] <- 0
     nindiv <- nrow(genotypes)
     nloc <- ncol(genotypes)/2
-    write.table("Header line", file, quote = FALSE, col.name = FALSE, 
-        row.name = FALSE)
+    write.table("Header line", file, quote = FALSE, col.names = FALSE, 
+        row.names = FALSE)
     for (iloc in 1:nloc) {
         write.table(paste("loc", iloc), file, quote = FALSE, 
-            col.name = FALSE, row.name = FALSE, append = TRUE)
+            col.names = FALSE, row.names = FALSE, append = TRUE)
     }
     dum.coord <- c(-999, -999)
     numb.pop <- 0
     for (iindiv in 1:nindiv) {
         if (sum(coordinates[iindiv, ] != dum.coord) > 0) {
-            write.table("Pop", file, quote = FALSE, col.name = FALSE, 
-                row.name = FALSE, append = TRUE)
+            write.table("Pop", file, quote = FALSE, col.names = FALSE, 
+                row.names = FALSE, append = TRUE)
             dum.coord <- coordinates[iindiv, ]
             numb.pop <- numb.pop + 1
         }
@@ -54,11 +54,11 @@ function (coordinates, genotypes, file)
         }
         if (iindiv < nindiv) {
             write.table(x = t(string), file = file, quote = FALSE, 
-                col.name = FALSE, row.name = FALSE, append = TRUE)
+                col.names = FALSE, row.names = FALSE, append = TRUE)
         }
         if (iindiv == nindiv) {
             write.table(x = t(string), file = file, eol = "", 
-                quote = FALSE, col.name = FALSE, row.name = FALSE, 
+                quote = FALSE, col.names = FALSE, row.names = FALSE, 
                 append = TRUE)
         }
     }

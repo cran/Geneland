@@ -19,12 +19,12 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
             nindiv))
     }
     if (give.tess.grid | give.freq.grid) {
-        coord.grid <- matrix(nr = 2, nc = npix[1] * npix[2], 
+        coord.grid <- matrix(nrow = 2, ncol = npix[1] * npix[2], 
             NA)
         coord.grid[1, ] <- rep(seq(from = coord.lim[1], to = coord.lim[2], 
             length = npix[1]), npix[2])
-        coord.grid[2, ] <- as.vector(matrix(nr = npix[1], nc = npix[2], 
-            byr = TRUE, rep(seq(from = coord.lim[3], to = coord.lim[4], 
+        coord.grid[2, ] <- as.vector(matrix(nrow = npix[1], ncol = npix[2], 
+            byrow = TRUE, rep(seq(from = coord.lim[3], to = coord.lim[4], 
                 length = npix[2]), npix[1])))
     }
     if (give.freq.grid) {
@@ -82,7 +82,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
             print("End of GaussRF")
         }
         else {
-            ff <- matrix(nr = ncol(coord.all), nc = sum(allele.numbers) * 
+            ff <- matrix(nrow = ncol(coord.all), ncol = sum(allele.numbers) * 
                 npop, data = rnorm(sum(allele.numbers) * npop), 
                 byrow = TRUE)
         }
@@ -113,7 +113,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
             }
         }
         print("freq. stored")
-        z <- matrix(nr = nindiv, nc = nloc * 2)
+        z <- matrix(nrow = nindiv, ncol = nloc * 2)
         for (iindiv in 1:nindiv) {
             ipop <- color.nuclei[nearest.nucleus[iindiv]]
             for (iloc in 1:nloc) {
@@ -148,7 +148,8 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
                 sub.pop <- color.nuclei[nearest.nucleus.indiv] == 
                   ipop
                 size.pop <- sum(sub.pop)
-                a <- matrix(nr = size.pop, nc = size.pop, data = -999)
+                a <- matrix(nrow = size.pop, ncol = size.pop, 
+                  data = -999)
                 if (size.pop > 0) {
                   res <- .Fortran(name = "areq4", PACKAGE = "Geneland", 
                     as.integer(size.pop), as.integer(nloc), as.integer(nloc * 
@@ -167,7 +168,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
             }
             print("End of computation of IBD index Dsigma^2")
         }
-        diff.B <- matrix(nr = npop, nc = npop, NA)
+        diff.B <- matrix(nrow = npop, ncol = npop, NA)
         if (comp.diff) {
             pop.mbrshp = color.nuclei[nearest.nucleus.indiv]
             if (plot.pairs.borders) {
@@ -187,7 +188,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
                       diag(dd) <- Inf
                       npairs <- sum(dd[1:nindiv1, (nindiv1 + 
                         1):(nindiv1 + nindiv2)] < width)
-                      ind.pairs <- matrix(nr = npairs, nc = 2)
+                      ind.pairs <- matrix(nrow = npairs, ncol = 2)
                       k <- 1
                       for (iindiv1 in 1:nindiv1) {
                         for (iindiv2 in 1:nindiv2) {
@@ -223,7 +224,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
                   dd <- as.matrix(dist(t(coord.indiv[, sub1])))
                   diag(dd) <- Inf
                   npairs <- sum(dd < width)/2
-                  ind.pairs <- matrix(nr = npairs, nc = 2)
+                  ind.pairs <- matrix(nrow = npairs, ncol = 2)
                   k <- 1
                   for (iindiv1 in 1:(nindiv1 - 1)) {
                     for (iindiv2 in (iindiv1 + 1):nindiv1) {
@@ -246,7 +247,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
         }
     }
     if (sim.quanti) {
-        quanti.var <- matrix(nr = nindiv, nc = nquanti.var)
+        quanti.var <- matrix(nrow = nindiv, ncol = nquanti.var)
         for (iindiv in 1:nindiv) {
             ipop <- color.nuclei[nearest.nucleus[iindiv]]
             quanti.var[iindiv, ] <- rnorm(n = nquanti.var, mean = mean.quanti[ipop, 
@@ -255,7 +256,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
     }
     res <- list(coord.lim = coord.lim, coord.indiv = t(coord.indiv), 
         npop = npop, nearest.nucleus.indiv = nearest.nucleus.indiv, 
-        number.nuclei = number.nuclei, coord.nuclei = coord.nuclei, 
+        number.nuclei = number.nuclei, coord.nuclei = t(coord.nuclei), 
         color.nuclei = color.nuclei)
     if (sim.gen) {
         res <- c(res, list(allele.numbers = allele.numbers, model = model, 
@@ -269,7 +270,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
             quanti.var = quanti.var))
     }
     if (give.tess.grid | give.freq.grid) {
-        res <- c(res, list(nearest.nucleus.grid = nearest.nucleus.grid, 
+        res <- c(res, list(coord.grid = t(coord.grid), nearest.nucleus.grid = nearest.nucleus.grid, 
             npix = npix))
     }
     if (give.freq.grid) {

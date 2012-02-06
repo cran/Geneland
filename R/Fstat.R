@@ -11,7 +11,7 @@ function (genotypes, npop, pop.mbrship, ploidy = 2)
         genotypes[is.na(genotypes)] <- -999
     }
     Fis = rep(-999, npop)
-    Fst = matrix(nr = npop, nc = npop, -999)
+    Fst = matrix(nrow = npop, ncol = npop, -999)
     if (npop > 1) {
         for (iclass1 in 1:(npop - 1)) {
             for (iclass2 in (iclass1 + 1):npop) {
@@ -23,7 +23,7 @@ function (genotypes, npop, pop.mbrship, ploidy = 2)
                   pop.mbrshiptmp <- pop.mbrship[sub1 | sub2]
                   pop.mbrshiptmp[pop.mbrshiptmp == iclass1] <- 1
                   pop.mbrshiptmp[pop.mbrshiptmp == iclass2] <- 2
-                  tabindiv <- matrix(nr = nindivtmp, nc = 2, 
+                  tabindiv <- matrix(nrow = nindivtmp, ncol = 2, 
                     data = -999)
                   kk <- numeric(2)
                   effcl <- table(pop.mbrshiptmp)
@@ -49,7 +49,7 @@ function (genotypes, npop, pop.mbrship, ploidy = 2)
                 ])
             nindivtmp <- nrow(ztmp)
             pop.mbrshiptmp <- c(rep(1, sum(sub1)), rep(2, sum(sub1)))
-            tabindiv <- matrix(nr = nindivtmp, nc = 2, data = -999)
+            tabindiv <- matrix(nrow = nindivtmp, ncol = 2, data = -999)
             kk <- numeric(2)
             effcl <- table(pop.mbrshiptmp)
             nloc <- length(allele.numbers)

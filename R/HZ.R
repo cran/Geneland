@@ -9,8 +9,8 @@ function (coordinates, geno.dip.codom = NULL, geno.dip.dom = NULL,
     rdirichlet <- function(param, n.real = 1) {
         param = t(param)
         nb = length(param)
-        Y <- matrix(nr = nb, nc = n.real, data = NA)
-        X <- matrix(nr = nb, nc = n.real, data = NA)
+        Y <- matrix(nrow = nb, ncol = n.real, data = NA)
+        X <- matrix(nrow = nb, ncol = n.real, data = NA)
         for (icol in 1:n.real) {
             Y[, icol] <- rgamma(n = nb, shape = param)
         }
@@ -87,7 +87,8 @@ function (coordinates, geno.dip.codom = NULL, geno.dip.dom = NULL,
         nalmax.dip.codom <- 1
         use.codom <- FALSE
         nalmax.dip.codom <- -999
-        geno.dip.codom.fmt <- matrix(nr = nindiv, nc = 2, -999)
+        geno.dip.codom.fmt <- matrix(nrow = nindiv, ncol = 2, 
+            -999)
     }
     if (!is.null(geno.dip.dom)) {
         nlocd <- ncol(geno.dip.dom)
@@ -98,7 +99,7 @@ function (coordinates, geno.dip.codom = NULL, geno.dip.dom = NULL,
     else {
         use.dom <- FALSE
         nalmax.dip.dom <- -999
-        geno.dip.dom.fmt <- matrix(nr = nindiv, nc = 1, -999)
+        geno.dip.dom.fmt <- matrix(nrow = nindiv, ncol = 1, -999)
     }
     if (!is.null(geno.hap)) {
         nlocd <- 1
@@ -117,7 +118,7 @@ function (coordinates, geno.dip.codom = NULL, geno.dip.dom = NULL,
     }
     else {
         nloch <- 1
-        geno.hap.fmt <- matrix(nr = nindiv, nc = nloch, -999)
+        geno.hap.fmt <- matrix(nrow = nindiv, ncol = nloch, -999)
         nalmax.hap <- 1
         use.hap <- FALSE
         nalmax.hap <- -999
@@ -152,7 +153,7 @@ function (coordinates, geno.dip.codom = NULL, geno.dip.dom = NULL,
     freq.est <- freq.est[1:npop.est, , ]
     dist.indiv <- as.matrix(dist(coordinates))
     if (is.null(dist.IC)) {
-        dist.IC <- matrix(nr = nindiv, nc = npop.est)
+        dist.IC <- matrix(nrow = nindiv, ncol = npop.est)
         for (iindiv in 1:nindiv) {
             for (ipop in 1:npop.est) {
                 dd <- 1e+300
@@ -222,9 +223,10 @@ function (coordinates, geno.dip.codom = NULL, geno.dip.dom = NULL,
     else {
         c.init <- rep(c.init, npop.est)
     }
-    alphadmix <- alphadmixtmp <- matrix(nr = nindiv, nc = npop.est, 
+    alphadmix <- alphadmixtmp <- matrix(nrow = nindiv, ncol = npop.est, 
         data = a.init * exp(-(dist.IC/b.init)^c.init))
-    q.init <- q.tmp <- matrix(nr = nindiv, nc = npop.est, data = NA)
+    q.init <- q.tmp <- matrix(nrow = nindiv, ncol = npop.est, 
+        data = NA)
     for (iindiv in 1:nindiv) {
         q.init[iindiv, ] <- rdirichlet(param = alphadmix[iindiv, 
             ])
@@ -255,5 +257,5 @@ function (coordinates, geno.dip.codom = NULL, geno.dip.dom = NULL,
     param.adm <- c(paste("nit :", nit), paste("thinning :", thinning), 
         paste("npop :", npop.est))
     write.table(param.adm, file = paste(path.mcmc.adm, "parameters.hz.txt", 
-        sep = ""), quote = FALSE, row.name = FALSE, col.name = FALSE)
+        sep = ""), quote = FALSE, row.names = FALSE, col.names = FALSE)
 }
