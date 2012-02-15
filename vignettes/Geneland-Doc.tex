@@ -13,6 +13,9 @@
 \usepackage{manfnt}
 \usepackage{color}
 \usepackage{verbatim}
+\usepackage{bm} 
+\usepackage{sfmath}
+
 %\usepackage{tikz}
 %\usepackage{listings}
 %\usepackage{listings,relsize}
@@ -280,9 +283,16 @@ and install Tcl/Tk 8.5.5 for X11 (tcltk-8.5.5-x11.dmg).
 \subsection{Tasks performed}  
 \subsubsection{Estimating the number of panmictic groups and locating their spatial boundaries}
 
-The main task of {\sc Geneland} consists in clustering a sample of population  genetics data 
-into a certain number of populations in such a way that each population is approximately at Hardy-Weinberg equilibrium with 
+The main task of {\sc Geneland} consists in clustering a sample 
+into a certain number of groups in such a way that each group is homogeneous.
+Since its earlier version, Geneland can process population genetics data, i.e. genotypes at several loci. 
+For usch data, the main assumption is that the putative groups are 
+approximately at Hardy-Weinberg equilibrium with 
 linkage equilibrium between loci (HWLE). 
+
+Since version 4.0.0, Geneland includes a model to deal with phenotypic data. 
+See section \ref{sec:pheno} and \citet{Guillot12a} for detail. 
+
 Different algorithms based on different models are implemented. The most popular algorithm is based on a spatial model 
 and makes use not only of genotypes but also of spatial coordinates of sampled individuals (or populations). 
 
@@ -301,7 +311,13 @@ $n$ haploid\index{haploid} or diploid\index{diploid}  individuals at $L$ co-domi
 \end{itemize}
 This second file is actually optional and {\sc Geneland} can also be used without spatial information.
 See section \ref{sec:data_format} for detail about data format.
+As of version 4.0.0, Geneland can also process phenotypic data. 
+The phenotypic data file should have one line per individual and one column per phenotypic variable. 
 
+The program is able to deal with any combination of  phenotypic and genetic data, 
+including situations where only phenotypic or only genetic data are available 
+and situations when each individual is observed through its own combination of phenotypic and genetic markers. 
+See Fig.~\ref{fig:global_dag} p.~\pageref{fig:global_dag} for an overview of the full model. 
 
 
 \subsubsection{Output files and graphics}
@@ -340,19 +356,22 @@ Three types of quantities are involved:
 population memberships.
  \end{itemize}
 
-They are modelled separately. $K$ is assumed to follow a uniform distribution between 0 and an upper bound $K_{\max}$ 
+They are modelled separately. $K$ is assumed to follow a uniform distribution between 0 and 
+an upper bound $K_{\max}$ 
 prescribed by the user. The genetic and the spatial model are specified conditionally on $K$. 
 This is described below. 
 
 
 
-\subsection{Mixture models}\label{sec:mixture}
+\subsection{Mixture models for genetic data}\label{sec:mixture}
 \subsubsection{Diploid data: looking for within group Hardy-Weinberg and linkage equilibrium}
 
-It is assumed that the overall dataset consists of individuals belonging to $K$ populations, each of these populations being 
+It is assumed that the overall dataset consists of individuals belonging to $K$ populations, 
+each of these populations being 
 at Hardy-Weinberg equilibrium with linkage equilibrium between loci. For $n$ individuals genotyped at $L$ loci, 
 denoting by $f_{klj}$ the frequency of allele 
-$j$ of locus $l$ in population $k$, by $p_i$ population membership of individual $i$ ($p_i  \in \{1,...,K\}$) and by 
+$j$ of locus $l$ in population $k$, by $p_i$ population membership of individual 
+$i$ ($p_i  \in \{1,...,K\}$) and by 
 $z_{il}=(\alpha_{il},\beta_{il})$ the genotype of individual $i$ at loci $l$, HWLE writes: 
 
 \begin{equation}\label{eq:like}
@@ -455,6 +474,36 @@ this model seems to be more prone to algorithm instabilities and more sensitive 
 It is recommended to start data analysis with the uncorrelated frequency model and then to check how these initial results 
 are modified by the use of the correlated frequency model. It is also important to check ex-post that the inferred groups 
 are significantly differentiated and at HWLE.
+
+
+\subsection{Mixture model for phenotypic data}\label{sec:pheno}
+We assume here  that we have a data-set consisting of  $n$ individuals sampled at sites ${\bf s}=(s_i)_{i=1,...,n}$ 
+(where $s_i$ is the two-dimensional spatial coordinate of individual $i$),  
+observed at some phenotypic variables denoted  ${\bf y}=(y_{ij})_{\substack{\;i=1,...,n \\j=1,...,q}}$.
+ Our approach also encompasses the case where sampling locations are missing (or considered to be 
+irrelevant). The only constraint that we impose is that if spatial coordinates are used, 
+they must be available for all individuals.
+
+As above, we assume that each  individual sampled belongs to one of $K$ putative clusters 
+and that variation in the data 
+can be captured by cluster-specific (location and scale) parameters. 
+
+
+Denoting by $p_i$ the cluster membership of individual $i$ ($p_i \in \{1,...,K\}$), 
+we assume that conditionally on $p_i=k$, $y_{ij}$ is drawn from a parametric distribution with cluster-specific parameters. 
+Independence is assumed within and across clusters  conditionally on cluster membership. This means in particular that 
+there is no residual dependence between variables not captured by cluster memberships. 
+We assume  that the $y$ values arise from  a  normal distribution. 
+Each cluster is  therefore characterized by a mean $\mu_{kj}$ and a variance $\sigma^2_{kj}$
+and our model is a mixture of multivariate independent normal distributions. 
+We use the natural conjugate prior family on 
+ $(\mu_{kj},1/\sigma^2_{kj})$ for each cluster $k$ and variable $j$.
+Namely, we  assume that the precision $1/\sigma^2_{kj}$ (i.e.  inverse variance)  follows  a Gamma distribution ${\cal G}(\alpha_{},\beta_{})$
+($\alpha_{}$ shape, $\beta_{}$ rate parameter) and that conditionally on $\sigma_{kj}$, the mean $\mu_{kj} $ has a normal distribution  with 
+mean $\xi_{}$ and variance $\sigma^2_{kj} / \kappa_{}$. 
+In the specification above, $\alpha_{},\beta_{}, \xi_{}$ and $\kappa_{}$ are hyper-parameters. Details about their choice 
+are  discussed in \citet{Guillot12a}. 
+
 
 \clearpage
 \subsection{Models underlying population membership}\label{sec:mbrship}
@@ -613,6 +662,26 @@ the spatial coordinates. See also section \ref{sec:faq_uncertainty}.
 
 
 
+\begin{figure}[h]
+\vspace{-2cm}
+\hspace{-1cm}
+\input{fig/dag3.pdf_t}
+\caption{Graph of the global model. 
+Continuous black lines represent stochastic dependencies, dashed black lines represent 
+deterministic dependencies. Boxes enclose data or fixed hyper-parameters, circles enclose inferred parameters. 
+Bold symbols refer to vector parameters. 
+The red, green and blue dashed lines enclose parameters relative to the phenotypic, 
+geographic and genetic parts 
+of the model respectively. The parameters of interest to biologists are the number of clusters $K$, 
+the vector ${\bf p}$ which encode the cluster memberships,
+and possibly  allele frequencies ${\bf f}$, mean phenotypic values $\bm{ \mu}$, phenotypic variance  $\bm{ \sigma^2}$ 
+which quantify the genetic and phenotypic 
+divergence between and within clusters. 
+Other parameters can be viewed mostly as nuisance parameters.}\label{fig:global_dag}
+\end{figure}
+
+\clearpage
+
 \subsection{Admixture model and hybrid zones}\index{admixture} \index{hybrid zone}
 
 \subsubsection{Model}
@@ -711,7 +780,7 @@ We place a uniform prior on $a$ and $b$ and assume independence of these two par
 
 \begin{figure}[h]
 \centerline{\input{fig/dag-final.pdf_t}}
-\caption{Directed acyclic graph of the model(s) implemented in {\sc Geneland}. 
+\caption{Directed acyclic graph of the genetic model(s) implemented in {\sc Geneland}. 
 Continuous lines represent stochastic dependencies, dashed lines represent 
 deterministic dependencies. Squared boxes enclose data or fixed hyper-parameters, rounded boxes enclose inferred parameters. 
 The thick green dotted line enclose parameters of the admixture model. }\label{fig:dag}

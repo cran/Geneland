@@ -52,11 +52,6 @@
     }
   
 }
-\keyword{ }
-
-\seealso{}
-
-\examples{}
 
 
 \details{

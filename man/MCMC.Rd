@@ -61,7 +61,9 @@
     }
 
   \item{geno.dip.codom}{Genotypes  for diploid data with codominant markers.
-    A matrix with one line per individual and two  columns per locus.}
+    A matrix with one line per individual and two  columns per locus.
+  Note that the object has to be of type matrix not table. This can be
+    forced by function \code{as.matrix}.}
     
  \item{geno.dip.dom}{Genotypes for diploid data with dominant
    markers. A matrix with one line per individual and one  column per
@@ -70,7 +72,9 @@
    codominant markers can be analyzed jointly by passing variables to arguments 
    geno.dip.codom and geno.dip.dom.
  Haploid data and diploid dominant data can not be analyzed jointly in
-   the current version.}
+ the current version.
+ Note that the object has to be of type matrix not table. This can be
+    forced by function \code{as.matrix}.}
 
  \item{geno.hap}{Genotypes of haploid data.
    A matrix with one line per individual and one  column per
@@ -78,14 +82,19 @@
    can be analyzed jointly (e.g. to analyse microsatelite data or SNP
    data together with mtDNA.
  Haploid data and diploid dominant data can not be analyzed jointly in
-   the current version.}
+   the current version.
+ Note that the object has to be of type matrix not table. This can be
+    forced by function \code{as.matrix}.}
     
 
-  \item{qtc}{TODO}
+  \item{qtc}{A matrix of continuous quantitative  phenotypic variables. One line per individual and one  column per
+   phenotypic variable. 
+ Note that the object has to be of type matrix not table. This can be
+    forced by function \code{as.matrix}. }
 
-  \item{qtd}{TODO}
+  \item{qtd}{A matrix of discrete quantitative phenotypic variables. NOT IMPLEMENTED YET}
 
-   \item{ql}{TODO}
+   \item{ql}{A matrix of categorical phenotypic variables. NOT IMPLEMENTED YET}
 
  
 \item{path.mcmc}{ Path to output files directory. It seems that the
@@ -315,7 +324,15 @@ current state of parameters in the Markov chain.
     Molecular Ecology Resources, 2009
 
     \item G. Guillot, R. Leblois, A. Coulon, A. Frantz  Statistical
-  methods in spatial genetics, Molecular Ecology, 2009. 
+    methods in spatial genetics, Molecular Ecology, 2009.
+
+    \item B. Guedj and G. Guillot. Estimating the location and shape of hybrid
+  zones. Molecular Ecology Resources, 11(6) 1119-1123, 2011
+
+   \item G. Guillot, S. Renaud, R. Ledevin, J. Michaux and J. Claude. A
+  Unifying Model for the Analysis of Phenotypic, Genetic and Geographic
+  Data. Systematic Biology, to appear, 2012.
+
 }}
 
 

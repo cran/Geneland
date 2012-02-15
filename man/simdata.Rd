@@ -153,7 +153,7 @@
   null alleles and isolation by distance. Submitted.}
 
 \author{Arnaud Estoup, Gilles Guillot, Filipe Santos}
-\note{ }
+
 \seealso{Function \code{show.simdata} to make graphical display of
   simulated data.}
 \examples{
@@ -177,6 +177,4 @@ dataset <- simdata(nindiv=100,
              plot.pairs.borders=TRUE)
 }
 }
-
-\keyword{}
 

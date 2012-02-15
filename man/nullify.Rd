@@ -17,10 +17,6 @@ nullify(genotypes, nall.null = 1, nloc.null)
 \value{A list with component: 
   \item{genotypes }{The new genotypes after alteration.}
 }
-\references{}
+
 \author{Gilles Guillot}
-
-\examples{}
-
-\keyword{ }
 

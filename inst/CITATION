@@ -24,17 +24,23 @@ citEntry(entry="Article",
          volume =	 5,
          number =	 3,
          pages="712-715",
-         textVersion ="G. Guillot, Mortier, F., Estoup, A. Geneland: A program for landscape genetics. Molecular Ecology Notes, 5, 712-715, 2005"  )
+         textVersion ="G. Guillot, Mortier, F., Estoup, A. Geneland: A program for landscape genetics.
+Molecular Ecology Notes, 5, 712-715, 2005"  )
 
 
 citEntry(entry="Article",
-         author = 	 "A. Coulon, G. Guillot G., Cosson J.-F., Angibault J.M.A. Aulagnier S., Cargnelutti B., Galan M., Hewison A.J.M",
-         title = 	 "Genetic structure is influenced by lansdcape features. Empirical evidence from a roe deer population",
+         author = 	 "A. Coulon, G. Guillot G., Cosson J.-F., Angibault J.M.A. Aulagnier S.,
+Cargnelutti B., Galan M., Hewison A.J.M",
+         title = 	 "Genetic structure is influenced by lansdcape features.
+Empirical evidence from a roe deer population",
          journal = 	 "Molecular Ecology",
          year = 	 2006,
          volume =	 15,
          pages="1669-1679",
-         textVersion ="A. Coulon, G. Guillot G., Cosson J.-F., Angibault J.M.A. Aulagnier S., Cargnelutti B., Galan M., Hewison A.J.M. Genetic structure is influenced by lansdcape features. Empirical evidence from a roe deer population. Molecular Ecology, 15 1669-1679, 2006"  )
+         textVersion ="A. Coulon, G. Guillot G., Cosson J.-F., Angibault J.M.A. Aulagnier S.,
+Cargnelutti B., Galan M., Hewison
+ A.J.M. Genetic structure is influenced by lansdcape features. Empirical evidence from a roe deer population.
+Molecular Ecology, 15 1669-1679, 2006"  )
 
 
 
@@ -102,10 +108,36 @@ citEntry(entry="Article",
 the inference of population genetic structure",
          journal = 	 "Molecular Ecology Resources",	
          year = 	 2010,
+         volume =	 "10",
+         number =	 "6",
+         pages="1082-1084",
+         textVersion ="G. Guillot and F. Santos.  Using AFLP markers and the
+Geneland program for the inference of population genetic structure. Molecular Ecology Resources 10(6), 1082-1084, 2010")
+
+
+
+
+citEntry(entry="Article",
+         author = 	 "B. Guedj and G. Guillot",
+         title = 	        "Estimating the location and shape of hybrid zones",
+         journal = 	 "Molecular Ecology Resources",	
+         year = 	 2011,
+         volume =	 "11",
+         number =	 "6",
+         pages="1119-1123",
+         textVersion ="B. Guedj and G. Guillot. Estimating the location and shape of hybrid zones. Molecular Ecology Resources, 11(6) 1119-1123, 2011")
+
+
+
+citEntry(entry="Article",
+         author = 	 "G. Guillot, S. Renaud, R. Ledevin, J. Michaux, J. Claude",
+         title = 	        "A Unifying Model for the Analysis of Phenotypic, Genetic and Geographic Data",
+         journal = 	 "Systematic Biology",	
+         year = 	 2012,
          volume =	 "",
          number =	 "",
          pages="",
-         textVersion ="G. Guillot and F. Santos  Using AFLP markers and the
-Geneland program for the inference of population genetic structure. Molecular Ecology Resources, 2010")
+         textVersion ="G. Guillot, S. Renaud, R. Ledevin, J. Michaux and  J. Claude.
+A Unifying Model for the Analysis of Phenotypic, Genetic and Geographic Data. Systematic Biology, to appear, 2012.")
 
 

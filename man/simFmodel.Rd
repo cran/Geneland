@@ -71,8 +71,3 @@ frequencies,  ancestral.frequencies, drifts, index.nearest.nucleus}
 \author{Gilles Guillot  }
 
 
-
-
-%\seealso{ Function \code{\link{mcmcFmodel}} for inference}
-
-\keyword{}

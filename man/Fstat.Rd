@@ -41,6 +41,3 @@ Fstat(genotypes,npop,pop.mbrship,ploidy)
   Evolution, 1984,
   vol. 38, 1358-1370.
 }
-
-\keyword{}
- 

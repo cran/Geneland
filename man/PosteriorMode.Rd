@@ -32,5 +32,3 @@ PosteriorMode(coordinates,path.mcmc,plotit=TRUE,format="pdf",new.dev=TRUE,
 
 
 \author{Gilles Guillot  }
-
-\keyword{}

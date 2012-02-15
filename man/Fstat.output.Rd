@@ -33,5 +33,3 @@ Fstat.output(coordinates,genotypes,ploidy,burnin,path.mcmc)
   Evolution, 1984,
   vol. 38, 1358-1370.
 }
-
-\keyword{}

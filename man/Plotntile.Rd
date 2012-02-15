@@ -20,5 +20,3 @@ Plotntile(path.mcmc,burnin,printit=FALSE,file)
 
 \author{Gilles Guillot  }
 
-
-\keyword{}

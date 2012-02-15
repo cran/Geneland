@@ -78,4 +78,3 @@ path.all,nrun,nxdom, nydom,burnin)
 \seealso{\code{\link{PlotTessellation}}}
 
 
-\keyword{}

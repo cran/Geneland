@@ -46,15 +46,10 @@ file.plot.gen)
   \item{zlim.freq}{A vector of two integers giving the limit of the
     values for the image of fields of frequencies}
 }
-\details{ 
 
-}
 \value{
 No value returned
 }
 \references{Guillot G. and Estoup A. }
 \author{Gilles Guillot}
-\note{}
-\examples{}
-\keyword{}
 

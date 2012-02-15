@@ -7,9 +7,9 @@ Maintainer: Gilles Guillot <gigu@imm.dtu.dk>
 URL: http://www2.imm.dtu.dk/~gigu/Geneland/
 License: GPL
 Suggests: mapproj,maps
-Version: 3.3.2
-Date: Mon Feb 6 09:43:38 2012
+Version: 4.0.0
+Date: Wed Feb 15 13:46:09 2012
 Depends: RandomFields,fields,snow,tcltk
-Packaged: 2012-02-06 08:43:48 UTC; gilles
+Packaged: 2012-02-15 12:46:14 UTC; gilles
 Repository: CRAN
-Date/Publication: 2012-02-06 11:57:18
+Date/Publication: 2012-02-15 13:02:32

@@ -30,8 +30,5 @@ PlotFreq(path.mcmc,ipop,iloc,iall,printit=FALSE,path)
 
 \author{Gilles Guillot  }
 
-\keyword{}
-
-
 
 

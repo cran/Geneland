@@ -18,5 +18,3 @@ PlotDrift(path.mcmc,printit=FALSE,file)
 
 \author{Gilles Guillot  }
 
-
-\keyword{}

@@ -24,5 +24,3 @@ PlotFreqA(path.mcmc,iloc,iall,printit=FALSE,path)
 \author{Gilles Guillot  }
 
 
-
-\keyword{}

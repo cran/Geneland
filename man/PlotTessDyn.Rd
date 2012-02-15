@@ -3,7 +3,7 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Plot tessellation along an MCMC run.}
 
-\description{Plot tessellation along an MCMC run.}
+\description{Plot sequence of tessellations simulated along an MCMC run.}
 
 \usage{
 PlotTessDyn(coordinates,path.mcmc,nxgrid,nygrid)
@@ -18,8 +18,6 @@ PlotTessDyn(coordinates,path.mcmc,nxgrid,nygrid)
 
 
 \author{Gilles Guillot}
-
-\keyword{}
 
 
 

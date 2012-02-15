@@ -21,4 +21,3 @@ process in order to convert eol character from unix style to dos style. }
 \author{Gilles Guillot and Tanguy de l'Argentaye}
 
 
-\keyword{}

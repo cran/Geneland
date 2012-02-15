@@ -21,6 +21,3 @@ PlotTessellation(coordinates, path.mcmc,printit,path)
 
 
 \seealso{ \code{\link{PostProcessChain}}}
-
-
-\keyword{}

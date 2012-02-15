@@ -25,6 +25,4 @@ Estoup, Mortier, Cosson, Genetics, 2005
  Guillot, Mortier, Estoup, Geneland : A program for landscape genetics.
  Molecular Ecology  Notes, 2005.}
 \author{Gilles Guillot  }
-
-\keyword{}
  

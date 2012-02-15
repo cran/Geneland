@@ -12,14 +12,5 @@ Geneland.GUI(lib.loc)}
   where Geneland is installed}
 }
 %- maybe also 'usage' for other objects documented here.
-\details{}
-\value{}
-\references{ }
-\author{ Filipe Santos}
-\note{}
-\seealso{ }
-
-% Add one or more standard keywords, see file 'KEYWORDS' in the
-% R documentation directory.
-\keyword{ }
+\author{Filipe Santos}
 
