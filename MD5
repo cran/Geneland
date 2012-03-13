@@ -1,11 +1,11 @@
-7eeb5c21bad34b12176cc8ea8dd30575 *ChangeLog
-9f0429326dde505e788cbb357ccfb4a4 *DESCRIPTION
+1801839e3a5e868095db023a5f33339c *ChangeLog
+1607f5053b338e38df52d932c2c3d970 *DESCRIPTION
 2870dafc0e91c48868ac6ae0b9c5179a *NAMESPACE
 b233bd5a26262d9724ce6580c040c9d4 *R/EstimateFreqNA.R
 737b014058117d3c7d83fd17817a7f42 *R/FormatGenotypes.R
 d3bc9a82a1ec83881d32f0efb84c9b9f *R/Fstat.R
 16de5a7fdd8a2437e65e3fc143a12640 *R/Fstat.output.R
-708871326802725279bf9511277fa610 *R/Geneland.GUI.R
+35df828c88cd7232c8d179c9a88ef3f5 *R/Geneland.GUI.R
 367ef6353aa9c713e90e2687373969d5 *R/HZ.R
 982a6a563501157647301bc90558b88e *R/MCMC.R
 797643f081439c232ce8095048a7ff6e *R/PlotDrift.R
@@ -24,7 +24,7 @@ c18641bf41cec5ea045d4d3496377260 *R/show.estimate.hz.R
 c0ddf5f9caf18fe8daecac7e4264c19d *R/show.simdata.R
 88fc9c32d812a5d9583e1475e5a1b08d *R/simFmodel.R
 7419a6154830be39af58e3d27b7dd6cd *R/simdata.R
-eafe35546168a60975c1741845d5b584 *R/zzz.R
+903808698d520c60c0259265b341f3b1 *R/zzz.R
 2e745b7f8e53041f9e4b176de4256e57 *data/coordinates.txt.gz
 46122ae5d268e28d3df60a4dc7042c9a *data/genotypes.txt.gz
 2391941bb1f3f647e501527dc81ddb06 *inst/CITATION
@@ -78,7 +78,7 @@ b69330008c4e4099628d2c6f69bdf6b3 *src/alarousset.f
 fb8fb45955f997526f2c9f7a15c7bcb9 *src/main.f
 173a35721a3693f4766a3cc0c812d6de *src/wrapper.c
 1f94037fbbee5a696dd9ce04ad581cb0 *vignettes/Geneland-Doc.bbl
-6fd6a61e0a88bde21ed55fecfa56df6e *vignettes/Geneland-Doc.pdf
+287a5e345bb296c04830175280812cf0 *vignettes/Geneland-Doc.pdf
 b9f87b9ec5cd71847ef443e46535b373 *vignettes/Geneland-Doc.tex
 1456e8bfaef23ab1234aad302eee1103 *vignettes/dag-final.pdf
 f0e08c8dd1e3353da3e6ec9d8b2977d8 *vignettes/dag3.pdf

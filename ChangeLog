@@ -1,5 +1,5 @@
 	-----------------------------------
-	Changes 3.3.2 to 4.0.0
+	Changes 4.0.0 to 4.0.1
 	-----------------------------------
 
 	Model for phenotypic variable available.
@@ -13,6 +13,8 @@
 *   In R
 ******************************
 		
+	Model for quantitative phenotypic varibales in the GUI
+	
 ******************************
 *   In Rd
 ******************************

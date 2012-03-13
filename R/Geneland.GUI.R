@@ -75,6 +75,7 @@ function (lib.loc = NULL)
     codominantgenotypefile <- tclVar("")
     dominantgenotypefile <- tclVar("")
     haploidgenotypefile <- tclVar("")
+    qtcfile <- tclVar("")
     outputdir <- tclVar("")
     outputnoadm <- tclVar("")
     outputadm <- tclVar("")
@@ -221,6 +222,12 @@ function (lib.loc = NULL)
             tkgrid(label18.widget, row = 18, column = 1, sticky = "w")
             tkgrid(label19.widget, row = 19, column = 1, sticky = "w")
         }
+        phenotipicHelp <- function() {
+            ttcredits <- tktoplevel(parent = .TkRoot)
+            tkwm.title(ttcredits, "Phenotypic markers")
+            label1.widget <- tklabel(ttcredits, text = "A file containing phenotypic variables.\n\n One line per individual and one column per phenotypic variable.\n\n(see manual for details)")
+            tkgrid(label1.widget, row = 1, column = 1, sticky = "w")
+        }
         label1.widget <- tklabel(ttconf, text = tclvalue(coordinatesfile), 
             width = 45, justify = "left")
         tkconfigure(label1.widget, textvariable = coordinatesfile)
@@ -308,7 +315,7 @@ function (lib.loc = NULL)
             }
             else {
                 globalcodominantgenotypes <<- NULL
-                tclvalue(labelgenotext) = "Genotype: Dodominant data unloaded"
+                tclvalue(labelgenotext) = "Genotype: Codominant data unloaded"
             }
             tkfocus(tt)
         }
@@ -346,6 +353,44 @@ function (lib.loc = NULL)
             command = getdominantgenotypefile, width = 16, justify = "left")
         tkgrid(button2dom.widget, row = 6, column = 1, sticky = "we")
         tkgrid(label2dom.widget, row = 6, column = 2, columnspan = 4, 
+            sticky = "we")
+        label3sep.widget <- tklabel(ttconf, font = "*-Courier--i-normal--12-*", 
+            foreground = "blue", text = "----------Phenotype files----------", 
+            width = 45, justify = "left")
+        helpPheno.widget <- tkbutton(ttconf, width = 2, text = "?", 
+            font = "*-Times-bold-normal--12-*", command = phenotipicHelp, 
+            justify = "left")
+        tkgrid(label3sep.widget, row = 7, column = 1, columnspan = 4, 
+            sticky = "we")
+        tkgrid(helpPheno.widget, row = 7, column = 5, sticky = "we")
+        label2qtc.widget <- tklabel(ttconf, text = tclvalue(qtcfile), 
+            width = 45, justify = "left")
+        tkconfigure(label2qtc.widget, textvariable = qtcfile)
+        getqtcfile <- function() {
+            tclvalue(qtcfile) <- tclvalue(tkgetOpenFile(filetypes = "{{All files} *}", 
+                title = "Choose phenotypic markers file"))
+            if (tclvalue(qtcfile) != "") {
+                if (tclvalue(sep2) == "White space") 
+                  tclvalue(sep2) <- ""
+                globalqtc <<- read.table(tclvalue(qtcfile), sep = tclvalue(sep2), 
+                  na.strings = tclvalue(md))
+                Log(paste("as.matrix(read.table(", tclvalue(qtcfile), 
+                  "),sep=\"", tclvalue(sep2), "\",na.strings=", 
+                  tclvalue(md), "\")", sep = ""), "[SUCCESS] ")
+                if (tclvalue(sep2) == "") 
+                  tclvalue(sep2) <- "White space"
+                tclvalue(labelgenotext) = "Phenotypic markers: file loaded"
+            }
+            else {
+                globalqtc <<- NULL
+                tclvalue(labelgenotext) = "Phenotypic markers: data unloaded"
+            }
+            tkfocus(tt)
+        }
+        button2qtc.widget <- tkbutton(ttconf, text = "Phenotypic markers file", 
+            command = getqtcfile, width = 16, justify = "left")
+        tkgrid(button2qtc.widget, row = 8, column = 1, sticky = "we")
+        tkgrid(label2qtc.widget, row = 8, column = 2, columnspan = 4, 
             sticky = "we")
         label3.widget <- tklabel(ttconf, text = tclvalue(outputdir), 
             width = 45, justify = "left")
@@ -411,7 +456,7 @@ function (lib.loc = NULL)
                 tcl("update")
                 err <- try(MCMC(coordinates = globalcoordinates, 
                   geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
-                  geno.hap = globalhaploidgenotypes, qtc = globalqtc, 
+                  geno.hap = globalhaploidgenotypes, qtc = as.matrix(globalqtc), 
                   qtd = globalqtd, ql = globalql, path.mcmc = tclvalue(outputdir), 
                   rate.max = as.numeric(tclvalue(rate)), delta.coord = as.numeric(tclvalue(delta)), 
                   npopmin = as.numeric(tclvalue(npopmin)), npopinit = as.numeric(tclvalue(npopinit)), 
@@ -710,7 +755,7 @@ function (lib.loc = NULL)
                   Sys.sleep(0.5)
                   err <- try(MCMC(coordinates = globalcoordinates, 
                     geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
-                    geno.hap = globalhaploidgenotypes, qtc = globalqtc, 
+                    geno.hap = globalhaploidgenotypes, qtc = as.matrix(globalqtc), 
                     qtd = globalqtd, ql = globalql, path.mcmc = tempoutputdir, 
                     rate.max = as.numeric(tclvalue(rate)), delta.coord = as.numeric(tclvalue(delta)), 
                     npopmin = as.numeric(tclvalue(npopmin)), 
@@ -861,7 +906,7 @@ function (lib.loc = NULL)
                   Sys.sleep(0.5)
                   err <- try(MCMC(coordinates = globalcoordinates, 
                     geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
-                    geno.hap = globalhaploidgenotypes, qtc = globalqtc, 
+                    geno.hap = globalhaploidgenotypes, qtc = as.matrix(globalqtc), 
                     qtd = globalqtd, ql = globalql, path.mcmc = tempoutputdir, 
                     rate.max = crate.max, delta.coord = cdelta.coord, 
                     npopmin = cnpopmin, npopinit = cnpopinit, 
@@ -3573,7 +3618,7 @@ function (lib.loc = NULL)
         globalhaploidgenotypes <<- NULL
         globalcodominantgenotypes <<- NULL
         globaldominantgenotypes <<- NULL
-        globalqtc <- 0
+        globalqtc <<- NULL
         globalqtd <- 0
         globalql <- 0
         globallabels <<- NA
@@ -3581,6 +3626,7 @@ function (lib.loc = NULL)
         tclvalue(haploidgenotypefile) <<- ""
         tclvalue(codominantgenotypefile) <<- ""
         tclvalue(dominantgenotypefile) <<- ""
+        tclvalue(qtcfile) <<- ""
         tclvalue(outputdir) <<- ""
         tclvalue(advanced) <<- 0
         tclvalue(burnin) <<- 0
