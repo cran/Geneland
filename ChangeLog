@@ -1,8 +1,7 @@
 	-----------------------------------
-	Changes 4.0.0 to 4.0.1
+	Changes 4.0.1 to 4.0.2
 	-----------------------------------
 
-	Model for phenotypic variable available.
 	
 ******************************
 *   In doc
@@ -13,7 +12,8 @@
 *   In R
 ******************************
 		
-	Model for quantitative phenotypic varibales in the GUI
+	- Bug in GUI for phenotype data corrected
+	- a and b parameters in HZ model can be initialized in the GUI
 	
 ******************************
 *   In Rd

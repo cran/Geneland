@@ -18,7 +18,7 @@
   packageStartupMessage('o        See http://www2.imm.dtu.dk/~gigu/Geneland/#              o')
   packageStartupMessage('o        for additional references                                o')
   packageStartupMessage('o                                                                 o')
-  packageStartupMessage('o        This is Geneland-4.0.1                                   o')
+  packageStartupMessage('o        This is Geneland-4.0.2                                   o')
   packageStartupMessage('o                                                                 o')
   packageStartupMessage('ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo')
 }

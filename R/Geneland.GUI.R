@@ -355,7 +355,7 @@ function (lib.loc = NULL)
         tkgrid(label2dom.widget, row = 6, column = 2, columnspan = 4, 
             sticky = "we")
         label3sep.widget <- tklabel(ttconf, font = "*-Courier--i-normal--12-*", 
-            foreground = "blue", text = "----------Phenotype files----------", 
+            foreground = "blue", text = "----------Phenotype file-----------", 
             width = 45, justify = "left")
         helpPheno.widget <- tkbutton(ttconf, width = 2, text = "?", 
             font = "*-Times-bold-normal--12-*", command = phenotipicHelp, 
@@ -372,8 +372,8 @@ function (lib.loc = NULL)
             if (tclvalue(qtcfile) != "") {
                 if (tclvalue(sep2) == "White space") 
                   tclvalue(sep2) <- ""
-                globalqtc <<- read.table(tclvalue(qtcfile), sep = tclvalue(sep2), 
-                  na.strings = tclvalue(md))
+                globalqtc <<- as.matrix(read.table(tclvalue(qtcfile), 
+                  sep = tclvalue(sep2), na.strings = tclvalue(md)))
                 Log(paste("as.matrix(read.table(", tclvalue(qtcfile), 
                   "),sep=\"", tclvalue(sep2), "\",na.strings=", 
                   tclvalue(md), "\")", sep = ""), "[SUCCESS] ")
@@ -456,7 +456,7 @@ function (lib.loc = NULL)
                 tcl("update")
                 err <- try(MCMC(coordinates = globalcoordinates, 
                   geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
-                  geno.hap = globalhaploidgenotypes, qtc = as.matrix(globalqtc), 
+                  geno.hap = globalhaploidgenotypes, qtc = globalqtc, 
                   qtd = globalqtd, ql = globalql, path.mcmc = tclvalue(outputdir), 
                   rate.max = as.numeric(tclvalue(rate)), delta.coord = as.numeric(tclvalue(delta)), 
                   npopmin = as.numeric(tclvalue(npopmin)), npopinit = as.numeric(tclvalue(npopinit)), 
@@ -755,7 +755,7 @@ function (lib.loc = NULL)
                   Sys.sleep(0.5)
                   err <- try(MCMC(coordinates = globalcoordinates, 
                     geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
-                    geno.hap = globalhaploidgenotypes, qtc = as.matrix(globalqtc), 
+                    geno.hap = globalhaploidgenotypes, qtc = globalqtc, 
                     qtd = globalqtd, ql = globalql, path.mcmc = tempoutputdir, 
                     rate.max = as.numeric(tclvalue(rate)), delta.coord = as.numeric(tclvalue(delta)), 
                     npopmin = as.numeric(tclvalue(npopmin)), 
@@ -906,7 +906,7 @@ function (lib.loc = NULL)
                   Sys.sleep(0.5)
                   err <- try(MCMC(coordinates = globalcoordinates, 
                     geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
-                    geno.hap = globalhaploidgenotypes, qtc = as.matrix(globalqtc), 
+                    geno.hap = globalhaploidgenotypes, qtc = globalqtc, 
                     qtd = globalqtd, ql = globalql, path.mcmc = tempoutputdir, 
                     rate.max = crate.max, delta.coord = cdelta.coord, 
                     npopmin = cnpopmin, npopinit = cnpopinit, 
@@ -1005,11 +1005,11 @@ function (lib.loc = NULL)
                   tkconfigure(timelabel.widget, text = "Parallel processing...")
                   tcl("update")
                   clusterApply(cluster, 1:tclvalue(ntestpop), 
-                    mrcluster, tclvalue(ploidy), tclvalue(outputdir), 
-                    as.numeric(tclvalue(rate)), as.numeric(tclvalue(delta)), 
-                    as.numeric(tclvalue(npopmin)), as.numeric(tclvalue(npopinit)), 
-                    as.numeric(tclvalue(npopmax)), as.numeric(tclvalue(nuclei)), 
-                    as.numeric(tclvalue(nit)), cthinning <- as.numeric(tclvalue(thinning)), 
+                    mrcluster, tclvalue(outputdir), as.numeric(tclvalue(rate)), 
+                    as.numeric(tclvalue(delta)), as.numeric(tclvalue(npopmin)), 
+                    as.numeric(tclvalue(npopinit)), as.numeric(tclvalue(npopmax)), 
+                    as.numeric(tclvalue(nuclei)), as.numeric(tclvalue(nit)), 
+                    cthinning <- as.numeric(tclvalue(thinning)), 
                     tclvalue(freq), as.logical(tclvalue(spatial)), 
                     as.logical(tclvalue(jcf)), as.logical(tclvalue(null)))
                   for (i in 1:as.numeric(tclvalue(ntestpop))) mrafter(i)
@@ -1330,70 +1330,121 @@ function (lib.loc = NULL)
         tkfocus(ttpost)
     }
     hybridzone <- function() {
-        Hybzon <- function() {
-            tttry <- tktoplevel(parent = .TkRoot)
-            tkgrab(tttry)
-            tkwm.geometry(tttry, "+200+200")
-            tkwm.title(tttry, "wait")
-            warn <- tklabel(tttry, image = imagepleasewait)
-            tkpack(warn)
-            tkfocus(tttry)
-            tcl("update")
-            Sys.sleep(0.5)
-            print("Starting...")
-            if ((is.null(globaldominantgenotypes) && is.null(globalcodominantgenotypes) && 
-                !is.null(globalhaploidgenotypes)) || (is.null(globaldominantgenotypes) && 
-                !is.null(globalcodominantgenotypes) && is.null(globalhaploidgenotypes)) || 
-                (!is.null(globaldominantgenotypes) && is.null(globalcodominantgenotypes) && 
-                  is.null(globalhaploidgenotypes))) {
-                err <- try(HZ(coordinates = globalcoordinates, 
-                  geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
-                  geno.hap = globalhaploidgenotypes, path.mcmc.noadm = tclvalue(outputnoadm), 
-                  estimate.a = as.logical(tclvalue(estimatea)), 
-                  estimate.b = as.logical(tclvalue(estimateb)), 
-                  estimate.c = as.logical(tclvalue(estimatec)), 
-                  common.param = as.logical(tclvalue(cparam)), 
-                  nit = as.numeric(tclvalue(nit)), thinning = as.numeric(tclvalue(thinning)), 
-                  path.mcmc.adm = tclvalue(outputadm)), silent = TRUE)
-                tkdestroy(tttry)
-                print("Done.")
-                if (class(err) == "try-error") {
-                  Log(paste("HZ(coordinates=", matrix2str(globalcoordinates), 
-                    ",geno.dip.dom=", matrix2str(globaldominantgenotypes), 
-                    ",geno.dip.codom=", matrix2str(globalcodominantgenotypes), 
-                    ",geno.hap=", matrix2str(globalhaploidgenotypes), 
-                    ",path.mcmc.noadm=\"", tclvalue(outputnoadm), 
-                    "\",estimate.a=", as.logical(tclvalue(estimatea)), 
-                    ",estimate.b=", as.logical(tclvalue(estimateb)), 
-                    ",estimate.c=", as.logical(tclvalue(estimatec)), 
-                    ",common.param=", as.logical(tclvalue(cparam)), 
-                    ",nit =", as.numeric(tclvalue(nit)), ",thinning=", 
-                    as.numeric(tclvalue(thinning)), ",path.mcmc.adm=\"", 
-                    tclvalue(outputadm), "\")", sep = ""), "[FAILED] ")
-                  tkmessageBox(message = err, icon = "error", 
-                    type = "ok", parent = tt)
+        flagWindow <- FALSE
+        Hybask <- function() {
+            inita <- tclVar("")
+            initb <- tclVar("")
+            Hybzon <- function() {
+                if (flagWindow) {
+                  tkdestroy(tthybask)
+                  flagWindow <<- FALSE
+                }
+                tttry <- tktoplevel(parent = .TkRoot)
+                tkgrab(tttry)
+                tkwm.geometry(tttry, "+200+200")
+                tkwm.title(tttry, "wait")
+                warn <- tklabel(tttry, image = imagepleasewait)
+                tkpack(warn)
+                tkfocus(tttry)
+                tcl("update")
+                Sys.sleep(0.5)
+                print("Starting...")
+                initRa <- NULL
+                initRb <- NULL
+                if (tclvalue(inita) != "") {
+                  initRa <- as.numeric(tclvalue(inita))
+                }
+                if (tclvalue(initb) != "") {
+                  initRb <- as.numeric(tclvalue(initb))
+                }
+                if ((is.null(globaldominantgenotypes) && is.null(globalcodominantgenotypes) && 
+                  !is.null(globalhaploidgenotypes)) || (is.null(globaldominantgenotypes) && 
+                  !is.null(globalcodominantgenotypes) && is.null(globalhaploidgenotypes)) || 
+                  (!is.null(globaldominantgenotypes) && is.null(globalcodominantgenotypes) && 
+                    is.null(globalhaploidgenotypes))) {
+                  err <- try(HZ(coordinates = globalcoordinates, 
+                    geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
+                    geno.hap = globalhaploidgenotypes, path.mcmc.noadm = tclvalue(outputnoadm), 
+                    estimate.a = as.logical(tclvalue(estimatea)), 
+                    estimate.b = as.logical(tclvalue(estimateb)), 
+                    estimate.c = as.logical(tclvalue(estimatec)), 
+                    a.init = initRa, b.init = initRb, common.param = as.logical(tclvalue(cparam)), 
+                    nit = as.numeric(tclvalue(nit)), thinning = as.numeric(tclvalue(thinning)), 
+                    path.mcmc.adm = tclvalue(outputadm)), silent = TRUE)
+                  tkdestroy(tttry)
+                  print("Done.")
+                  if (class(err) == "try-error") {
+                    Log(paste("HZ(coordinates=", matrix2str(globalcoordinates), 
+                      ",geno.dip.dom=", matrix2str(globaldominantgenotypes), 
+                      ",geno.dip.codom=", matrix2str(globalcodominantgenotypes), 
+                      ",geno.hap=", matrix2str(globalhaploidgenotypes), 
+                      ",path.mcmc.noadm=\"", tclvalue(outputnoadm), 
+                      "\",estimate.a=", as.logical(tclvalue(estimatea)), 
+                      ",estimate.b=", as.logical(tclvalue(estimateb)), 
+                      ",estimate.c=", as.logical(tclvalue(estimatec)), 
+                      ",a.init=", initRa, ",b.init=", initRb, 
+                      ",common.param=", as.logical(tclvalue(cparam)), 
+                      ",nit =", as.numeric(tclvalue(nit)), ",thinning=", 
+                      as.numeric(tclvalue(thinning)), ",path.mcmc.adm=\"", 
+                      tclvalue(outputadm), "\")", sep = ""), 
+                      "[FAILED] ")
+                    tkmessageBox(message = err, icon = "error", 
+                      type = "ok", parent = tt)
+                  }
+                  else {
+                    tkmessageBox(message = "Terminated with success", 
+                      type = "ok", parent = tt)
+                    Log(paste("HZ(coordinates=", matrix2str(globalcoordinates), 
+                      ",geno.dip.dom=", matrix2str(globaldominantgenotypes), 
+                      ",geno.dip.codom=", matrix2str(globalcodominantgenotypes), 
+                      ",geno.hap=", matrix2str(globalhaploidgenotypes), 
+                      ",path.mcmc.noadm=\"", outputnoadm, "\",estimate.a=", 
+                      as.logical(tclvalue(estimatea)), ",estimate.b=", 
+                      as.logical(tclvalue(estimateb)), ",estimate.c=", 
+                      as.logical(tclvalue(estimatec)), ",a.init=", 
+                      initRa, ",b.init=", initRb, ",common.param=", 
+                      as.logical(tclvalue(cparam)), ",nit =", 
+                      as.numeric(tclvalue(nit)), ",thinning=", 
+                      as.numeric(tclvalue(thinning)), ",path.mcmc.adm=\"", 
+                      tclvalue(outputadm), "\")", sep = ""), 
+                      "[SUCCESS] ")
+                  }
                 }
                 else {
-                  tkmessageBox(message = "Terminated with success", 
+                  tkdestroy(tttry)
+                  tkmessageBox(message = "You can only set either dominant genotype, codominant genotype or haploid genoptype", 
                     type = "ok", parent = tt)
-                  Log(paste("HZ(coordinates=", matrix2str(globalcoordinates), 
-                    ",geno.dip.dom=", matrix2str(globaldominantgenotypes), 
-                    ",geno.dip.codom=", matrix2str(globalcodominantgenotypes), 
-                    ",geno.hap=", matrix2str(globalhaploidgenotypes), 
-                    ",path.mcmc.noadm=\"", outputnoadm, "\",estimate.a=", 
-                    as.logical(tclvalue(estimatea)), ",estimate.b=", 
-                    as.logical(tclvalue(estimateb)), ",estimate.c=", 
-                    as.logical(tclvalue(estimatec)), ",common.param=", 
-                    as.logical(tclvalue(cparam)), ",nit =", as.numeric(tclvalue(nit)), 
-                    ",thinning=", as.numeric(tclvalue(thinning)), 
-                    ",path.mcmc.adm=\"", tclvalue(outputadm), 
-                    "\")", sep = ""), "[SUCCESS] ")
                 }
             }
+            if (tclvalue(estimatea) == "TRUE" && tclvalue(estimateb) == 
+                "TRUE") 
+                Hybzon()
             else {
-                tkdestroy(tttry)
-                tkmessageBox(message = "You can only set either dominant genotype, codominant genotype or haploid genoptype", 
-                  type = "ok", parent = tt)
+                tthybask <- tktoplevel()
+                flagWindow <<- TRUE
+                tkwm.title(tthybask, "Please insert initial values")
+                if (tclvalue(estimatea) == "FALSE") {
+                  initaentry.widget <- tkentry(tthybask, width = "6", 
+                    textvariable = inita)
+                  initalabel.widget <- tklabel(tthybask, text = "a:")
+                  tkgrid(initalabel.widget, row = 1, column = 1, 
+                    sticky = "w")
+                  tkgrid(initaentry.widget, row = 1, column = 2, 
+                    columnspan = 2, sticky = "w")
+                }
+                if (tclvalue(estimateb) == "FALSE") {
+                  initbentry.widget <- tkentry(tthybask, width = "6", 
+                    textvariable = initb)
+                  initblabel.widget <- tklabel(tthybask, text = "b:")
+                  tkgrid(initblabel.widget, row = 2, column = 1, 
+                    sticky = "w")
+                  tkgrid(initbentry.widget, row = 2, column = 2, 
+                    columnspan = 2, sticky = "w")
+                }
+                nextaskbutton <- tkbutton(tthybask, image = imagerun2, 
+                  text = "RUN >>", command = Hybzon)
+                tkgrid(nextaskbutton, row = 3, column = 3, sticky = "e")
+                tkfocus(tthybask)
             }
         }
         labelnoadm.widget <- tklabel(tthybzone, text = tclvalue(outputnoadm), 
@@ -1445,8 +1496,8 @@ function (lib.loc = NULL)
         westimateb <- .Tk.subwin(tthybzone)
         estimateboptionmenu.widget <- tcl("tk_optionMenu", westimateb, 
             estimateb, "FALSE", "TRUE")
-        tkgrid(estimateblabel.widget, row = 4, column = 1, sticky = "w")
-        tkgrid(westimateb, row = 4, column = 3, columnspan = 3, 
+        tkgrid(estimateblabel.widget, row = 5, column = 1, sticky = "w")
+        tkgrid(westimateb, row = 5, column = 3, columnspan = 3, 
             sticky = "w")
         estimateclabel.widget <- tklabel(tthybzone, text = "Estimate c:")
         estimatec <- tclVar("FALSE")
@@ -1471,7 +1522,7 @@ function (lib.loc = NULL)
         tkgrid(thinning.widget, row = 8, column = 2, columnspan = 3, 
             sticky = "w")
         nextbutton <- tkbutton(tthybzone, image = imagerun2, 
-            text = "RUN >>", command = Hybzon)
+            text = "RUN >>", command = Hybask)
         tkgrid(nextbutton, row = 9, column = 3, sticky = "e")
         tkfocus(tthybzone)
     }
