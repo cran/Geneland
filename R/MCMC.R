@@ -179,8 +179,8 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
     if (missing(nb.nuclei.max)) {
         nb.nuclei.max <- ifelse(spatial, 2 * nindiv, nindiv)
     }
-    if (!spatial & (nb.nuclei.max < nindiv)) {
-        stop("With option spatial=FALSE, nb.nuclei.max should be at least equal to the number of individuals")
+    if (nb.nuclei.max < nindiv) {
+        stop("nb.nuclei.max should be at least equal to the number of individuals")
     }
     if (spatial & (nb.nuclei.max < 2 * rate.max)) {
         stop("nb.nuclei.max is too small as compared to rate.max")
@@ -317,27 +317,33 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
     integer.par <- c(integer.par, rep(-999, 100 - length(integer.par)))
     double.par <- c(rate.max, delta.coord, shape1, shape2, prop.update.cell)
     double.par <- c(double.par, rep(-999, 100 - length(double.par)))
-    print(c("in MCMC.R nalt=", nalt))
-    out.res <- .Fortran(name = "mcmcgld", PACKAGE = "Geneland", 
-        as.double(t(coordinates)), as.integer(geno2.999), as.integer(miss.loc), 
-        as.integer(geno1.999), as.integer(ql.999), as.integer(nql), 
-        as.double(qtc.999), as.integer(nqtc), as.character(path.mcmc), 
-        as.integer(integer.par), as.double(double.par), as.integer(nindiv), 
-        as.integer(nloc.geno2), as.integer(nloc.geno1), as.integer(ncolt), 
-        as.integer(nalt), as.integer(nalmax), as.integer(nb.nuclei.max), 
-        as.integer(npopinit), as.integer(npopmin), as.integer(npopmax), 
-        as.double(xlim), as.double(ylim), as.integer(indcell), 
-        as.integer(indcelltemp), as.double(distcell), as.double(distcelltemp), 
-        as.double(t), as.double(ttemp), as.double(u), as.double(utemp), 
-        as.integer(c), as.integer(ctemp), as.double(f), as.double(ftemp), 
-        as.double(fa), as.double(drift), as.double(drifttemp), 
-        as.integer(n), as.integer(ntemp), as.double(a), as.double(ptemp), 
-        as.double(meanqtc), as.double(sdqtc), as.double(meanqtctmp), 
-        as.double(sdqtctmp), as.integer(nnqtc), as.double(sqtc), 
-        as.double(ssqtc), as.double(ksiqtc), as.double(kappaqtc), 
-        as.double(alphaqtc), as.double(betaqtc), as.double(gbeta), 
-        as.double(hbeta), as.integer(cellclass), as.integer(listcell), 
-        as.integer(true.geno), as.double(full.cond.y))
+    nitsaved <- nit/thinning
+    out1 <- array(dim = c(nitsaved, 5), data = -999)
+    outspace <- array(dim = c(nitsaved, 5, nb.nuclei.max), data = -999)
+    outfreq <- array(dim = c(nitsaved, 3, npopmax, ncolt, nalmax), 
+        data = -999)
+    outqtc <- array(dim = c(nitsaved, 2, npopmax, nqtc), data = -999)
+    out.res <- .Fortran("mcmcgld", PACKAGE = "Geneland", as.double(t(coordinates)), 
+        as.integer(geno2.999), as.integer(miss.loc), as.integer(geno1.999), 
+        as.integer(ql.999), as.integer(nql), as.double(qtc.999), 
+        as.integer(nqtc), as.character(path.mcmc), as.integer(integer.par), 
+        as.double(double.par), as.integer(nindiv), as.integer(nloc.geno2), 
+        as.integer(nloc.geno1), as.integer(ncolt), as.integer(nalt), 
+        as.integer(nalmax), as.integer(nb.nuclei.max), as.integer(npopinit), 
+        as.integer(npopmin), as.integer(npopmax), as.double(xlim), 
+        as.double(ylim), as.integer(indcell), as.integer(indcelltemp), 
+        as.double(distcell), as.double(distcelltemp), as.double(t), 
+        as.double(ttemp), as.double(u), as.double(utemp), as.integer(c), 
+        as.integer(ctemp), as.double(f), as.double(ftemp), as.double(fa), 
+        as.double(drift), as.double(drifttemp), as.integer(n), 
+        as.integer(ntemp), as.double(a), as.double(ptemp), as.double(meanqtc), 
+        as.double(sdqtc), as.double(meanqtctmp), as.double(sdqtctmp), 
+        as.integer(nnqtc), as.double(sqtc), as.double(ssqtc), 
+        as.double(ksiqtc), as.double(kappaqtc), as.double(alphaqtc), 
+        as.double(betaqtc), as.double(gbeta), as.double(hbeta), 
+        as.integer(cellclass), as.integer(listcell), as.integer(true.geno), 
+        as.double(full.cond.y), as.integer(nitsaved), as.double(out1), 
+        as.double(outspace), as.double(outfreq), as.double(outqtc))
     param <- c(paste("nindiv :", nindiv), paste("rate.max :", 
         rate.max), paste("nb.nuclei.max :", nb.nuclei.max), paste("nit :", 
         nit), paste("thinning :", thinning), paste("varnpop :", 
@@ -381,4 +387,56 @@ function (coordinates = NULL, geno.dip.codom = NULL, geno.dip.dom = NULL,
         row.names = FALSE, col.names = FALSE)
     write.table(allele.numbers.ql, file = paste(path.mcmc, "number.levels.ql.txt", 
         sep = ""), quote = FALSE, row.names = FALSE, col.names = FALSE)
+    print("Writing MCMC outputs in external text files")
+    out1 <- array(dim = c(nitsaved, 5), data = out.res[[61]])
+    write.table(file = paste(path.mcmc, "Poisson.process.rate.txt", 
+        sep = ""), out1[, 1], row.names = FALSE, col.names = FALSE)
+    write.table(file = paste(path.mcmc, "nuclei.numbers.txt", 
+        sep = ""), out1[, 2], row.names = FALSE, col.names = FALSE)
+    write.table(file = paste(path.mcmc, "populations.numbers.txt", 
+        sep = ""), out1[, 3], row.names = FALSE, col.names = FALSE)
+    write.table(file = paste(path.mcmc, "log.likelihood.txt", 
+        sep = ""), out1[, 4], row.names = FALSE, col.names = FALSE)
+    write.table(file = paste(path.mcmc, "log.posterior.density.txt", 
+        sep = ""), out1[, 5], row.names = FALSE, col.names = FALSE)
+    outspace <- array(dim = c(nitsaved, 5, nb.nuclei.max), data = out.res[[62]])
+    for (iitstor in 1:(nit/thinning)) {
+        append <- ifelse(iitstor > 1, TRUE, FALSE)
+        write.table(file = paste(path.mcmc, "coord.nuclei.txt", 
+            sep = ""), t(outspace[iitstor, 1:2, ]), row.names = FALSE, 
+            col.names = FALSE, append = append)
+        write.table(file = paste(path.mcmc, "color.nuclei.txt", 
+            sep = ""), outspace[iitstor, 3, ], row.names = FALSE, 
+            col.names = FALSE, append = append)
+        write.table(file = paste(path.mcmc, "hidden.coord.txt", 
+            sep = ""), t(outspace[iitstor, 4:5, ]), row.names = FALSE, 
+            col.names = FALSE)
+    }
+    outfreq <- array(dim = c(nitsaved, 3, npopmax, ncolt, nalmax), 
+        data = out.res[[63]])
+    for (iitstor in 1:(nit/thinning)) {
+        append <- ifelse(iitstor > 1, TRUE, FALSE)
+        write.table(file = paste(path.mcmc, "ancestral.frequencies.txt", 
+            sep = ""), outfreq[iitstor, 2, 1, , ], row.names = FALSE, 
+            col.names = FALSE, append = append)
+        write.table(file = paste(path.mcmc, "drifts.txt", sep = ""), 
+            t(outfreq[iitstor, 3, , 1, 1]), row.names = FALSE, 
+            col.names = FALSE, append = append)
+        for (iloc in 1:ncolt) {
+            append <- ifelse(iitstor > 1 | iloc > 1, TRUE, FALSE)
+            write.table(file = paste(path.mcmc, "frequencies.txt", 
+                sep = ""), t(outfreq[iitstor, 1, , iloc, ]), 
+                row.names = FALSE, col.names = FALSE, append = append)
+        }
+    }
+    outqtc <- array(dim = c(nitsaved, 2, npopmax, nqtc), data = out.res[[64]])
+    for (iitstor in 1:(nit/thinning)) {
+        append <- ifelse(iitstor > 1, TRUE, FALSE)
+        write.table(file = paste(path.mcmc, "mean.qtc.txt", sep = ""), 
+            outqtc[iitstor, 1, , ], row.names = FALSE, col.names = FALSE, 
+            append = append)
+        write.table(file = paste(path.mcmc, "sd.qtc.txt", sep = ""), 
+            outqtc[iitstor, 2, , ], row.names = FALSE, col.names = FALSE, 
+            append = append)
+    }
 }

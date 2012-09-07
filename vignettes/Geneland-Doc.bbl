@@ -1,4 +1,4 @@
-\begin{thebibliography}{29}
+\begin{thebibliography}{31}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
@@ -15,6 +15,13 @@ M.A Beaumont and D.J. Balding.
 \newblock Identifying adaptive genetic divergence among populations from genome
   scans.
 \newblock \emph{Molecular Ecology}, 13:\penalty0 969--980, 2004.
+
+\bibitem[Bivand et~al.(2008)Bivand, Pebesma, and G{\'o}mez-{R}ubio]{Bivand08}
+R.~Bivand, E.~Pebesma, and V.~G{\'o}mez-{R}ubio.
+\newblock \emph{Applied Spatial Data Analysis with {R}}.
+\newblock Springer, New York, 2008.
+\newblock URL \url{http://www.springer.com/978-0-387-78170-9}.
+\newblock ISBN 978-0-387-78170-.
 
 \bibitem[Callen et~al.(1993)Callen, Thompson, Shen, Phillips, Richards, and
   Mulley]{Callen93}
@@ -58,14 +65,8 @@ M.~Fontaine, S.J.E. Baird, S.~Piry, N.~Ray, K.~Tolley, S.~Duke, A.~Birkun,
 \bibitem[Guedj and Guillot(2011)]{Guedj11}
 B.~Guedj and G.~Guillot.
 \newblock Estimating the location and shape of hybrid zones.
-\newblock \emph{To appear in {M}olecular {E}cology {R}esources}, 2011.
-\newblock 16pp.
-
-\bibitem[Guillot(2005)]{Guillot05b}
-G.~Guillot.
-\newblock Geneland: a computer package for landscape genetics.
-\newblock Contributed R package, 2005.
-\newblock http://www2.imm.dtu.dk/~gigu/Geneland/Geneland-Doc.pdf.
+\newblock \emph{To appear in {M}olecular {E}cology {R}esources}, 11\penalty0
+  (6):\penalty0 1119--1123, 2011.
 
 \bibitem[Guillot(2008)]{Guillot08b}
 G.~Guillot.
@@ -85,6 +86,13 @@ G.~Guillot.
   population genetics data'.
 \newblock \emph{Bioinformatics}, 25\penalty0 (14):\penalty0 1805--1806,
   2009{\natexlab{b}}.
+
+\bibitem[Guillot and Carpentier-{S}kandalis(2011)]{Guillot11b}
+G.~Guillot and A.~Carpentier-{S}kandalis.
+\newblock On the informativeness of dominant and co-dominant genetic markers
+  for {B}ayesian supervised clustering.
+\newblock \emph{The Open Statistics and Probability Journal}, 3:\penalty0
+  7--12, 2011.
 
 \bibitem[Guillot and Foll(2009)]{Guillot09c}
 G.~Guillot and M.~Foll.
@@ -137,7 +145,7 @@ G.~Guillot, R.~Leblois, A.~Coulon, and A.~Frantz.
 G.~Guillot, S.~Renaud, R.~Ledevin, J.~Michaux, and J.~Claude.
 \newblock A unifying model for the analysis of phenotypic, genetic and
   geographic data.
-\newblock \emph{To appear in Syst. Biol.}, 2012.
+\newblock \emph{Systematic Biology}, 61, 2012.
 
 \bibitem[Hannelius et~al.(2008)Hannelius, Salmela, Lappalainen, Guillot,
   Lindgren, {v}on {D}\"obeln, Lahermo, and Kere]{Hannelius08}
@@ -146,6 +154,12 @@ U.~Hannelius, E.~Salmela, T.~Lappalainen, G.~Guillot, C.M. Lindgren, U.~{v}on
 \newblock Population substructure in {F}inland and {S}weden revealed by a small
   number of unlinked autosomal {SNP}s.
 \newblock \emph{BMC {G}enetics}, 9\penalty0 (54), 2008.
+
+\bibitem[Hille et~al.(2012)Hille, Janssen, and Guillot]{Hille12}
+A.~Hille, I.~Janssen, and G.~Guillot.
+\newblock Determining spatial population structure of the grass snake (natrix
+  natrix) in amsterdam surroundings.
+\newblock \emph{In preparation}, 2012.
 
 \bibitem[Nicholson et~al.(2002)Nicholson, Smith, J{\'o}nsson, G{\'u}stafsson,
   Stef{\'a}nsson, and Donnelly]{Nicholson02}

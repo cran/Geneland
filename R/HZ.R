@@ -241,6 +241,12 @@ function (coordinates, geno.dip.codom = NULL, geno.dip.dom = NULL,
     geno.dip.codom.fmt[is.na(geno.dip.codom.fmt)] <- -999
     geno.dip.dom.fmt[is.na(geno.dip.dom.fmt)] <- -999
     geno.hap.fmt[is.na(geno.hap.fmt)] <- -999
+    nitstor <- nit/thinning
+    qout <- array(dim = c(nitstor, nindiv, npop.est), data = -999)
+    aout <- matrix(nrow = nitstor, ncol = npop.est, data = -999)
+    bout <- matrix(nrow = nitstor, ncol = npop.est, data = -999)
+    cout <- matrix(nrow = nitstor, ncol = npop.est, data = -999)
+    print("coucou avant .Fortran")
     res <- .Fortran("mcmchz", PACKAGE = "Geneland", as.double(q.init), 
         as.double(q.tmp), as.integer(geno.dip.codom.fmt), as.integer(geno.dip.dom.fmt), 
         as.integer(geno.hap.fmt), as.integer(use.codom), as.integer(use.dom), 
@@ -253,7 +259,25 @@ function (coordinates, geno.dip.codom = NULL, geno.dip.dom = NULL,
         as.double(c.max), as.double(dist.IC), as.integer(nchar.path.adm), 
         as.character(path.mcmc.adm), as.integer(nit), as.integer(thinning), 
         as.integer(estimate.a), as.integer(estimate.b), as.integer(estimate.c), 
-        as.integer(estimate.q), as.double(delta.b), as.integer(common.param))
+        as.integer(estimate.q), as.double(delta.b), as.integer(common.param), 
+        as.integer(nitstor), as.double(qout), as.double(aout), 
+        as.double(bout), as.double(cout))
+    qout <- array(dim = c(nitstor, nindiv, npop.est), data = res[[39]])
+    aout <- matrix(nrow = nitstor, ncol = npop.est, data = res[[40]])
+    bout <- matrix(nrow = nitstor, ncol = npop.est, data = res[[41]])
+    cout <- matrix(nrow = nitstor, ncol = npop.est, data = res[[42]])
+    for (iitstor in 1:(nit/thinning)) {
+        append <- ifelse(iitstor > 1, TRUE, FALSE)
+        write.table(qout[iitstor, , ], paste(path.mcmc.adm, "q.txt", 
+            sep = ""), row.names = FALSE, col.names = FALSE, 
+            append = append)
+    }
+    write.table(aout, paste(path.mcmc.adm, "a.txt", sep = ""), 
+        row.names = FALSE, col.names = FALSE)
+    write.table(bout, paste(path.mcmc.adm, "b.txt", sep = ""), 
+        row.names = FALSE, col.names = FALSE)
+    write.table(cout, paste(path.mcmc.adm, "c.txt", sep = ""), 
+        row.names = FALSE, col.names = FALSE)
     param.adm <- c(paste("nit :", nit), paste("thinning :", thinning), 
         paste("npop :", npop.est))
     write.table(param.adm, file = paste(path.mcmc.adm, "parameters.hz.txt", 

@@ -46,9 +46,10 @@
 
 %\title{Population genetics analysis using R and the Geneland programs}
 % \author{Gilles Guillot}
-\author{Gilles Guillot\footnote{Department of Informatics and Mathematical Modelling, 
-Technical University of Denmark, Copenhagen, gigu[\`a]imm.dtu.dk} , 
-Filipe Santos, Arnaud Estoup}
+%% \author{Gilles Guillot\footnote{Department of Informatics and Mathematical Modelling, 
+%% Technical University of Denmark, Copenhagen, gigu[\`a]imm.dtu.dk} , 
+%% Filipe Santos, Arnaud Estoup}
+%% \author{The Geneland development group}
 %\author{}
 
  
@@ -81,10 +82,11 @@ Filipe Santos, Arnaud Estoup}
 \begin{tabular}{l}
 \hline
 \\
-{\Huge \sf Population genetics analysis }\\
+{\Huge \sf Population genetic and morphometric data analysis }\\
 {\Huge \sf using R and the {\sc Geneland} program }\\
 \\
-{\huge \sf  Gilles Guillot, Filipe Santos, Arnaud Estoup}\\
+%{\huge \sf  Gilles Guillot, Filipe Santos, Arnaud Estoup}\\
+{\huge \sf The Geneland development group}
 \\
 \hline
 \end{tabular}
@@ -127,7 +129,8 @@ If you are experiencing troubles with {\sc Geneland}, before requesting help, pl
 \item make sure you are able to describe and reproduce the problem you are experiencing
 \end{itemize}
 
-If you think you have identified a bug or feel the manual lacks information, you are welcome to report it, then
+If you think you have identified a bug or feel the manual lacks information, you are welcome to report it. 
+Then
 \begin{itemize}
 
 \item make sure you are a registered {\sc Geneland} user
@@ -148,8 +151,8 @@ Questions should be addressed to Gilles Guillot: \texttt{gigu[\`a]imm.dtu.dk}.
 \subsubsection{History}
 The work around {\sc Geneland} started in 2002-2003  at INRA in Avignon, France. 
 This resulted in an algorithm to perform clustering under a spatial as well as a non-spatial model 
-for codominant markers \citep{Guillot05a}. 
-This algorihtm has been made available as a regular R package officially released in 2005 \citep{Guillot05c}. 
+for codominant markers 
+This algorihtm has been made available as a regular R package officially released on the Comprehensive R Archive Network in 2004. 
 Filipe Santos joined the project in 2007 and wrote  the gra\-phical user interface in R-Tcl/Tk together with Arnaud Estoup.
 People who helped designing and improving the package includes:  
 Annie Bouvier, Aur\'elie Coulon, Jean-Francois Cosson, Fr\'ed\'eric Mortier and Benjamin Guedj. 
@@ -158,15 +161,17 @@ Annie Bouvier, Aur\'elie Coulon, Jean-Francois Cosson, Fr\'ed\'eric Mortier and 
 Subsequent developments include a scheme accounting for the presence of null alleles \citep{Guillot08a}, 
 an improvement of the  inference technique under the correlated frequency model \citep{Guillot08b}, 
 a more efficient MCMC post-processing scheme \citep{Guillot08b}, 
-an option to handle dominant markers \citep{Guillot10b} and a model to estimate the location and shape of hybrid zones \citep{Guedj11}.
+an option to handle dominant markers \citep{Guillot10b}, 
+a model to estimate the location and shape of hybrid zones \citep{Guedj11} 
+and a generalisation of the model to deal with phenotype data \citep{Guillot12a}.
+Axel Hille fulfilled a long-standing need of Geneland users by writing and sharing an R script showing how to 
+combine {\sc Geneland} outputs with GIS data (section \ref{sec:AH}).
 
 The program and its manual benefitted from comments from users registered on the {\sc Geneland} mailing list and also 
-from discussions with people who attended courses in populations genetics based on {\sc Geneland} 
-in Lisbon, Prague and  Porto in 2008 and in Helsinki and Oulu in 2009. They are all warmly thanked.
-%% Special thanks go to Axel Hille who fulfilled a long-standing need of Geneland users by writing and sharing an R script showing how to 
-%% combine {\sc Geneland} outputs with GIS data (section \ref{sec:AH}).
-
-The GUI in R-Tcl/Tk is currently maintained by Filipe Santos and the  R and Fortran codes are maintained by Gilles Guillot.
+from discussions with people who attended courses  based on {\sc Geneland}. 
+They are all warmly thanked.
+The GUI is currently maintained by Filipe Santos, the manual section for interface with GIS data by Axel Hille 
+and the  R and Fortran codes  by Gilles Guillot. 
 
 \subsubsection{Credit}
 The {\sc Geneland} project received support from Institut National de le Recherche Agronomique, Bureau des Ressources G\'en\'etiques, 
@@ -215,9 +220,11 @@ See \url{ http://en.wikipedia.org/wiki/R\_(programming\_language)} for details.\
 
 \subsubsection{Memory}
 Computations in {\sc Geneland} are carried out through a so-called Markov Chain Monte-Carlo (MCMC) technique. This implies that the 
-overall computing task consists of a (very) long sequence of rather simple tasks. A small set of variables is stored in RAM, 
-updated sequentially and written to the disk from time to time. This requires a few Mb  of RAM. The exact amount varies 
-with datasets and computing options but it is fulfilled by any current computer. 
+overall computing task consists of a (very) long sequence of rather simple tasks. %% A small set of variables is stored in RAM, 
+%% updated sequentially and written to the disk from time to time. This requires a few Mb  of RAM. The exact amount varies 
+%% with datasets and computing options but it is fulfilled by any current computer. 
+Since version 4.0.3, all MCMC output variables are stored in RAM during the MCMC computation and then stored after MCMC completion on the disk. 
+This typically requires 50-500 Mb for standard datasets.
 
 \subsubsection{Disk space}
 The amount of disk space required depends on which fraction of the computations are stored on the disk. 
@@ -725,7 +732,7 @@ then by definition $d_{i1}=0$ and we get
  & = & \frac{1}{1+e^{-d_{i2}/b}} \label{eq:expect_q_K=2}
 \end{eqnarray}
 i.e. the well known sigmoid function familiar to people studying hybrid zones.
-Under this model, the width of the cline (defined as the inverse of the maximum gradient) is $w=1/4b$.
+Under this model, the width of the cline (defined as the inverse of the maximum gradient) is $w=4b$.
 The variation of the expected admixture coefficients is illustrated in figure \ref{fig:exp_q}.
 
 
@@ -807,7 +814,7 @@ Estimates of parameters of the hybrid zone model can be visualized with function
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Data format}\label{sec:data_format}
 
-\subsection{Genotypes file}
+\subsection{Genotypes file}\index{data format}
 
 
 Assuming that you have data for $n$  individuals  genotyped at $L$ loci, 
@@ -821,7 +828,7 @@ the data must be arranged in
 \item extra header lines are not allowed when data are loaded via the GUI. 
 Headers lines can be dealt with via the R function \texttt{read.table}. 
  The way these lines are handled when the data are loaded is prescribed 
-through the arguments of .\index{read.table}
+through the arguments of \texttt{read.table}.\index{R function read.table}
 \item missing data \index{missing data} are allowed. 
 Users of the GUI have to specify the character string coding missing value in the \texttt{missing data symbol} sub-menu 
 of the main menu. 
@@ -899,7 +906,7 @@ In the command line version, this file corresponds to argument {\tt geno.hap} of
 Diploid codominant data and haploid  data can be analyzed jointly.
 Diploid dominant data and haploid data can not be analyzed jointly.
 
-\subsection{Coordinates file}
+\subsection{Coordinates file}\index{data format}
 
 
 \subsubsection{File format}
@@ -920,7 +927,7 @@ to very bad (large domain, close to a pole).
 \item extra header lines are not allowed when data are loaded via the GUI. 
 Headers lines can be dealt with via the R function \texttt{read.table}. 
  The way these lines are handled when the data are loaded is prescribed 
-through the arguments of .\index{read.table}
+through the arguments of \texttt{read.table}. \index{R function read.table}
 \item missing data are not allowed in this file. 
 \item if some coordinates are missing, you can either substitute an estimated value 
 or do the analysis with {\sc Geneland} without spatial coordinates at all using the non spatial model. 
@@ -990,6 +997,33 @@ coord.utm <- convUL(coord)
 
 See {\tt ? convUL} for detail.
 
+
+\subsection{Phenotypes file}\index{data format}
+
+
+Assuming that you have data for $n$  individuals recognized by $q$ quantitative 
+phenotypic variables, the data must be arranged in 
+\begin{itemize}
+\item a plain ascii file 
+\item without any extra invisible characters (like in MS-Word .doc files)
+\item with one line per individual
+\item with one column per  quantitative phenotypic variable
+\item the number of digits of each field is arbitrary and can vary across lines and columns
+\item extra header lines are not allowed when data are loaded via the GUI. 
+Headers lines can be dealt with via the R function \texttt{read.table}. 
+ The way these lines are handled when the data are loaded is prescribed 
+through the arguments of .\index{R function read.table}
+\item missing data \index{missing data} are allowed. 
+Users of the GUI have to specify the character string coding missing value in the \texttt{missing data symbol} sub-menu 
+of the main menu. 
+For users of the R command-line interface loading their data with the R function \texttt{read.table}, 
+missing values can be coded in the raw text data file by any arbitrary character string, 
+(e.g. {\tt000, 00, NA} or {\tt -999}). 
+The character string used to encode missing data must be specified through the argument \texttt{na.strings} 
+of function \texttt{read.table}. By default, when data are loaded through \texttt{read.table}, 
+it is assumed that missing data 
+are coded as {\tt NA}.
+\end{itemize}
 
 
 \clearpage
@@ -1093,7 +1127,6 @@ Because one may want to play with the burn-in and the resolution without re-laun
 \end{itemize}
 
 
- 
 \clearpage
 \subsection{Generating graphical and numerical outputs}
 
@@ -1148,6 +1181,40 @@ $Fst
 
 
 namely, individual  $\Fis$ and pairwise $\Fst$ for estimated clusters.
+
+\clearpage
+\subsection{MCMC inference under the admixture model}
+ Assuming that you have an MCMC run under the non-admixture model, inference under the admixture model can be done as:
+\begin{verbatim}
+                 HZ(coordinates=coord,
+                    geno.dip.codom=geno,
+                    path.mcmc.noadm="path_to_noadmixture_mcmc_run/",
+                    nit=20000,
+                    thinning=10,
+                    path.mcmc.adm="path_to_admixture_mcmc_run/")  
+
+\end{verbatim}
+
+
+In the below, the $a$ and $b$ parameters are fixed, the latest being large which corresponds to a situation of lose 
+spatial structure of admixture coefficients. 
+\begin{verbatim}
+                 HZ(coordinates=coord,
+                    geno.dip.codom=geno,
+                    path.mcmc.noadm="path_to_noadmixture_mcmc_run/",
+                    a.init=1,
+                    b.init=1000,
+                    a.max=10,
+                    estimate.a=TRUE,
+                    estimate.b=FALSE,
+                    nit=20000,
+                    thinning=10,
+                    path.mcmc.adm="path_to_admixture_mcmc_run/")  
+
+\end{verbatim}
+
+
+
 
 \clearpage
 \subsection{Launching several independent runs}
@@ -1680,21 +1747,7 @@ Spatial graphical displays do not make sense in this context.
 You may find that the graphical features available through the GUI and the {\sc Geneland} graphical functions are too limited. 
 The possibilities to improve graphics by working directly though the command-line  are almost unlimited.
 
-\subsubsection{Superimposing countries boundaries and coast lines on a {\sc Geneland} map}
 
-Let us assume that you have a map giving population memberships or posterior probabilities of population memberships over a given domain. 
-You can superimpose countries boundaries and coast line by typing:
-
-\begin{verbatim}
-map(resolution=0,add=TRUE)
-\end{verbatim}
-
- 
-
-
-This will add the desired lines to the active graphic window (by default the last window opened). 
-The active graphic window can be redefined by e.g. \texttt{dev.set(3)} (this will set window \# 3 as active window). 
-See on-line help of function \texttt{map} for details (\texttt{? map}).
 
 \subsection[Convergence checking]{Exploring MCMC outputs to better check convergence  [TODO]}
 
@@ -1747,7 +1800,21 @@ plot(map,
 \end{verbatim} }
 
 
+\subsubsection{Superimposing countries boundaries and coast lines on a {\sc Geneland} map}
 
+Let us assume that you have a map giving population memberships or posterior probabilities of population memberships over a given domain. 
+You can superimpose countries boundaries and coast line by typing:
+
+\begin{verbatim}
+map(resolution=0,add=TRUE)
+\end{verbatim}
+
+ 
+
+
+This will add the desired lines to the active graphic window (by default the last window opened). 
+The active graphic window can be redefined by e.g. \texttt{dev.set(3)} (this will set window \# 3 as active window). 
+See on-line help of function \texttt{map} for details (\texttt{? map}).
 
 \subsubsection{GRASS [TODO]}\index{GRASS}
 Output of {\sc Geneland} can be combined with 
@@ -1815,21 +1882,23 @@ Much more on the on-line help of R package {\tt RgoogleMaps} ({\tt ? RgoogleMaps
 
 \begin{figure}[h]
 \hspace{2cm}\includegraphics[width=5cm]{./fig/MyMap_zoom7.jpeg} \hspace{1cm}\includegraphics[width=5cm]{./fig/MyMap_zoom10.jpeg}
-\caption{A rare sunny view of the Oslo fjord at two resolutions!}\label{fig:Oslo_fjord}
+\caption{A rare sunny view of the Oslo fjord at two resolutions.}\label{fig:Oslo_fjord}
 \end{figure}
 
 
-%% \subsubsection[Displaying GIS data]{Displaying GIS data: A complete worked out example }\label{sec:AH}\index{GIS}
+\subsubsection[Displaying GIS data]{Displaying GIS data: A complete worked out example }\label{sec:AH}\index{GIS}
 
-%% We  provide here a complete R script showing how Geneland outputs can be displayed using the various GIS 
-%% R package\footnote{The script is due to Alex Hille who is warmly thanked for sharing with the Geneland users.}.
-%% \index{R package rgdal}
-%% \index{R package sp}
-%% \index{R package maptools}
-%% \index{R package shapefiles}
-%% \index{R package tripack}
+We  provide here a complete R script showing how Geneland outputs can be displayed using the various GIS 
+R packages. This example is based on the book by \citet{Bivand08} and the case presented by \citet{Hille12}. 
+The data used in this script are available from the Geneland homepage as 
+\url{www2.imm.dtu.dk/~gigu/Geneland/GIS_data} and \url{www2.imm.dtu.dk/~gigu/Geneland/genetic_data}.
+\index{R package rgdal}
+\index{R package sp}
+\index{R package maptools}
+\index{R package shapefiles}
+\index{R package tripack}
 
-%% \verbatiminput{GGE_AH.R}
+\verbatiminput{GGE_AH.R}
 \clearpage
 
 
@@ -2240,7 +2309,7 @@ would be subject to a large error rate. However, the p-value of a classical t-te
 and a map of the geographical locations of these clusters.
 It might happen that $\hat{K}$ is larger than the number of clusters observed on this map. The non-observed clusters 
 where referred to as ``ghost'' clusters by \cite{Guillot05a}. 
-The first version of {\sc Geneland}  \cite{Guillot05a,Guillot05b} was prone to this issue which was mostly due 
+The first version of {\sc Geneland}  \cite{Guillot05a,Guillot05c} was prone to this issue which was mostly due 
 to a lack of MCMC mixing corrected in \cite{Guillot08a}. 
 This phenomenon can still occur in some instances. 
 Imagine for example a set of three individuals for which inference is carried out with an MCMC run of three iterations. 
@@ -2367,7 +2436,7 @@ Permutation of cluster labels allowing to get rid of the label switching issue.
 
 \newpage
 \nocite{Guillot05a,Guillot05c,Coulon06,Fontaine07,Guillot08b,Hannelius08,Guillot09c,Guillot09e,Guillot09g,
-Guillot09i,Guillot10b,Guillot10c}
+Guillot09i,Guillot10b,Guillot11b,Guillot12a}
 
 \bibliography{/media/SSD_Gilles/biogillesg/com/biblio/biblio,/media/SSD_Gilles/biogillesg/com/biblio/gilles}
 

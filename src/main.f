@@ -9,23 +9,24 @@
      &     nnqtc,sqtc,ssqtc,
      &     ksiqtc,kappaqtc,alphaqtc,betaqtc,gbeta,hbeta,
      &     cellpop,listcell,
-     &     yy,fcy) 
+     &     yy,fcy,nitsaved,out1,outspace,outfreq,outqtc) 
       implicit none 
 
 *     data
       integer nindiv,nlocd,nlocd2,nloch,nloch2,ncolt,
      &     nal,nalmax,zz,z,ploidy,jcf,nchpath,missloc,
-     &     nqtc,ql,nql
+     &     nqtc,ql,nql,nitsaved
       double precision s,qtc
 
 *     hyper parameters
       double precision lambdamax,dt,shape1,shape2,
      &     ksiqtc,kappaqtc,alphaqtc,betaqtc,gbeta,hbeta
 
-*     parameters
+*     parameters 
       integer npp,nppmax,npop,npopmin,npopmax,c,ctmp
       double precision lambda,u,utmp,f,t,fa,drift,ftmp,drifttmp,alpha,
-     &     meanqtc,sdqtc,meanqtctmp,sdqtctmp
+     &     meanqtc,sdqtc,meanqtctmp,sdqtctmp,out1,outspace,outfreq,
+     &     outqtc
 
 *     modeling/computing options
       integer nit,thinning,fmodel,kfix,spatial,filtna,nudcel,
@@ -34,14 +35,15 @@
 
 *     variables de travail
       integer iloc,iindiv,iit,ipp,ipop,ial,indcell,indcelltmp,
-     &     n,cellpop,listcell,cellpophost,ntmp,nn,yy,iud,nud,nnqtc,iqtc
+     &     n,cellpop,listcell,cellpophost,ntmp,nn,yy,iud,nud,nnqtc,iqtc,
+     &     iitstor
       double precision ptmp,xlim,ylim,ggrunif,rpostlamb,
      &     distcell,distcelltmp,a,ttmp,lpriorallvar,llallvar2,
      &     lpriorallvartmp,llallvartmp,fcy,pct,sqtc,ssqtc
-      character*255 path,filef,filenpp,filelambda,filenpop,fileu,filec,
+      character*255  path,filef,filenpp,filelambda,filenpop,fileu,filec,
      &     filefa,filedrift,filelpp,filell,filet,filesize,
      &     filemq,filesdq,filebetaqtc
- 
+
 *     dimensions
       dimension s(2,nindiv),t(2,nindiv),zz(nindiv,2*nlocd),
      &     z(nindiv,nloch),ql(nindiv,nql),qtc(nindiv,nqtc),
@@ -63,7 +65,11 @@
      &     nnqtc(npopmax,nqtc),sqtc(npopmax,nqtc),
      &     ssqtc(npopmax,nqtc),intpar(100),dblepar(100),
      &     ksiqtc(nqtc),kappaqtc(nqtc),alphaqtc(nqtc),betaqtc(nqtc),
-     &     gbeta(nqtc),hbeta(nqtc)
+     &     gbeta(nqtc),hbeta(nqtc),
+     &     out1(nitsaved,5),outspace(nitsaved,5,nppmax),
+     &     outfreq(nitsaved,3,npopmax,ncolt,nalmax),
+     &     outqtc(nitsaved,2,npopmax,nqtc)
+
 
  1000 format (2(1x,e15.8,1x))
  2000 format (300(1x,e15.8,1x))
@@ -122,56 +128,58 @@ c     parameter ploidy says how to interpret data in matrix z
       filemq  = path(1:nchpath) // "mean.qtc.txt"
       filesdq  = path(1:nchpath) // "sd.qtc.txt"
       filebetaqtc = path(1:nchpath) // "beta.qtc.txt"
-      if(intpar(1) .eq.1) then
-         open(9,file=filelambda)
-      endif
-      if(intpar(2) .eq.1) then
-         open(10,file=filenpp)
-      endif
-      if(intpar(3) .eq.1) then
-         open(11,file=filenpop)
-      endif   
-      if(intpar(4) .eq.1) then
-         open(12,file=fileu)
-      endif
-      if(intpar(5) .eq.1) then
-         open(13,file=filec)
-      endif
-      if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &     (useql .eq. 1)) then  
-         if(intpar(6) .eq.1) then
-            open(14,file=filef)
-         endif
-         if(intpar(7) .eq.1) then
-            open(15,file=filefa) 
-         endif
-         if(intpar(8) .eq.1) then
-            open(16,file=filedrift)
-         endif
-      endif
-      if(intpar(9) .eq.1) then
-         open(17,file=filelpp)
-      endif
-      if(intpar(10) .eq.1) then
-         open(18,file=filell) 
-      endif
-      if(intpar(11) .eq.1) then
-         open(19,file=filet) 
-      endif
-      if(intpar(12) .eq.1) then
-         open(20,file=filesize)
-      endif
-      if(useqtc .eq. 1) then 
-         if(intpar(13) .eq.1) then
-            open(21,file=filemq)
-         endif
-         if(intpar(14) .eq.1) then
-            open(22,file=filesdq)
-         endif   
-         if(intpar(15) .eq.1) then
-            open(23,file=filebetaqtc)
-         endif
-      endif
+
+
+c$$$      if(intpar(1) .eq.1) then
+c$$$         open(9,file=filelambda)
+c$$$      endif
+c$$$      if(intpar(2) .eq.1) then
+c$$$         open(10,file=filenpp)
+c$$$      endif
+c$$$      if(intpar(3) .eq.1) then
+c$$$         open(11,file=filenpop)
+c$$$      endif   
+c$$$      if(intpar(4) .eq.1) then
+c$$$         open(12,file=fileu)
+c$$$      endif
+c$$$      if(intpar(5) .eq.1) then
+c$$$         open(13,file=filec)
+c$$$      endif
+c$$$      if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &     (useql .eq. 1)) then  
+c$$$         if(intpar(6) .eq.1) then
+c$$$            open(14,file=filef)
+c$$$         endif
+c$$$         if(intpar(7) .eq.1) then
+c$$$            open(15,file=filefa) 
+c$$$         endif
+c$$$         if(intpar(8) .eq.1) then
+c$$$            open(16,file=filedrift)
+c$$$         endif
+c$$$      endif
+c$$$      if(intpar(9) .eq.1) then
+c$$$         open(17,file=filelpp)
+c$$$      endif
+c$$$      if(intpar(10) .eq.1) then
+c$$$         open(18,file=filell) 
+c$$$      endif
+c$$$      if(intpar(11) .eq.1) then
+c$$$         open(19,file=filet) 
+c$$$      endif
+c$$$      if(intpar(12) .eq.1) then
+c$$$         open(20,file=filesize)
+c$$$      endif
+c$$$      if(useqtc .eq. 1) then 
+c$$$         if(intpar(13) .eq.1) then
+c$$$            open(21,file=filemq)
+c$$$         endif
+c$$$         if(intpar(14) .eq.1) then
+c$$$            open(22,file=filesdq)
+c$$$         endif   
+c$$$         if(intpar(15) .eq.1) then
+c$$$            open(23,file=filebetaqtc)
+c$$$         endif
+c$$$      endif
 
       call intpr('Output files have been opened:',-1,0,0)
 
@@ -300,8 +308,6 @@ c$$$      u(2,16) = .8
          call rpostqtc2(qtc,nindiv,nqtc,indcell,c,meanqtc,
      &        sdqtc,nnqtc,sqtc,ssqtc,npop,npopmax,nppmax,
      &        ksiqtc,kappaqtc,alphaqtc,betaqtc)
-c         write(*,*) 'meanqtc=',meanqtc
-c         write(*,*) 'sdqtc=',sdqtc
           call intpr('mean & var quantitative variables initialized:',
      &        -1,0,0)
       endif
@@ -379,59 +385,38 @@ c$$$      write(*,*) 'betaqtc=',betaqtc
 * Main MCMC loop
 *****************************************  
       call intpr('Percentage of computations:',-1,0,0)
+      iitstor = 0
       do iit=1,nit
          if(mod(iit,thinning) .eq. 0) then
+            iitstor = iitstor + 1
 *************************************
-*     writing reuslts in output files
+*     writing results in output files
+
+
+******************************
+*     writing scalar variables 
             pct = dble(iit)/dble(nit)*100.
             call dblepr('                     ',-1,pct,1)
             if(intpar(1) .eq.1) then
-               write(9,*) lambda
+c               write(9,*) lambda
+               out1(iitstor,1) = lambda
             endif
             if(intpar(2) .eq.1) then
-               write(10,*) npp
+c               write(10,*) npp
+               out1(iitstor,2) = dble(npp)
             endif
             if(intpar(3) .eq.1) then
-               write(11,*) npop
+c               write(11,*) npop
+               out1(iitstor,3) = dble(npop)
             endif
-            if(intpar(4) .eq.1) then
-               write(12,1000) 
-     &              (sngl(u(1,ipp)),sngl(u(2,ipp)), ipp=1,nppmax)
-            endif
-            if(intpar(5) .eq.1) then
-               do ipp=1,nppmax
-                  write(13,*) c(ipp)
-               enddo
-            endif
-
-            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &           (useql .eq. 1)) then  
-               if(intpar(6) .eq.1) then
-                  do iloc=1,ncolt
-                     do ial=1,nalmax
-                        write(14,2000) (sngl(f(ipop,iloc,ial)),
-     &                       ipop=1,npopmax)
-                     enddo
-                  enddo  
-               endif
- 
-              if(intpar(7) .eq.1) then
-                  write(15,2000) 
-     &                 ((sngl(fa(iloc,ial)),ial=1,nalmax),iloc=1,ncolt)
-               endif
-               if(intpar(8) .eq.1) then
-                  write(16,2000) (sngl(drift(ipop)),ipop=1,npopmax)
-               endif
-            endif
-
             if(intpar(10) .eq.1) then
                llallvartmp = llallvar2(yy,z,ql,nindiv,nlocd,nloch,
      &              nql,ncolt,npopmax,nalmax,nppmax,c,f,indcell,qtc,
      &              nqtc,meanqtc,sdqtc,
      &              usegeno2,usegeno1,useql,useqtc,ploidy)
-               write(18,*) llallvartmp
+c               write(18,*) llallvartmp
+               out1(iitstor,4) = llallvartmp
             endif
-
             if(intpar(9) .eq.1) then
                lpriorallvartmp = llallvartmp + 
      &              lpriorallvar(lambdamax,lambda,
@@ -439,45 +424,114 @@ c$$$      write(*,*) 'betaqtc=',betaqtc
      &     ncolt,nal,nalmax,indcell,fmodel,xlim,ylim,shape1,shape2,
      &     nqtc,meanqtc,sdqtc,ksiqtc,kappaqtc,alphaqtc,betaqtc,
      &     usegeno2,usegeno1,useql,useqtc)
-                write(17,*) lpriorallvartmp + llallvartmp
+c                write(17,*) lpriorallvartmp + llallvartmp
+c     line above seens wrongs corrected as below on 2012/09/06
+               out1(iitstor,5) = lpriorallvartmp 
             endif
+*     end writing scalar variables 
+**********************************             
 
-            if(intpar(11) .eq. 1) then
-               write(19,1000) (sngl(t(1,iindiv)),sngl(t(2,iindiv)),
-     &              iindiv=1,nindiv)
+
+***************************************
+*     writing space variables 
+            if(intpar(4) .eq.1) then
+c$$$               write(12,1000) 
+c$$$     &              (sngl(u(1,ipp)),sngl(u(2,ipp)), ipp=1,nppmax)
+               do ipp = 1,nppmax
+                  outspace(iitstor,1,ipp) = u(1,ipp)
+                  outspace(iitstor,2,ipp) = u(2,ipp)
+               enddo
             endif
+            if(intpar(5) .eq.1) then
+               do ipp=1,nppmax
+c                  write(13,*) c(ipp)
+                  outspace(iitstor,3,ipp) = dble(c(ipp))
+               enddo
+            endif
+            if(intpar(11) .eq. 1) then
+c$$$               write(19,1000) (sngl(t(1,iindiv)),sngl(t(2,iindiv)),
+c$$$     &              iindiv=1,nindiv)
+               do iindiv = 1,nindiv
+                  outspace(iitstor,4,iindiv) = t(1,iindiv)
+                  outspace(iitstor,5,iindiv) = t(2,iindiv)
+               enddo
+            endif
+***************************************          
+
+***************************************
+*     writing allele frequencies variables 
+            if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+     &           (useql .eq. 1)) then  
+               if(intpar(6) .eq.1) then
+                  do iloc=1,ncolt
+                     do ial=1,nalmax
+c$$$  write(14,2000) (sngl(f(ipop,iloc,ial)),
+c$$$  &                       ipop=1,npopmax)
+                        do ipop = 1,npop
+                           outfreq(iitstor,1,ipop,iloc,ial) = 
+     &                          f(ipop,iloc,ial)
+                        enddo
+                     enddo
+                  enddo  
+               endif
+               
+               if(intpar(7) .eq.1) then
+c$$$  write(15,2000) 
+c$$$  &                 ((sngl(fa(iloc,ial)),ial=1,nalmax),iloc=1,ncolt)
+                  do iloc=1,ncolt
+                     do ial=1,nalmax
+                        outfreq(iitstor,2,1,iloc,ial) = fa(iloc,ial)
+                     enddo
+                  enddo
+               endif
+               if(intpar(8) .eq.1) then
+c     write(16,2000) (sngl(drift(ipop)),ipop=1,npopmax)
+                  do ipop = 1,npop
+                     outfreq(iitstor,3,ipop,1,1) = drift(ipop)
+                  enddo
+               endif
+            endif
+*****************************************
+
 
 *     counting nb of individuals in each pop
-            if(intpar(12) .eq.1) then
-               do ipop = 1,npopmax
-                  n(ipop,1,1) = 0
-               enddo
-               do iindiv = 1,nindiv
-                  n(c(indcell(iindiv)),1,1) =  
-     &                 n(c(indcell(iindiv)),1,1) + 1 
-               enddo
-               write(20,3000) (n(ipop,1,1),ipop=1,npopmax)
-            endif
- 
-           if(useqtc .eq. 1) then 
+c$$$            if(intpar(12) .eq.1) then
+c$$$               do ipop = 1,npopmax
+c$$$                  n(ipop,1,1) = 0
+c$$$               enddo
+c$$$               do iindiv = 1,nindiv
+c$$$                  n(c(indcell(iindiv)),1,1) =  
+c$$$     &                 n(c(indcell(iindiv)),1,1) + 1 
+c$$$               enddo
+c$$$               write(20,3000) (n(ipop,1,1),ipop=1,npopmax)
+c$$$            endif
+
+***************************** 
+* writing qtc variables
+            if(useqtc .eq. 1) then 
                if(intpar(13) .eq.1) then
                   do ipop = 1,npopmax
-                     write(21,2000)  
-     &                    (sngl(meanqtc(ipop,iqtc)),iqtc=1,nqtc)
+c$$$  write(21,2000)  
+c$$$  &                    (sngl(meanqtc(ipop,iqtc)),iqtc=1,nqtc)
+                     do iqtc = 1,nqtc
+                        outqtc(iitstor,1,ipop,iqtc) = meanqtc(ipop,iqtc)
+                     enddo
                   enddo
                endif
                if(intpar(14) .eq. 1) then
                   do ipop = 1,npopmax
-                     write(22,2000)  
-     &                    (sngl(sdqtc(ipop,iqtc)),iqtc=1,nqtc)
+c$$$  write(22,2000)  
+c$$$  &                    (sngl(sdqtc(ipop,iqtc)),iqtc=1,nqtc)
+                     do iqtc = 1,nqtc
+                        outqtc(iitstor,2,ipop,iqtc) = sdqtc(ipop,iqtc)
+                     enddo
                   enddo
-               endif
-               if(intpar(15) .eq. 1) then
-                     write(23,2000)  (betaqtc(iqtc),iqtc=1,nqtc)
                endif
             endif
          endif
-c         write(*,*) "apres ecriture ggrunif=",ggrunif(0.d0,1.d0) 
+*     end writing
+*****************************
+
 
 
 **************************************
@@ -655,56 +709,56 @@ c             write(*,*) 'udyDOM3'
 
 ***********************
 *     closing all files
-      if(intpar(1) .eq.1) then
-         close(9)
-      endif
-      if(intpar(2) .eq.1) then
-         close(10)
-      endif
-      if(intpar(3) .eq.1) then
-         close(11)
-      endif   
-      if(intpar(4) .eq.1) then
-         close(12)
-      endif
-      if(intpar(5) .eq.1) then
-         close(13)
-      endif
-      if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &     (useql .eq. 1)) then  
-         if(intpar(6) .eq.1) then
-            close(14)
-         endif
-         if(intpar(7) .eq.1) then
-            close(15)
-         endif
-         if(intpar(8) .eq.1) then
-            close(16)
-         endif
-      endif
-      if(intpar(9) .eq.1) then
-         close(17)
-      endif
-      if(intpar(10) .eq.1) then
-         close(18)
-      endif
-      if(intpar(11) .eq.1) then
-         close(19)
-      endif
-      if(intpar(12) .eq.1) then
-         close(20)
-      endif
-      if(useqtc .eq. 1) then 
-         if(intpar(13) .eq.1) then
-            close(21)
-         endif
-         if(intpar(14) .eq.1) then
-            close(22)
-         endif
-         if(intpar(15) .eq.1) then
-            close(23)
-         endif
-      endif
+c$$$      if(intpar(1) .eq.1) then
+c$$$         close(9)
+c$$$      endif
+c$$$      if(intpar(2) .eq.1) then
+c$$$         close(10)
+c$$$      endif
+c$$$      if(intpar(3) .eq.1) then
+c$$$         close(11)
+c$$$      endif   
+c$$$      if(intpar(4) .eq.1) then
+c$$$         close(12)
+c$$$      endif
+c$$$      if(intpar(5) .eq.1) then
+c$$$         close(13)
+c$$$      endif
+c$$$      if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &     (useql .eq. 1)) then  
+c$$$         if(intpar(6) .eq.1) then
+c$$$            close(14)
+c$$$         endif
+c$$$         if(intpar(7) .eq.1) then
+c$$$            close(15)
+c$$$         endif
+c$$$         if(intpar(8) .eq.1) then
+c$$$            close(16)
+c$$$         endif
+c$$$      endif
+c$$$      if(intpar(9) .eq.1) then
+c$$$         close(17)
+c$$$      endif
+c$$$      if(intpar(10) .eq.1) then
+c$$$         close(18)
+c$$$      endif
+c$$$      if(intpar(11) .eq.1) then
+c$$$         close(19)
+c$$$      endif
+c$$$      if(intpar(12) .eq.1) then
+c$$$         close(20)
+c$$$      endif
+c$$$      if(useqtc .eq. 1) then 
+c$$$         if(intpar(13) .eq.1) then
+c$$$            close(21)
+c$$$         endif
+c$$$         if(intpar(14) .eq.1) then
+c$$$            close(22)
+c$$$         endif
+c$$$         if(intpar(15) .eq.1) then
+c$$$            close(23)
+c$$$         endif
+c$$$      endif
 
       call intpr('************************************',-1,0,0)
       call intpr('***    End of MCMC simulation    ***',-1,0,0)
@@ -12252,7 +12306,7 @@ c      write(*,*) 'usegeno2=',usegeno2
      &     thinning,filenpop,filenpp,fileu,filec,filef,fileperm,filedom,
      &     filemeanqtc,filemeanf,s,u,c,f,pivot,fpiv,fmean,dom,coorddom,
      &     indcel,distcel,order,ordertmp,npopest,usegeno2,usegeno1,
-     &     useql,useqtc,nqtc,meanqtc,meanqtcpiv)
+     &     useql,useqtc,nqtc,meanqtc,meanqtcpiv,nitsaved,outorderf)
       implicit none
       character*255 fileu,filec,filenpp,filenpop,filedom,filef,fileperm,
      &      filemeanqtc,filemeanf
@@ -12260,10 +12314,10 @@ c      write(*,*) 'usegeno2=',usegeno2
      &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indcel,
      &     ipop,nlocd,nloch,nql,ncolt,nal,nalmax,ijunk,order,ordertmp,
      &     ipopperm,burnin,ninrub,npopest,nnit,iloc,ial,pivot,
-     &     usegeno2,usegeno1,useql,useqtc,nqtc
+     &     usegeno2,usegeno1,useql,useqtc,nqtc,nitsaved,outorderf
       double precision s,u,xlim,ylim,coorddom,dom,domperm,distcel,dt,
      &     f,fpiv,fmean,meanqtc,meanqtcpiv
-      integer iitsub,iqtc
+      integer iitsub,iqtc,iitmodK
 *     dimensionnement 
       dimension s(2,nindiv),u(2,nppmax),c(nppmax),
      &     dom(nxdommax*nydommax,npopmax),xlim(2),ylim(2),
@@ -12272,7 +12326,9 @@ c      write(*,*) 'usegeno2=',usegeno2
      &     distcel(nxdommax*nydommax),order(npopmax),ordertmp(npopmax),
      &     f(npopmax,ncolt,nalmax),fpiv(npopmax,ncolt,nalmax),
      &     fmean(npopmax,ncolt,nalmax),
-     &     nal(ncolt),meanqtc(npopmax,nqtc),meanqtcpiv(npopmax,nqtc)
+     &     nal(ncolt),meanqtc(npopmax,nqtc),meanqtcpiv(npopmax,nqtc),
+     &     outorderf(nitsaved,npopmax)
+
       open(9,file=filenpop)
       open(10,file=filenpp)
       open(11,file=fileu)
@@ -12366,6 +12422,7 @@ c            write(6,*) 'iydom=',iydom
 *     relabel wrt to pivot or take pivot as estimator
 c      write(6,*) 'relabel'
       nnit = 0
+      iitmodK = 0
       do iit=1,int(dble(nit)/dble(thinning))
          read(9,*) npop
          read(10,*) npp
@@ -12392,10 +12449,14 @@ c      write(6,*) 'relabel'
          if((npop .eq. npopest) .and. (iit .gt. burnin)) then 
             nnit = nnit + 1 
             if(npopest .lt. 10) then 
+               iitmodK = iitmodK + 1
                call relaballvar(npopmax,nlocd,nloch,nql,ncolt,nalmax,
      &              nal,npop,f,fpiv,meanqtc,meanqtcpiv,nqtc,usegeno2,
      &              usegeno1,useql,useqtc,order,ordertmp)
-               write(14,*) (order(ipop),ipop = 1,npopmax)
+c               write(14,*) (order(ipop),ipop = 1,npopmax)
+               do ipop = 1,npopmax
+                  outorderf(iitmodK,ipop) = order(ipop)
+               enddo
                if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
      &              (useql .eq. 1)) then
                   do ipop=1,npop
@@ -12439,22 +12500,22 @@ c      write(6,*) 'relabel'
          endif
       endif
 
-      if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
-     &     (useql .eq. 1)) then
- 1000    format (300(1x,e15.8,1x))
-         do iloc=1,ncolt
-            do ial=1,nalmax
-               write(17,1000) (sngl(fmean(ipop,iloc,ial)),
-     &              ipop=1,npopmax)
-            enddo
-         enddo  
-      endif
+c$$$      if(((usegeno2 .eq. 1) .or. (usegeno1 .eq. 1)) .or. 
+c$$$     &     (useql .eq. 1)) then
+c$$$ 1000    format (300(1x,e15.8,1x))
+c$$$         do iloc=1,ncolt
+c$$$            do ial=1,nalmax
+c$$$               write(17,1000) (sngl(fmean(ipop,iloc,ial)),
+c$$$     &              ipop=1,npopmax)
+c$$$            enddo
+c$$$         enddo  
+c$$$      endif
 
- 2000 format (1000(e15.5,1x))
-      do idom=1,nxdommax*nydommax
-         write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
-     &        (dom(idom,ipop), ipop=1,npopmax)
-      enddo
+c$$$ 2000 format (1000(e15.5,1x))
+c$$$      do idom=1,nxdommax*nydommax
+c$$$         write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
+c$$$     &        (dom(idom,ipop), ipop=1,npopmax)
+c$$$      enddo
 c      write(*,*) coorddom
       close(9)
       close(10)
@@ -12472,24 +12533,23 @@ c      write(*,*) coorddom
       endif                  
       end subroutine postprocesschain2
 
-
+c$$$
 c$$$***********************************************************************
-c$$$      subroutine  postprocesschain3(nxdommax,nydommax,burnin,ninrub,
+c$$$      subroutine  postprocessmultchain(nxdommax,nydommax,burnin,ninrub,
 c$$$     &     npopmax,nppmax,nindiv,nloc,nal,nalmax,xlim,ylim,dt,nit,
-c$$$     &     thinning,filenpop,filenpp,fileu,filec,filef,fileperm,filedom,
-c$$$     &     filemeanf,
-c$$$     &     s,u,c,f,pivot,fpiv,dom,coorddom,indcel,distcel,
-c$$$     &     order,ordertmp,npopest,meanf)
+c$$$     &     thinning,nrun,pathall,nchpathall,
+c$$$     &     s,u,c,f,pivot,chirunpiv,nchirunpiv,fpiv,dom,coorddom,indcel,
+c$$$     &     distcel,order,ordertmp,npopest)
 c$$$      implicit none
 c$$$      character*255 fileu,filec,filenpp,filenpop,filedom,filef,fileperm,
-c$$$     &     filemeanf
+c$$$     &     pathall,path,chirunpiv,chirun,fileftmp     
 c$$$      integer nit,thinning,npp,npop,iit,nindiv,nxdommax,
 c$$$     &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indcel,
 c$$$     &     ipop,nloc,nal,nalmax,ijunk,order,ordertmp,ipopperm,burnin,
-c$$$     &     ninrub,npopest,nnit,iloc,ial,pivot
+c$$$     &     ninrub,npopest,nnit,iloc,ial,pivot,nrun,irun,nchpathall,
+c$$$     &     irunpiv,nchirunpiv,resirun,nchpath
 c$$$      double precision s,u,xlim,ylim,coorddom,dom,domperm,distcel,dt,
-c$$$     &     f,fpiv,meanf
-c$$$
+c$$$     &     f,fpiv
 c$$$      integer iitsub
 c$$$*     dimensionnement 
 c$$$      dimension s(2,nindiv),u(2,nppmax),c(nppmax),
@@ -12497,28 +12557,14 @@ c$$$     &     dom(nxdommax*nydommax,npopmax),xlim(2),ylim(2),
 c$$$     &     domperm(nxdommax*nydommax,npopmax),
 c$$$     &     coorddom(2,nxdommax*nydommax),indcel(nxdommax*nydommax),
 c$$$     &     distcel(nxdommax*nydommax),order(npopmax),ordertmp(npopmax),
-c$$$     &     f(npopmax,nloc,nalmax),fpiv(npopmax,nloc,nalmax),nal(nloc),
-c$$$     &     meanf(npopmax,nloc,nalmax)
-c$$$      open(9,file=filenpop)
-c$$$      open(10,file=filenpp)
-c$$$      open(11,file=fileu)
-c$$$      open(12,file=filec)
-c$$$      open(13,file=filef)
-c$$$      open(14,file=fileperm)
-c$$$      open(15,file=filedom)
-c$$$      open(16,file=filemeanf)
+c$$$     &     f(npopmax,nloc,nalmax),fpiv(npopmax,nloc,nalmax),nal(nloc)
 c$$$
 c$$$c      write(6,*) 'debut postproc order=',order
-c$$$
-c$$$c      write(6,*) 'npopest=', npopest
-c$$$      do ipop = 1,npopmax
-c$$$         do iloc = 1,nloc
-c$$$            do ial = 1,nalmax
-c$$$               meanf(ipop,iloc,ial) = 0
-c$$$            enddo
-c$$$         enddo
-c$$$      enddo
-c$$$
+c$$$      fileperm = pathall(1:nchpathall) // "/perm.txt"
+c$$$      filedom = pathall(1:nchpathall) // "/proba.pop.membership.txt"
+c$$$      open(14,file=fileperm)
+c$$$      open(15,file=filedom)
+c$$$******************************
 c$$$*     coordonnées de la grille 
 c$$$      call limit(nindiv,s,xlim,ylim,dt)
 c$$$      idom = 1
@@ -12538,26 +12584,105 @@ c$$$            idom = idom + 1
 c$$$         enddo
 c$$$      enddo
 c$$$
-c$$$****************
-c$$$*     read frequencies for pivot state   
-c$$$c      write(6,*) 'look for pivot state'
-c$$$      do iit=1,pivot
+c$$$****************************************
+c$$$*     read frequencies for pivot state  
+c$$$*     index of the run containing pivot state
+c$$$c      write(*,*) 'en fortran pathall=',pathall
+c$$$c      write(*,*) 'en fortran pivot=',pivot
+c$$$c      write(*,*) 'en fortran nchpathall=',nchpathall
+c$$$c      write(*,*) 'en fortran chirunpiv=',chirunpiv
+c$$$c      write(*,*) 'en fortran nchirunpiv=',nchirunpiv
+c$$$c      nchpathall = len_trim(pathall)
+c$$$c      nchirunpiv =  len_trim(chirunpiv)
+c$$$      irunpiv = 1 + 
+c$$$     &     int(aint(float(pivot-1)/(float(nit)/float(thinning))))
+c$$$      fileftmp = pathall(1:nchpathall) // chirunpiv(1:nchirunpiv)
+c$$$c      write(*,*) 'en fortran fileftmp=',fileftmp
+c$$$      filef = fileftmp(1:(nchpathall+nchirunpiv)) // "/frequencies.txt"
+c$$$c      write(*,*) 'en fortran filef=',filef
+c$$$      open(13,file=filef)
+c$$$*     index of saved iteration containing pivot  in this file
+c$$$      iit = pivot - (irunpiv-1)*float(nit)/float(thinning)
+c$$$      do iitsub = 1,iit
 c$$$         do iloc=1,nloc
-c$$$c            write(6,*) 'iloc=',iloc
+c$$$c     write(6,*) 'iloc=',iloc
 c$$$            do ial=1,nalmax
-c$$$c               write(6,*) 'ial=',ial
+c$$$c     write(6,*) 'ial=',ial
 c$$$               read(13,*) (fpiv(ipop,iloc,ial),ipop=1,npopmax)
 c$$$            enddo
 c$$$         enddo
 c$$$      enddo
-c$$$      rewind 13
+c$$$      close(13)
 c$$$
 c$$$
-c$$$**************
-c$$$*     relabel wrt to pivot or take pivot as estimator
-c$$$c      write(6,*) 'relabel'
 c$$$      nnit = 0
-c$$$      do iit=1,int(float(nit)/float(thinning))
+c$$$      do iit=1,int(float(nrun*nit)/float(thinning))
+c$$$         irun = 1 + aint(float(iit-1)/(float(nit)/float(thinning)))
+c$$$         if(mod(iit-1,int(float(nit)/float(thinning))) .eq. 0) then 
+c$$$c            write(*,*) 'iit=',iit
+c$$$c            write(*,*) 'irun=',irun
+c$$$*     define path to file and  open files (Ref.: book Maryse Ain, p.340) 
+c$$$c           write(*,*) 'opening files'
+c$$$c            write(*,*) 'pathall=',pathall
+c$$$            resirun = irun
+c$$$            if(irun .gt. 999) then 
+c$$$               path = pathall(1:nchpathall) // 
+c$$$     &              char(int(aint(float(irun)/1000)) + ichar('0'))
+c$$$               nchpath = nchpathall + 1
+c$$$               resirun = resirun - 1000*int(aint(float(irun)/1000))
+c$$$               path = path(1:nchpath) // 
+c$$$     &              char(int(aint(float(resirun)/100)) + ichar('0'))
+c$$$               nchpath = nchpath + 1
+c$$$               resirun = resirun - 100*int(aint(float(resirun)/100))
+c$$$               path = path(1:nchpath) // 
+c$$$     &              char(int(aint(float(resirun)/10)) + ichar('0'))
+c$$$               path = path(1:nchpath) //
+c$$$     &              char(resirun + ichar('0'))
+c$$$               nchpath = nchpath + 1
+c$$$c               write(*,*) 'path=',path
+c$$$            endif
+c$$$            if((irun .gt. 99) .and. (irun .le. 999))then 
+c$$$               path = pathall(1:nchpathall) // 
+c$$$     &              char(int(aint(float(irun)/100)) + ichar('0'))
+c$$$               nchpath = nchpathall + 1
+c$$$               resirun = resirun - 100*int(aint(float(irun)/100))
+c$$$               path = path(1:nchpath) // 
+c$$$     &              char(int(aint(float(resirun)/10)) + ichar('0'))
+c$$$               resirun = resirun - 10*int(aint(float(resirun)/10))
+c$$$               path = path(1:nchpath) //
+c$$$     &              char(resirun + ichar('0'))
+c$$$               nchpath = nchpath + 1
+c$$$c               write(*,*) 'path=',path
+c$$$            endif
+c$$$            if((irun .gt. 9) .and. (irun .le. 99)) then 
+c$$$               path = pathall(1:nchpathall) // 
+c$$$     &              char(int(aint(float(irun)/10)) + ichar('0'))
+c$$$               nchpath = nchpathall + 1
+c$$$               resirun = resirun - 10*int(aint(float(irun)/10))
+c$$$               path = path(1:nchpath) // 
+c$$$     &              char(resirun + ichar('0'))
+c$$$               nchpath = nchpath + 1
+c$$$c               write(*,*) 'path=',path
+c$$$            endif
+c$$$            if(irun .le. 9) then 
+c$$$               path = pathall(1:nchpathall) // char(irun + ichar('0'))
+c$$$               nchpath = nchpathall + 1
+c$$$            endif
+c$$$
+c$$$            filenpp = path(1:nchpath) // "/nuclei.numbers.txt"
+c$$$            filenpop = path(1:nchpath)// "/populations.numbers.txt"
+c$$$            fileu = path(1:nchpath)   // "/coord.nuclei.txt"
+c$$$            filec = path(1:nchpath)   // "/color.nuclei.txt"
+c$$$            filef = path(1:nchpath)   // "/frequencies.txt"
+c$$$            open(9,file=filenpop)
+c$$$            open(10,file=filenpp)
+c$$$            open(11,file=fileu)
+c$$$            open(12,file=filec)
+c$$$            open(13,file=filef)
+c$$$         endif
+c$$$
+c$$$
+c$$$*     read and relabel  wrt to pivot or take pivot as estimator
 c$$$         read(9,*) npop
 c$$$         read(10,*) npp
 c$$$         do ipp=1,nppmax
@@ -12570,35 +12695,28 @@ c$$$               read(13,*) (f(ipop,iloc,ial),ipop=1,npopmax)
 c$$$            enddo
 c$$$         enddo  
 c$$$         if((npop .eq. npopest) .and. (iit .gt. burnin)) then 
-c$$$c            write(6,*) 'avant relab order=',order
 c$$$            nnit = nnit + 1 
 c$$$            if(npopest .lt. 10) then 
 c$$$               call relabel(npopmax,nloc,nalmax,nal,npopest,f,fpiv,
 c$$$     &              order,ordertmp)
-c$$$c            write(6,*) 'apre relab order=',order
 c$$$               write(14,*) (order(ipop),ipop = 1,npopmax)
 c$$$            endif
-c$$$            
-c$$$c            write(6,*) 'iit=',iit
-c$$$c            write(6,*) 'pivot=', pivot
-c$$$            if((npopest .lt. 10) .or. (nnit .eq. pivot)) then 
+c$$$            if((npopest .lt. 10) .or. (iit .eq. pivot)) then 
 c$$$               call calccell(nxdommax*nydommax,coorddom,
 c$$$     &              npp,nppmax,u,indcel,distcel)
 c$$$               do idom=1,nxdommax*nydommax
 c$$$                  ipop = order(c(indcel(idom)))
-c$$$c                  write(*,*) 'ipop=',ipop
 c$$$                  dom(idom,ipop) = dom(idom,ipop) + 1.
 c$$$               enddo
-c$$$*     increment estimated allele frequencies
-c$$$               do ipop = 1,npopmax
-c$$$                  do iloc = 1,nloc
-c$$$                     do ial = 1,nalmax
-c$$$                        meanf(ipop,iloc,ial) =  meanf(ipop,iloc,ial) +  
-c$$$     &                       f(order(ipop),iloc,ial)
-c$$$                     enddo
-c$$$                  enddo
-c$$$               enddo
 c$$$            endif
+c$$$         endif
+c$$$      
+c$$$         if(mod(iit,int(float(nit)/float(thinning))) .eq. 0) then 
+c$$$            close(9)
+c$$$            close(10)
+c$$$            close(11)
+c$$$            close(12)
+c$$$            close(13)
 c$$$         endif
 c$$$      enddo
 c$$$      if(npopest .lt. 10) then 
@@ -12607,246 +12725,19 @@ c$$$            do ipop=1,npopmax
 c$$$               dom(idom,ipop) = dom(idom,ipop)/float(nnit)
 c$$$            enddo
 c$$$         enddo
-c$$$         do ipop = 1,npopmax
-c$$$            do iloc = 1,nloc
-c$$$               do ial = 1,nalmax
-c$$$                  meanf(ipop,iloc,ial) = meanf(ipop,iloc,ial) / 
-c$$$     &                 float(nnit)
-c$$$               enddo
-c$$$            enddo
-c$$$         enddo
 c$$$      endif
 c$$$
 c$$$ 2000 format (1000(e15.5,1x))
 c$$$      do idom=1,nxdommax*nydommax
 c$$$         write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
 c$$$     &        (dom(idom,ipop), ipop=1,npopmax)
-c$$$      enddo
-c$$$      
-c$$$ 3000 format (300(1x,e15.8,1x))
-c$$$      do iloc=1,nloc
-c$$$         do ial=1,nalmax
-c$$$            write(16,3000) (sngl(meanf(ipop,iloc,ial)),ipop=1,npopmax)
-c$$$         enddo
 c$$$      enddo  
-c$$$      
-c$$$c     write(*,*) coorddom
-c$$$      close(9)
-c$$$      close(10)
-c$$$      close(11)
-c$$$      close(12)
-c$$$      close(13)
 c$$$      close(14)
-c$$$      close(15)
-c$$$      close(16)
-c$$$      end subroutine postprocesschain3
-
-
-
-***********************************************************************
-      subroutine  postprocessmultchain(nxdommax,nydommax,burnin,ninrub,
-     &     npopmax,nppmax,nindiv,nloc,nal,nalmax,xlim,ylim,dt,nit,
-     &     thinning,nrun,pathall,nchpathall,
-     &     s,u,c,f,pivot,chirunpiv,nchirunpiv,fpiv,dom,coorddom,indcel,
-     &     distcel,order,ordertmp,npopest)
-      implicit none
-      character*255 fileu,filec,filenpp,filenpop,filedom,filef,fileperm,
-     &     pathall,path,chirunpiv,chirun,fileftmp     
-      integer nit,thinning,npp,npop,iit,nindiv,nxdommax,
-     &     nydommax,npopmax,ipp,nppmax,c,ixdom,iydom,idom,indcel,
-     &     ipop,nloc,nal,nalmax,ijunk,order,ordertmp,ipopperm,burnin,
-     &     ninrub,npopest,nnit,iloc,ial,pivot,nrun,irun,nchpathall,
-     &     irunpiv,nchirunpiv,resirun,nchpath
-      double precision s,u,xlim,ylim,coorddom,dom,domperm,distcel,dt,
-     &     f,fpiv
-      integer iitsub
-*     dimensionnement 
-      dimension s(2,nindiv),u(2,nppmax),c(nppmax),
-     &     dom(nxdommax*nydommax,npopmax),xlim(2),ylim(2),
-     &     domperm(nxdommax*nydommax,npopmax),
-     &     coorddom(2,nxdommax*nydommax),indcel(nxdommax*nydommax),
-     &     distcel(nxdommax*nydommax),order(npopmax),ordertmp(npopmax),
-     &     f(npopmax,nloc,nalmax),fpiv(npopmax,nloc,nalmax),nal(nloc)
-
-c      write(6,*) 'debut postproc order=',order
-      fileperm = pathall(1:nchpathall) // "/perm.txt"
-      filedom = pathall(1:nchpathall) // "/proba.pop.membership.txt"
-      open(14,file=fileperm)
-      open(15,file=filedom)
-******************************
-*     coordonnées de la grille 
-      call limit(nindiv,s,xlim,ylim,dt)
-      idom = 1
-      do ixdom =1,nxdommax
-c         write(6,*) 'ixdom=',ixdom
-         do iydom=1,nydommax
-c            write(6,*) 'iydom=',iydom
-            coorddom(1,idom) = xlim(1) + 
-     &           float(ixdom-1)*(xlim(2) - xlim(1))/float(nxdommax-1)
-            coorddom(2,idom) = ylim(1) +
-     &           float(iydom-1)*(ylim(2) - ylim(1))/float(nydommax-1)
-            do ipop=1,npopmax
-               dom(idom,ipop) = 0.
-               domperm(idom,ipop) = 0.
-            enddo
-            idom = idom + 1
-         enddo
-      enddo
-
-****************************************
-*     read frequencies for pivot state  
-*     index of the run containing pivot state
-c      write(*,*) 'en fortran pathall=',pathall
-c      write(*,*) 'en fortran pivot=',pivot
-c      write(*,*) 'en fortran nchpathall=',nchpathall
-c      write(*,*) 'en fortran chirunpiv=',chirunpiv
-c      write(*,*) 'en fortran nchirunpiv=',nchirunpiv
-c      nchpathall = len_trim(pathall)
-c      nchirunpiv =  len_trim(chirunpiv)
-      irunpiv = 1 + 
-     &     int(aint(float(pivot-1)/(float(nit)/float(thinning))))
-      fileftmp = pathall(1:nchpathall) // chirunpiv(1:nchirunpiv)
-c      write(*,*) 'en fortran fileftmp=',fileftmp
-      filef = fileftmp(1:(nchpathall+nchirunpiv)) // "/frequencies.txt"
-c      write(*,*) 'en fortran filef=',filef
-      open(13,file=filef)
-*     index of saved iteration containing pivot  in this file
-      iit = pivot - (irunpiv-1)*float(nit)/float(thinning)
-      do iitsub = 1,iit
-         do iloc=1,nloc
-c     write(6,*) 'iloc=',iloc
-            do ial=1,nalmax
-c     write(6,*) 'ial=',ial
-               read(13,*) (fpiv(ipop,iloc,ial),ipop=1,npopmax)
-            enddo
-         enddo
-      enddo
-      close(13)
-
-
-      nnit = 0
-      do iit=1,int(float(nrun*nit)/float(thinning))
-         irun = 1 + aint(float(iit-1)/(float(nit)/float(thinning)))
-         if(mod(iit-1,int(float(nit)/float(thinning))) .eq. 0) then 
-c            write(*,*) 'iit=',iit
-c            write(*,*) 'irun=',irun
-*     define path to file and  open files (Ref.: book Maryse Ain, p.340) 
-c           write(*,*) 'opening files'
-c            write(*,*) 'pathall=',pathall
-            resirun = irun
-            if(irun .gt. 999) then 
-               path = pathall(1:nchpathall) // 
-     &              char(int(aint(float(irun)/1000)) + ichar('0'))
-               nchpath = nchpathall + 1
-               resirun = resirun - 1000*int(aint(float(irun)/1000))
-               path = path(1:nchpath) // 
-     &              char(int(aint(float(resirun)/100)) + ichar('0'))
-               nchpath = nchpath + 1
-               resirun = resirun - 100*int(aint(float(resirun)/100))
-               path = path(1:nchpath) // 
-     &              char(int(aint(float(resirun)/10)) + ichar('0'))
-               path = path(1:nchpath) //
-     &              char(resirun + ichar('0'))
-               nchpath = nchpath + 1
-c               write(*,*) 'path=',path
-            endif
-            if((irun .gt. 99) .and. (irun .le. 999))then 
-               path = pathall(1:nchpathall) // 
-     &              char(int(aint(float(irun)/100)) + ichar('0'))
-               nchpath = nchpathall + 1
-               resirun = resirun - 100*int(aint(float(irun)/100))
-               path = path(1:nchpath) // 
-     &              char(int(aint(float(resirun)/10)) + ichar('0'))
-               resirun = resirun - 10*int(aint(float(resirun)/10))
-               path = path(1:nchpath) //
-     &              char(resirun + ichar('0'))
-               nchpath = nchpath + 1
-c               write(*,*) 'path=',path
-            endif
-            if((irun .gt. 9) .and. (irun .le. 99)) then 
-               path = pathall(1:nchpathall) // 
-     &              char(int(aint(float(irun)/10)) + ichar('0'))
-               nchpath = nchpathall + 1
-               resirun = resirun - 10*int(aint(float(irun)/10))
-               path = path(1:nchpath) // 
-     &              char(resirun + ichar('0'))
-               nchpath = nchpath + 1
-c               write(*,*) 'path=',path
-            endif
-            if(irun .le. 9) then 
-               path = pathall(1:nchpathall) // char(irun + ichar('0'))
-               nchpath = nchpathall + 1
-            endif
-
-            filenpp = path(1:nchpath) // "/nuclei.numbers.txt"
-            filenpop = path(1:nchpath)// "/populations.numbers.txt"
-            fileu = path(1:nchpath)   // "/coord.nuclei.txt"
-            filec = path(1:nchpath)   // "/color.nuclei.txt"
-            filef = path(1:nchpath)   // "/frequencies.txt"
-            open(9,file=filenpop)
-            open(10,file=filenpp)
-            open(11,file=fileu)
-            open(12,file=filec)
-            open(13,file=filef)
-         endif
-
-
-*     read and relabel  wrt to pivot or take pivot as estimator
-         read(9,*) npop
-         read(10,*) npp
-         do ipp=1,nppmax
-            read(11,*) u(1,ipp),u(2,ipp)
-            read(12,*) c(ipp)
-         enddo
-         do iloc=1,nloc
-            do ial=1,nalmax
-               read(13,*) (f(ipop,iloc,ial),ipop=1,npopmax)
-            enddo
-         enddo  
-         if((npop .eq. npopest) .and. (iit .gt. burnin)) then 
-            nnit = nnit + 1 
-            if(npopest .lt. 10) then 
-               call relabel(npopmax,nloc,nalmax,nal,npopest,f,fpiv,
-     &              order,ordertmp)
-               write(14,*) (order(ipop),ipop = 1,npopmax)
-            endif
-            if((npopest .lt. 10) .or. (iit .eq. pivot)) then 
-               call calccell(nxdommax*nydommax,coorddom,
-     &              npp,nppmax,u,indcel,distcel)
-               do idom=1,nxdommax*nydommax
-                  ipop = order(c(indcel(idom)))
-                  dom(idom,ipop) = dom(idom,ipop) + 1.
-               enddo
-            endif
-         endif
-      
-         if(mod(iit,int(float(nit)/float(thinning))) .eq. 0) then 
-            close(9)
-            close(10)
-            close(11)
-            close(12)
-            close(13)
-         endif
-      enddo
-      if(npopest .lt. 10) then 
-         do idom=1,nxdommax*nydommax
-            do ipop=1,npopmax
-               dom(idom,ipop) = dom(idom,ipop)/float(nnit)
-            enddo
-         enddo
-      endif
-
- 2000 format (1000(e15.5,1x))
-      do idom=1,nxdommax*nydommax
-         write(15,2000) coorddom(1,idom),  coorddom(2,idom), 
-     &        (dom(idom,ipop), ipop=1,npopmax)
-      enddo  
-      close(14)
-      close(15)     
-      
-      end subroutine postprocessmultchain
-
-
+c$$$      close(15)     
+c$$$      
+c$$$      end subroutine postprocessmultchain
+c$$$
+c$$$
 
 
 *********************************************************************

@@ -132,8 +132,11 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
     meanqv <- meanqvpiv <- matrix(nrow = npopmax, ncol = nqtc, 
         -999)
     ninrub = 0
+    nitsaved <- nit/thinning
+    out.orderf <- matrix(nrow = nit/thinning, ncol = npopmax, 
+        data = -999)
     print("Calling Fortran function postprocesschain2")
-    out.res <- .Fortran(name = "postprocesschain2", PACKAGE = "Geneland", 
+    out.res <- .Fortran("postprocesschain2", PACKAGE = "Geneland", 
         as.integer(nxdom), as.integer(nydom), as.integer(burnin), 
         as.integer(ninrub), as.integer(npopmax), as.integer(nb.nuclei.max), 
         as.integer(nindiv), as.integer(nloc.geno2), as.integer(nloc.geno1), 
@@ -149,8 +152,24 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
         as.double(distvois), as.integer(orderf), as.integer(orderftmp), 
         as.integer(npop.est), as.integer(use.geno2), as.integer(use.geno1), 
         as.integer(use.ql), as.integer(use.qtc), as.integer(nqtc), 
-        as.double(meanqv), as.double(meanqvpiv))
+        as.double(meanqv), as.double(meanqvpiv), as.integer(nitsaved), 
+        as.integer(out.orderf))
     print("End of Fortran function postprocesschain2")
+    out.orderf <- matrix(nrow = nit/thinning, ncol = npopmax, 
+        data = out.res[[50]])
+    write.table(out.orderf, file = paste(path.mcmc, "perm.txt", 
+        sep = ""), row.names = FALSE, col.names = FALSE, append = FALSE)
+    fmean <- array(dim = c(npopmax, ncolt, nalmax), data = out.res[[34]])
+    for (iloc in 1:ncolt) {
+        append <- ifelse(iloc == 1, FALSE, TRUE)
+        write.table(t(fmean[, iloc, ]), paste(path.mcmc, "mean.freq.txt", 
+            sep = ""), row.names = FALSE, col.names = FALSE, 
+            append = append)
+    }
+    dom <- matrix(nrow = nxdom * nydom, ncol = npopmax, data = out.res[[35]])
+    coorddom <- matrix(nrow = 2, ncol = nxdom * nydom, data = out.res[[36]])
+    write.table(cbind(t(coorddom), dom), paste(path.mcmc, "proba.pop.membership.txt", 
+        sep = ""), append = FALSE)
     coord.grid <- read.table(filedom)[, 1:2]
     pmbr <- as.matrix(read.table(filedom)[, -(1:2)])
     pmp <- rep(NA, dim(pmbr)[1])
@@ -165,10 +184,10 @@ function (coordinates = NULL, path.mcmc, nxdom, nydom, burnin)
     u <- matrix(nrow = 2, ncol = nb.nuclei.max, data = -999)
     c <- rep(times = nb.nuclei.max, -999)
     pmp <- matrix(nrow = nindiv, ncol = npopmax, data = 0)
-    out.res <- .Fortran(name = "pppmindiv2", PACKAGE = "Geneland", 
-        as.integer(nindiv), as.double(t(coordinates)), as.integer(npopmax), 
-        as.integer(nb.nuclei.max), as.integer(indvois), as.double(distvois), 
-        as.double(u), as.integer(c), as.double(pmp), as.character(filenpop), 
+    out.res <- .Fortran("pppmindiv2", PACKAGE = "Geneland", as.integer(nindiv), 
+        as.double(t(coordinates)), as.integer(npopmax), as.integer(nb.nuclei.max), 
+        as.integer(indvois), as.double(distvois), as.double(u), 
+        as.integer(c), as.double(pmp), as.character(filenpop), 
         as.character(filenpp), as.character(fileu), as.character(filec), 
         as.character(fileperm), as.integer(nit), as.integer(thinning), 
         as.integer(burnin), as.integer(orderf), as.integer(npop.est), 

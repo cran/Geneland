@@ -4,7 +4,7 @@
 /******************/
 /* random numbers */
 /******************/
-
+ 
 /* simulation */
 void F77_SUB(rndstart)(void) 
 { GetRNGstate(); }
@@ -75,3 +75,22 @@ double F77_SUB(ggpnorm)(double *x, double *mu, double *sigma,
 double F77_SUB(gglog1p)(double *x) 
 { return log1p(*x); }
 
+
+/*********************/
+/* Writing to files  */
+/*********************/
+/* void F77_SUB(ggwint1)(char *filename, int *output)  */
+/* { */
+/*   FILE *pFile; */
+/*   pFile = fopen(filename,"a");  */
+/*   fprintf(pFile, "%d \n", *output); */
+/*   fclose(pFile); */
+/* } */
+
+/* void F77_SUB(ggwdble1)(char *filename, double *output)  */
+/* { */
+/*   FILE *pFile; */
+/*   pFile = fopen(filename,"a");  */
+/*   fprintf(pFile, "%f \n", *output); */
+/*   fclose(pFile); */
+/* } */

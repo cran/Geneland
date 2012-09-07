@@ -1,5 +1,5 @@
 	-----------------------------------
-	Changes 4.0.1 to 4.0.2
+	Changes 4.0.2 to 4.0.3
 	-----------------------------------
 
 	
@@ -12,15 +12,27 @@
 *   In R
 ******************************
 		
-	- Bug in GUI for phenotype data corrected
-	- a and b parameters in HZ model can be initialized in the GUI
+	- first argument now unnamed in calls to .Fortran 
+	in MCMC.R, PostProcessChain.R, Fstat.R
+	- function PostProcessMultchain no longer distributed
+
+
+
+
 	
 ******************************
 *   In Rd
 ******************************
-	
+	 - PostProcessMultchain.Rd commenetd	
 
 	
 ************************************
 *   In Fortran
 ************************************
+ - no more writing in external files 
+ - Corrected potential bug in computation of posterior before writing 
+	(likelihood counted twice)
+
+************************************
+*   In C
+************************************	

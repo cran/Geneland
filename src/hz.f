@@ -1,21 +1,23 @@
-*     gfortran -c postq.f
       subroutine mcmchz(q,qtmp,zcodom,zdom,zhap,codom,dom,hap,
      &     npop,npopmax,nindiv,f,nlocd,nloch,nalmax,
      &     alphadmix,alphadmixtmp,a,b,c,atmp,btmp,ctmp,amax,bmax,cmax,
      &     dist,nchpath,path,nit,thinning,calluda,calludb,calludc,
-     &     calludq,deltab,compar)
+     &     calludq,deltab,compar,nitstor,qout,aout,bout,cout)
       implicit none
       integer npop,npopmax,nindiv,nlocd,nloch,nalmax,zcodom,zdom,zhap,
-     &     nit,thinning,nchpath,compar,codom,dom,hap
+     &     nit,thinning,nchpath,compar,codom,dom,hap,nitstor
       double precision f,q,qtmp,alphadmix,alphadmixtmp,a,b,c,
-     &     atmp,btmp,ctmp,amax,bmax,cmax,dist,deltab
+     &     atmp,btmp,ctmp,amax,bmax,cmax,dist,deltab,
+     &     qout,aout,bout,cout
       dimension zcodom(nindiv,2*nlocd),zdom(nindiv,nlocd),
      &     zhap(nindiv,nloch),f(npopmax,nlocd,nalmax),
      &     q(nindiv,npopmax),qtmp(nindiv,npopmax),
      &     alphadmix(nindiv,npopmax), alphadmixtmp(nindiv,npopmax),
      &     dist(nindiv,npopmax),a(npopmax),b(npopmax),c(npopmax),
-     &     atmp(npopmax),btmp(npopmax),ctmp(npopmax)
-      integer iit,ipop,iindiv,calluda,calludb,calludc,calludq
+     &     atmp(npopmax),btmp(npopmax),ctmp(npopmax),
+     &     qout(nitstor,nindiv,npopmax),aout(nitstor,npopmax),
+     &     bout(nitstor,npopmax),cout(nitstor,npopmax)
+      integer iit,ipop,iindiv,calluda,calludb,calludc,calludq,iitstor
       double precision pct,lpriorq,llike
       character*255 path, fileq, filea, fileb, filec, filellike, 
      &     filelpriorq
@@ -37,24 +39,33 @@ c$$$      enddo
       filellike = path(1:nchpath) // "llike.txt"
       filelpriorq = path(1:nchpath) // "lpriorq.txt"
 
-      open(9,file=fileq)
-      open(10,file=filea)
-      open(11,file=fileb)
-      open(12,file=filec)
-      open(17,file=filellike)
-      open(18,file=filelpriorq)
+c$$$      open(9,file=fileq)
+c$$$      open(10,file=filea)
+c$$$      open(11,file=fileb)
+c$$$      open(12,file=filec)
+c$$$      open(17,file=filellike)
+c$$$      open(18,file=filelpriorq)
 
+      iitstor = 0
       do iit=1,nit
          if(mod(iit,thinning) .eq. 0) then
             pct = dble(iit)/dble(nit)*100.
             call dblepr('                     ',-1,pct,1)
-            do iindiv=1,nindiv
-               write(9,2000) (sngl(q(iindiv,ipop)),ipop=1,npopmax)
-c     write(*,*) (sngl(alphadmix(iindiv,ipop)),ipop=1,npopmax)
+            iitstor = iitstor + 1 
+            do ipop=1,npopmax
+               do iindiv=1,nindiv
+                  qout(iitstor,iindiv,ipop) = q(iindiv,ipop)
+                  aout(iitstor,ipop) = a(ipop)
+                  bout(iitstor,ipop) = b(ipop)
+                  cout(iitstor,ipop) = c(ipop)
+               enddo
             enddo
-            write(10,2000) (sngl(a(ipop)),ipop=1,npopmax)
-            write(11,2000) (sngl(b(ipop)),ipop=1,npopmax)
-            write(12,2000) (sngl(c(ipop)),ipop=1,npopmax)
+c$$$            do iindiv=1,nindiv
+c$$$               write(9,2000) (sngl(q(iindiv,ipop)),ipop=1,npopmax)
+c$$$            enddo
+c$$$            write(10,2000) (sngl(a(ipop)),ipop=1,npopmax)
+c$$$            write(11,2000) (sngl(b(ipop)),ipop=1,npopmax)
+c$$$            write(12,2000) (sngl(c(ipop)),ipop=1,npopmax)
          endif
          if(calludq .eq. 1) then
             call udq(q,qtmp,zcodom,zdom,zhap,codom,dom,hap,
@@ -76,12 +87,12 @@ c     write log- prior and likelihood
 c         call ppost(q,zcodom,npop,npopmax,nindiv,f,nlocd,nalmax,alphadmix,
 c     &        lpriorq,llike)
       enddo
-      close(9)
-      close(10)
-      close(11)
-      close(12)
-      close(17)
-      close(18)
+c$$$      close(9)
+c$$$      close(10)
+c$$$      close(11)
+c$$$      close(12)
+c$$$      close(17)
+c$$$      close(18)
       call rndend()
       end subroutine mcmchz
       
@@ -154,8 +165,8 @@ c           write(*,*) 'sa=',sa
 c           write(*,*) 'sb=',sb
 c         write(*,*) 'llike=',llike
       enddo
-      write(17,*) llike
-      write(18,*) lpriorq
+c      write(17,*) llike
+c      write(18,*) lpriorq
 c      write(*,*) 'fin'
       end subroutine ppost
 

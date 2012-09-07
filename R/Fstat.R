@@ -30,7 +30,7 @@ function (genotypes, npop, pop.mbrship, ploidy = 2)
                   nloc <- length(allele.numbers)
                   nloc2 <- 2 * nloc
                   Fistmp <- Fsttmp <- Fittmp <- -999
-                  res <- .Fortran(name = "ggfst", PACKAGE = "Geneland", 
+                  res <- .Fortran("ggfst", PACKAGE = "Geneland", 
                     as.integer(nindivtmp), as.integer(nloc), 
                     as.integer(nloc2), as.integer(allele.numbers), 
                     as.integer(2), as.integer(effcl), as.integer(ztmp), 
@@ -55,12 +55,12 @@ function (genotypes, npop, pop.mbrship, ploidy = 2)
             nloc <- length(allele.numbers)
             nloc2 <- 2 * nloc
             Fistmp <- Fsttmp <- Fittmp <- -999
-            res <- .Fortran(name = "ggfst", PACKAGE = "Geneland", 
-                as.integer(nindivtmp), as.integer(nloc), as.integer(nloc2), 
-                as.integer(allele.numbers), as.integer(2), as.integer(effcl), 
-                as.integer(ztmp), as.integer(pop.mbrshiptmp), 
-                as.integer(tabindiv), as.integer(kk), as.double(Fistmp), 
-                as.double(Fsttmp), as.double(Fittmp))
+            res <- .Fortran("ggfst", PACKAGE = "Geneland", as.integer(nindivtmp), 
+                as.integer(nloc), as.integer(nloc2), as.integer(allele.numbers), 
+                as.integer(2), as.integer(effcl), as.integer(ztmp), 
+                as.integer(pop.mbrshiptmp), as.integer(tabindiv), 
+                as.integer(kk), as.double(Fistmp), as.double(Fsttmp), 
+                as.double(Fittmp))
             Fis[iclass1] <- res[[11]][1]
         }
     }
