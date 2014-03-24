@@ -1,8 +1,11 @@
 useDynLib(Geneland)
 
+import(parallel)
+
 # Export all names
 exportPattern(".")
 
 
+
 import(RandomFields,fields)
-import(snow,tcltk)
+import(tcltk)

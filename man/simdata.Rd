@@ -159,6 +159,7 @@
 \examples{
 \dontrun{
 dataset <- simdata(nindiv=100,
+             sim.gen=TRUE,
              number.nuclei=10,
              allele.numbers=rep(5,3),
              model="stable",
@@ -167,6 +168,7 @@ dataset <- simdata(nindiv=100,
              beta=1,
              gamma=1,
              npop=3,
+             sim.gen=TRUE,
              give.tess.grid=TRUE,
              give.freq.grid=TRUE,
              npix=c(10,10),

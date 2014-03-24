@@ -1984,6 +1984,7 @@ dataset <- simdata(nindiv=100,
                   beta=1,
                   gamma=1,
                   npop=3,
+                  sim.gen=TRUE,
                   give.tess.grid=TRUE,
                   give.freq.grid=TRUE,
                   npix=c(100,100),
@@ -1993,9 +1994,6 @@ dataset <- simdata(nindiv=100,
                   width=0.1,
                   plot.pairs.borders=FALSE)
 \end{verbatim}
-
-
-
 
 
 The function returns a list stored in the R object {\tt dataset }.
@@ -2085,7 +2083,7 @@ though disregarding the spatial aspect of the dataset.
 
 
 
-\section{Analyzing other software's outputs [TODO]}
+% \section{Analyzing other software's outputs [TODO]}
 
 \appendix
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -2245,12 +2243,12 @@ This makes inferences simpler, faster and it avoids the issue of {\em "ghost pop
 One should still keep in mind potential MCMC convergence issues and check that parameters inferred are consistent across
  several such single-step runs. 
 
-\subsection[Selecting best run]{How to select a run among several runs performed under the same model options?}
+\subsection[Best run under same model option]{How to select a run among several runs performed under the same model options?}
 To compare outputs of several runs under the same model options, use the mean posterior density. 
 Note that the posterior density of the inferred K (given as a percentage in the output under the GUI) 
 should not be used as a measure of goodness of fit.
 
-\subsection[Selecting best run]{How to select a run among several runs performed under different model options?}
+\subsection[Best run under various model options]{How to select a run among several runs performed under different model options?}
 
 Comparing outputs of different  models is a difficult issue in statistics
 and there is no satisfactory solution for clustering models in populations genetics

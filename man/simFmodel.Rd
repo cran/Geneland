@@ -8,7 +8,8 @@
 }
 \usage{
 simFmodel(nindiv, coordinates, coord.lim, number.nuclei,
-coord.nuclei, color.nuclei,nall, npop, freq.model="Uncorrelated",drift,dominance="Codominant", plots = FALSE, ploth = FALSE)
+coord.nuclei, color.nuclei,nall, npop, freq.model="Uncorrelated",
+drift,dominance="Codominant", plots = FALSE, ploth = FALSE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -25,7 +26,8 @@ coord.nuclei, color.nuclei,nall, npop, freq.model="Uncorrelated",drift,dominance
 
   \item{coord.nuclei}{Coordinates of nuclei of Voronoi tessellation}
 
-  \item{color.nuclei}{Population labels of the nuclei (vector of integers of size \code{number.nuclei})}
+  \item{color.nuclei}{Population labels of the nuclei
+    (vector of integers of size \code{number.nuclei})}
 
   \item{nall}{ Vector of integers giving number of alleles at each locus}
 

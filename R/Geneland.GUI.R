@@ -1,7 +1,6 @@
 Geneland.GUI <-
 function (lib.loc = NULL) 
 {
-    require(tcltk)
     tt <- tktoplevel()
     tkwm.title(tt, "Geneland - Graphical Interface")
     tkwm.geometry(tt, "+100+100")
@@ -12,12 +11,12 @@ function (lib.loc = NULL)
     tkpack(imgAsLabel)
     tkfocus(tt)
     tcl("after", "3000", "destroy", tt)
-    require(Geneland)
     idb.dataset <- 0
     globalcoordinates <- NULL
     globaldominantgenotypes <- NULL
     globalcodominantgenotypes <- NULL
     globalhaploidgenotypes <- NULL
+    globaldiploidgenotypes <- NULL
     globalqtc <- NULL
     globalqtd <- NULL
     globalql <- NULL
@@ -519,9 +518,9 @@ function (lib.loc = NULL)
                 }
             }
             else {
-                probs <<- c()
-                pops <<- c()
-                runs <<- c()
+                probs <- c()
+                pops <- c()
+                runs <- c()
                 txtleft <- c()
                 txtmidle <- c()
                 txtright <- c()
@@ -902,7 +901,6 @@ function (lib.loc = NULL)
                   tempoutputdir <- paste(outdir, as.character(i), 
                     "/", sep = "")
                   dir.create(tempoutputdir, showWarnings = FALSE)
-                  require("Geneland")
                   Sys.sleep(0.5)
                   err <- try(MCMC(coordinates = globalcoordinates, 
                     geno.dip.dom = globaldominantgenotypes, geno.dip.codom = globalcodominantgenotypes, 
@@ -2598,7 +2596,7 @@ function (lib.loc = NULL)
                 print("Done.")
                 if (class(err) == "try-error") {
                   Log(paste("show.estimate.hz(coordinates=", 
-                    matrix2string(globalcoordinates), ",path.mcmc.adm=\"", 
+                    matrix2str(globalcoordinates), ",path.mcmc.adm=\"", 
                     tclvalue(outputadm), "\",burnin=", as.numeric(tclvalue(burnin)), 
                     "angle=", as.numeric(tclvalue(angle)), ")", 
                     sep = ""), "[FAILED] ")
@@ -2607,7 +2605,7 @@ function (lib.loc = NULL)
                 }
                 else {
                   Log(paste("show.estimate.hz(coordinates=", 
-                    matrix2string(globalcoordinates), ",path.mcmc.adm=\"", 
+                    matrix2str(globalcoordinates), ",path.mcmc.adm=\"", 
                     tclvalue(outputadm), "\",burnin=", as.numeric(tclvalue(burnin)), 
                     "angle=", as.numeric(tclvalue(angle)), ")", 
                     sep = ""), "[SUCCESS] ")
@@ -4134,7 +4132,7 @@ function (lib.loc = NULL)
                 }
             }
         }
-        if (require(snow) == FALSE) 
+        if (!("snow" %in% installed.packages())) 
             tkmessageBox(message = "Snow not found. Install it before using this feature", 
                 icon = "error", type = "ok", parent = ttpara)
         else {

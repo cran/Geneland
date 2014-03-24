@@ -1,5 +1,5 @@
 	-----------------------------------
-	Changes 4.0.2 to 4.0.3
+	Changes 4.0.3 to 4.0.4
 	-----------------------------------
 
 	
@@ -7,14 +7,22 @@
 *   In doc
 ******************************	
 
+	Function simdata: sim.gen =TRUE in example 
 	
 ******************************
 *   In R
 ******************************
-		
-	- first argument now unnamed in calls to .Fortran 
-	in MCMC.R, PostProcessChain.R, Fstat.R
-	- function PostProcessMultchain no longer distributed
+- Calling Fortran function areq4: first argument not named
+	
+In Geneland.GUI	
+- require(tcltk) commented 
+- if (require(snow) == FALSE) replaced by if(!('snow' %in%
+	installed.packages()))
+- Redefined some variables that where global to local 
+	
+- No more message at start-up triggered by zzz.R
+- Use parallel instead of snow and imports it in NAMSPACE file
+	
 
 
 
@@ -23,16 +31,22 @@
 ******************************
 *   In Rd
 ******************************
-	 - PostProcessMultchain.Rd commenetd	
 
 	
 ************************************
 *   In Fortran
 ************************************
- - no more writing in external files 
- - Corrected potential bug in computation of posterior before writing 
-	(likelihood counted twice)
-
+ 
 ************************************
 *   In C
 ************************************	
+
+	
+********************
+*   Elsewhere
+********************
+Mail Kurt Hornik 2014/02/20: 
+	Check: files in ‘vignettes’ ... NOTE
+The following files look like leftovers/mistakes:
+  ‘Geneland-Doc.bbl’
+Please remove them from your package.

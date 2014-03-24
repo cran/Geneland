@@ -151,7 +151,7 @@ function (nindiv, coord.indiv, coord.lim = c(0, 1, 0, 1), npop,
                 a <- matrix(nrow = size.pop, ncol = size.pop, 
                   data = -999)
                 if (size.pop > 0) {
-                  res <- .Fortran(name = "areq4", PACKAGE = "Geneland", 
+                  res <- .Fortran("areq4", PACKAGE = "Geneland", 
                     as.integer(size.pop), as.integer(nloc), as.integer(nloc * 
                       2), as.integer(allele.numbers), as.integer(max(allele.numbers)), 
                     as.integer(z[sub.pop, ]), as.double(a))
