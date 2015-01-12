@@ -1,5 +1,5 @@
 344edb6727dead6539dcb665f349ba2e *ChangeLog
-8c7de867b3168b8caaa3247ba7c90b74 *DESCRIPTION
+be90ddc0d444e07084019ef75d4315c6 *DESCRIPTION
 a8eb3db44976cff9b0dd3127cbc253c6 *NAMESPACE
 b233bd5a26262d9724ce6580c040c9d4 *R/EstimateFreqNA.R
 737b014058117d3c7d83fd17817a7f42 *R/FormatGenotypes.R
@@ -25,7 +25,7 @@ c0ddf5f9caf18fe8daecac7e4264c19d *R/show.simdata.R
 1eb8046376eaee6fa9b7220016e442e3 *R/simdata.R
 2e745b7f8e53041f9e4b176de4256e57 *data/coordinates.txt.gz
 46122ae5d268e28d3df60a4dc7042c9a *data/genotypes.txt.gz
-2391941bb1f3f647e501527dc81ddb06 *inst/CITATION
+d03cd5af34963a6deae3b283bc98edb0 *inst/CITATION
 4bc7caddb0cd396560fcf90b822cf177 *inst/images/geneland6.gif
 7e9cc4bafea9e7098299ea1955e7ee90 *inst/images/geneland6.gif.SAVE
 c8929b3975be56991d2ffedadcaaeb12 *inst/images/icon-configure.gif
