@@ -7329,6 +7329,7 @@ c$$$      write(*,*) 'ftmp(',ipophost,2,2,')=',ftmp(ipophost,2,2)
      &     fa(nlocmax,nalmax),lambdamax,lambda,xlim(2),ylim(2)
       integer ipp,ipop,iloc,ial
       double precision gglgamfn,shape1,shape2,ll,lg
+      lpp = 0
 *     contrib npop
       lpp = lpp - dlog(dble(npopmax))
 *     contrib lambda
@@ -13051,7 +13052,7 @@ c$$$      write(*,*) 'npp=',npp, '\n'
      &     order(npopmax),ordertmp(npopmax),nal(nloc)
       double precision sp,sptmp,spf
       integer ipop
-      Integer*4 I,I1,J,G,H
+      integer I,I1,J,G,H
 
       sp = 0 
       do ipop=1,npop
@@ -13164,7 +13165,7 @@ c      Write(*,*) 'sptmp=',sptmp
      &     meanqtc(npopmax,nqtc),meanqtcpiv(npopmax,nqtc)
       double precision sp,sptmp,spfgq
       integer ipop
-      Integer*4 I,I1,J,G,H
+      integer I,I1,J,G,H
 
       sp = 0 
       do ipop=1,npop
@@ -13256,7 +13257,7 @@ c      Write(*,*) 'sptmp=',sptmp
      &     meanqtc(npopmax,nqtc),meanqtcpiv(npopmax,nqtc)
       double precision sp,sptmp,spfallvar
       integer ipop
-      Integer*4 I,I1,J,G,H
+      integer I,I1,J,G,H
 
       sp = 0 
       do ipop=1,npop

@@ -1,10 +1,10 @@
-344edb6727dead6539dcb665f349ba2e *ChangeLog
-be90ddc0d444e07084019ef75d4315c6 *DESCRIPTION
-a8eb3db44976cff9b0dd3127cbc253c6 *NAMESPACE
-b233bd5a26262d9724ce6580c040c9d4 *R/EstimateFreqNA.R
+56ba83100c01f240b898af383663c487 *ChangeLog
+10c65a587a62f1e7d7dd7524909d7f8c *DESCRIPTION
+dccee769174bd133f9623b1aae95cff7 *NAMESPACE
+ac100b11b291d01ad793a3a9e17a4696 *R/EstimateFreqNA.R
 737b014058117d3c7d83fd17817a7f42 *R/FormatGenotypes.R
 102e7ab1a57521115aebca3b77a11f99 *R/Fstat.R
-16de5a7fdd8a2437e65e3fc143a12640 *R/Fstat.output.R
+9c4383d20355f6f2617d2f084883f281 *R/Fstat.output.R
 8c50b9b0aa55e06108d9b997435de4ee *R/Geneland.GUI.R
 ffad0a463e734346e835c8ce11c5d6f5 *R/HZ.R
 512ed30e4e57f10eacbf4dfd593f5fc4 *R/MCMC.R
@@ -72,7 +72,7 @@ ba68cd656088850902056fee448a8ad7 *man/nullify.Rd
 b69330008c4e4099628d2c6f69bdf6b3 *src/alarousset.f
 50c3b412dfb6aabce2b3b7d06c37ee5a *src/ggfstat.f
 0c9c36fec7ad37a92fb76eeafa0cd55c *src/hz.f
-e7b9a993ffd9a67692169a3b79bf5871 *src/main.f
+c5d8a2b64849a19e1354f685e1543272 *src/main.f
 955ec67a62249d5159c83c2167ae742d *src/wrapper.c
 f8ff07d6e4194efe7df8aaa48d9da3e6 *vignettes/Geneland-Doc.pdf
 36d1e213682b55018c3652f0f4d8dc20 *vignettes/Geneland-Doc.tex

@@ -1,5 +1,5 @@
 	-----------------------------------
-	Changes 4.0.3 to 4.0.4
+	Changes 4.0.5 to 4.0.6
 	-----------------------------------
 
 	
@@ -7,24 +7,10 @@
 *   In doc
 ******************************	
 
-	Function simdata: sim.gen =TRUE in example 
 	
 ******************************
 *   In R
 ******************************
-- Calling Fortran function areq4: first argument not named
-	
-In Geneland.GUI	
-- require(tcltk) commented 
-- if (require(snow) == FALSE) replaced by if(!('snow' %in%
-	installed.packages()))
-- Redefined some variables that where global to local 
-	
-- No more message at start-up triggered by zzz.R
-- Use parallel instead of snow and imports it in NAMSPACE file
-	
-
-
 
 
 	
@@ -36,7 +22,9 @@ In Geneland.GUI
 ************************************
 *   In Fortran
 ************************************
- 
+	. Declarations integer*4 changed into integer
+	. lpp initialised at 0 in function lpp
+	
 ************************************
 *   In C
 ************************************	
@@ -45,8 +33,3 @@ In Geneland.GUI
 ********************
 *   Elsewhere
 ********************
-Mail Kurt Hornik 2014/02/20: 
-	Check: files in ‘vignettes’ ... NOTE
-The following files look like leftovers/mistakes:
-  ‘Geneland-Doc.bbl’
-Please remove them from your package.

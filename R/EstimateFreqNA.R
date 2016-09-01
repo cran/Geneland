@@ -2,7 +2,7 @@ EstimateFreqNA <-
 function (path.mcmc) 
 {
     fileparam <- paste(path.mcmc, "parameters.txt", sep = "")
-    param <- as.matrix(read.table(fileparam))
+    param <- as.matrix(read.table(file = fileparam))
     nit <- as.numeric(param[param[, 1] == "nit", 3])
     thinning <- as.numeric(param[param[, 1] == "thinning", 3])
     filter.null.alleles <- as.logical(param[param[, 1] == "filter.null.alleles", 
@@ -17,7 +17,7 @@ function (path.mcmc)
     nb.levels.ql <- scan(paste(path.mcmc, "number.levels.ql.txt", 
         sep = ""))
     filef <- paste(path.mcmc, "frequencies.txt", sep = "")
-    f <- as.matrix(read.table(filef))
+    f <- as.matrix(read.table(file = filef))
     npopmax <- ncol(f)
     nlocd <- length(allele.numbers.dip)
     nloch <- length(allele.numbers.hap)

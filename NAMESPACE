@@ -6,6 +6,14 @@ import(parallel)
 exportPattern(".")
 
 
+importFrom("grDevices", "dev.new", "dev.off", "heat.colors", "palette",
+           "pdf", "postscript", "terrain.colors")
+importFrom("graphics", "abline", "contour", "hist", "par",
+           "plot.default", "polygon", "text", "title")
+importFrom("stats", "dist", "lm", "pnorm", "qexp", "qgamma", "rbeta",
+           "rexp", "rgamma", "rnorm", "rpois", "runif")
+importFrom("utils", "browseURL", "file_test", "help.start",
+           "installed.packages", "read.table", "write.table")
 
 import(RandomFields,fields)
 import(tcltk)
